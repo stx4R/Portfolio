@@ -156,10 +156,7 @@
 <script>
   // 좌클릭/우클릭 금지
   document.addEventListener('mousedown', function(e) {
-      if (e.button === 0) { // 좌클릭
-          alert('Left click is prohibited for security.');
-          e.preventDefault();
-      } else if (e.button === 2) { // 우클릭
+        if (e.button === 2) { // 우클릭
           alert('Right click is prohibited for security.');
           e.preventDefault();
       }
