@@ -136,4 +136,46 @@
 </main>
 
 </body>
+  <body class="bg-neutral-900 text-white">
+
+<script>
+  // 좌클릭/우클릭 금지
+  document.addEventListener('mousedown', function(e) {
+      if (e.button === 0) { // 좌클릭
+          alert('좌클릭 금지!');
+          e.preventDefault();
+      } else if (e.button === 2) { // 우클릭
+          alert('우클릭 금지!');
+          e.preventDefault();
+      }
+  });
+
+  // 개발자 도구 접근 차단 (F12, Ctrl+Shift+I/J, Ctrl+U)
+  document.addEventListener('keydown', function(e) {
+      // F12
+      if(e.key === 'F12') {
+          alert('개발자 도구 접근 금지!');
+          e.preventDefault();
+      }
+      // Ctrl+Shift+I, Ctrl+Shift+J
+      if(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) {
+          alert('개발자 도구 접근 금지!');
+          e.preventDefault();
+      }
+      // Ctrl+U (소스 보기)
+      if(e.ctrlKey && e.key === 'U') {
+          alert('소스 보기 금지!');
+          e.preventDefault();
+      }
+  });
+
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+</script>
+
+<main class="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
+</main>
+
+</body>
+
 </html>
