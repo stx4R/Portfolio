@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portfolio</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Aro Xu 스타일과 비슷한 폰트: Pretendard -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
   <style>
-  ::-webkit-scrollbar {
-    display: none;
-  }
+    body, html {
+      font-family: "Pretendard", sans-serif;
+    }
 
-  html {
-    scrollbar-width: none;
-  }
-
-  main {
-    -ms-overflow-style: none; 
-    scrollbar-width: none;
-  }
-</style>
-
+    ::-webkit-scrollbar { display: none; }
+    html { scrollbar-width: none; }
+    main { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
 <body class="bg-neutral-900 text-white">
 
@@ -150,44 +150,32 @@
 
 </main>
 
-</body>
-  <body class="bg-neutral-900 text-white">
-
 <script>
-  // 좌클릭/우클릭 금지
   document.addEventListener('mousedown', function(e) {
-        if (e.button === 2) { // 우클릭
-          alert('Right click is prohibited for security.');
-          e.preventDefault();
-      }
+    if (e.button === 2) {
+      alert('Right click is prohibited for security.');
+      e.preventDefault();
+    }
   });
 
-  // 개발자 도구 접근 차단 (F12, Ctrl+Shift+I/J, Ctrl+U)
   document.addEventListener('keydown', function(e) {
-      // F12
-      if(e.key === 'F12') {
-          alert('Access of Developer Tool is blocked for security.');
-          e.preventDefault();
-      }
-      // Ctrl+Shift+I, Ctrl+Shift+J
-      if(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) {
-          alert('Access of Developer Tool is blocked for security.');
-          e.preventDefault();
-      }
-      // Ctrl+U (소스 보기)
-      if(e.ctrlKey && e.key === 'U') {
-          alert('Watching source is prohibited for security.');
-          e.preventDefault();
-      }
+    if (e.key === 'F12') {
+      alert('Access of Developer Tool is blocked for security.');
+      e.preventDefault();
+    }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) {
+      alert('Access of Developer Tool is blocked for security.');
+      e.preventDefault();
+    }
+    if (e.ctrlKey && e.key === 'U') {
+      alert('Watching source is prohibited for security.');
+      e.preventDefault();
+    }
   });
 
   document.addEventListener('selectstart', e => e.preventDefault());
   document.addEventListener('dragstart', e => e.preventDefault());
 </script>
 
-<main class="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
-</main>
-
 </body>
-
 </html>
