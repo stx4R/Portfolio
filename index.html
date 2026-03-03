@@ -84,7 +84,7 @@
           Be creative, Be better.
         </h2>
 
-        <div class="mt-12 space-y-8">
+        <div class="mt-12 space-y-10">
           <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
 
           <div>
@@ -114,6 +114,92 @@
       </div>
     </div>
   </section>
+
+  <!-- ment3 -->
+  <section id="tenacity" class="bg-neutral-900 text-white snap-start">
+    <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
+      <div class="flex-1 flex flex-col justify-center">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-cyan-400 text-black inline-block w-fit whitespace-nowrap" style="background-color: #865C16;">
+          Efforts never betray.
+        </h2>
+
+        <div class="mt-12 space-y-8">
+
+          <div>
+            <h3 class="text-xl font-semibold mb-4">🚮 HowTo</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300"><a href="https://teachablemachine.withgoogle.com/" class="underline hover:opacity-70">Teachable Machine</a> 을 활용한 분리수거 방법 검색</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ⭕</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-semibold mb-4">📝 WhatToDo</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300">P2P BlockChain을 활용한 일정 정리 최적화</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-semibold mb-4">🪑 SeatAutoAllocate</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300">TTC Algorithm을 활용한 우선순위 자리배치</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    <div class="hidden lg:flex flex-1 items-center justify-center">
+      <div class="grid grid-cols-2 grid-rows-2 gap-4 w-full max-w-lg aspect-square">
+        
+        <div class="relative row-span-2 group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_HowTo.png'); background-color: #2a2a2a;">
+          </div>
+          <div onclick="openModal('https://stx4r.github.io/HowTo/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 text-center">
+            <h3 class="text-xl font-bold mb-2">HowTo</h3>
+            <p class="text-sm text-neutral-300">Teachable Machine</p>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_WTD.jpg'); background-color: #3a3a3a;">
+          </div>
+          <div onclick="openModal('https://stx4r.github.io/WTD/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
+            <h3 class="text-lg font-bold mb-1">WhatToDo</h3>
+            <p class="text-xs text-neutral-300">P2P Block Chain</p>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_SeatAutoAllocate.jpg'); background-color: #4a4a4a;">
+          </div>
+          <div class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
+            <h3 class="text-lg font-bold mb-1">SeatAutoAllocate</h3>
+            <p class="text-xs text-neutral-300">TTC Algorithm</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+        <div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="relative w-full max-w-5xl h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <div class="absolute top-4 right-4 z-10">
+                <button onclick="closeModal()" class="bg-black/20 hover:bg-black/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                    ✕
+                </button>
+            </div>
+            <iframe id="projectIframe" src="" class="w-full h-full border-none"></iframe>
+        </div>
+    </div>
+  </section>
+
 
   <!-- Contact -->
   <section id="contact" class="bg-neutral-900 text-white snap-start">
@@ -151,6 +237,33 @@
 </main>
 
 </script>
+<script>
+    function openModal(url) {
+        const modal = document.getElementById('projectModal');
+        const iframe = document.getElementById('projectIframe');
+        
+        iframe.src = url;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
 
+    function closeModal() {
+        const modal = document.getElementById('projectModal');
+        const iframe = document.getElementById('projectIframe');
+        
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        iframe.src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('projectModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
 </body>
 </html>
