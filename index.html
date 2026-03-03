@@ -151,31 +151,6 @@
 
 </main>
 
-<script>
-  document.addEventListener('mousedown', function(e) {
-    if (e.button === 2) {
-      alert('Right click is prohibited for security.');
-      e.preventDefault();
-    }
-  });
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12') {
-      alert('🚫 Access of Developer Tool is blocked for security.');
-      e.preventDefault();
-    }
-    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) {
-      alert('🚫 Access of Developer Tool is blocked for security.');
-      e.preventDefault();
-    }
-    if (e.ctrlKey && e.key === 'U') {
-      alert('🚫 Watching source is prohibited for security.');
-      e.preventDefault();
-    }
-  });
-
-  document.addEventListener('selectstart', e => e.preventDefault());
-  document.addEventListener('dragstart', e => e.preventDefault());
 </script>
 
 </body>
