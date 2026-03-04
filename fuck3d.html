@@ -1,0 +1,26 @@
+<!-- 2차시 HyperLink 실험 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <style>
+    body { margin: 0; background-color: #1a1a1a; overflow: hidden; }
+    model-viewer {
+      width: 100vw;
+      height: 100vh;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <model-viewer 
+    src="static/turtleshipyarr.glb" 
+    camera-controls 
+    auto-rotate 
+    shadow-intensity="1"
+    environment-image="neutral"
+    touch-action="pan-y">
+  </model-viewer>
+</body>
+</html>
