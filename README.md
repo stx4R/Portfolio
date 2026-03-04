@@ -1,3 +1,6 @@
+## fuck3d.html 사용 X
+
+
 ## Tech Stack
 
 ### **Frontend**
@@ -15,4 +18,3 @@
 ### **Deployment**
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-181717?logo=github&logoColor=white)](https://pages.github.com/)
 
-© 2025 stx4R. All rights reserved.
