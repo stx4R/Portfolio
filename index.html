@@ -22,14 +22,6 @@
           
           <iframe id="projectIframe" src="" class="w-full h-full border-none hidden"></iframe>
           
-          <model-viewer id="project3D" 
-              class="w-full h-full hidden" 
-              camera-controls 
-              auto-rotate 
-              shadow-intensity="1"
-              environment-image="neutral"
-              touch-action="pan-y">
-          </model-viewer>
       </div>
   </div>
   
@@ -40,7 +32,6 @@
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
     main { -ms-overflow-style: none; scrollbar-width: none; }
-    model-viewer { background-color: #171717; --poster-color: transparent; }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -343,17 +334,6 @@
 function openModal(url) {
         const modal = document.getElementById('projectModal');
         const iframe = document.getElementById('projectIframe');
-        const modelViewer = document.getElementById('project3D');
-        
-        iframe.classList.add('hidden');
-        modelViewer.classList.add('hidden');
-        iframe.src = '';
-        modelViewer.src = '';
-
-        if (url.toLowerCase().endsWith('.glb')) {
-            modelViewer.src = url;
-            modelViewer.classList.remove('hidden');
-        } else {
             iframe.src = url;
             iframe.classList.remove('hidden');
         }
@@ -366,12 +346,10 @@ function openModal(url) {
     function closeModal() {
         const modal = document.getElementById('projectModal');
         const iframe = document.getElementById('projectIframe');
-        const modelViewer = document.getElementById('project3D');
         
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         iframe.src = '';
-        modelViewer.src = ''; 
         document.body.style.overflow = 'auto';
     }
 
