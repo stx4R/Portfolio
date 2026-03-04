@@ -37,10 +37,10 @@
     body, html {
       font-family: "Pretendard", sans-serif;
     }
-
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
     main { -ms-overflow-style: none; scrollbar-width: none; }
+    model-viewer { background-color: #171717; --poster-color: transparent; }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -339,7 +339,7 @@
 <!-- fuckpopup -->
 
 <script>
-    function openModal(url) {
+function openModal(url) {
         const modal = document.getElementById('projectModal');
         const iframe = document.getElementById('projectIframe');
         const modelViewer = document.getElementById('project3D');
@@ -349,7 +349,7 @@
         iframe.src = '';
         modelViewer.src = '';
 
-        if (url.endsWith('.glb')) {
+        if (url.toLowerCase().endsWith('.glb')) {
             modelViewer.src = url;
             modelViewer.classList.remove('hidden');
         } else {
@@ -370,7 +370,7 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         iframe.src = '';
-        modelViewer.src = '';
+        modelViewer.src = ''; 
         document.body.style.overflow = 'auto';
     }
 
@@ -381,7 +381,7 @@
         }
     }
 </script>
-
+  
 </script>
 </body>
 </html>
