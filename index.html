@@ -11,36 +11,14 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-  
-  <div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="relative w-full max-w-5xl h-[80vh] bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl"> <div class="absolute top-4 right-4 z-[110]">
-              <button onclick="closeModal()" class="bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-                  ✕
-              </button>
-          </div>
-          
-          <iframe id="projectIframe" src="" class="w-full h-full border-none hidden"></iframe>
-          
-          <model-viewer id="project3D" 
-              class="w-full h-full hidden" 
-              camera-controls 
-              auto-rotate 
-              shadow-intensity="1"
-              environment-image="neutral"
-              touch-action="pan-y">
-          </model-viewer>
-      </div>
-  </div>
-  
   <style>
     body, html {
       font-family: "Pretendard", sans-serif;
     }
+
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
     main { -ms-overflow-style: none; scrollbar-width: none; }
-    model-viewer { background-color: #171717; --poster-color: transparent; }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -111,8 +89,7 @@
     <!-- Ctrl + Click 기능으로도 추가 가능한지 실험 필요 -->
     <!-- ㄴ 근데 어떻게 하는지 모름 ㅅㅂ -->
 
-    <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 -->
-    <!-- ㄴ 버그 터져서 전부 포기-->  
+    <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 -->  
 
   <section id="fuckhyperlink" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24" px-8 md:px-16 lg:px-24">
@@ -136,7 +113,9 @@
 
           <div>
             <div class="flex items-center gap-2 mb-3">
-              <span class="text-2xl">🎨</span>
+              <span class="text-2xl cursor-pointer hover:scale-120 transition-transform" 
+                    onclick="openModal('3d-view.html')" 
+                    title="3D 모델 보기">🎨</span>
               <h3 class="text-xl font-semibold">&lt;3D&Graphic Designer/&gt;</h3>
             </div>
             <p class="text-neutral-400 mb-2">툴과 기술을 활용하여 다양한 매체와 플랫폼에서</p>
@@ -226,7 +205,7 @@
           <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
               style="background-image: url('static/project_SeatAutoAllocate.jpg'); background-color: #4a4a4a;">
           </div>
-          <div onclick="openModal('https://github.com/stx4R/SeatAutoAllocate')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
+          <div class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
             <h3 class="text-lg font-bold mb-1">SeatAutoAllocate</h3>
             <p class="text-xs text-neutral-300">TTC Algorithm</p>
           </div>
@@ -253,14 +232,14 @@
     <!-- 이건 좋음 -->
     <!-- ㄴ 디자인은 모름 -->
   
-  <section id="fuckhover" class="bg-neutral-900 text-white snap-start">
+  <section id="roadmap" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24" px-8 md:px-16 lg:px-24">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-5xl md:text-6xl font-bold mb-8 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #0F5132;">
-          Practice makes Perfect.
+          Practice makes perfect.
         </h2>
 
-        <div class="mt-12 space-y-10">
+        <div class="mt-12 space-y-8">
           <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
 
           <div>
@@ -280,10 +259,7 @@
             </div>
             <p class="text-neutral-400 mb-2">툴과 기술을 활용하여 다양한 매체와 플랫폼에서</p>
             <p class="text-neutral-400 mb-2">3D 모델과 그래픽을 창작합니다.</p>
-            <p class="text-neutral-400">
-              <a href="https://www.maxon.net/ko/cinema-4d/" class="underline hover:opacity-70">Cinema 4D</a> 와 
-              <a href="https://www.blender.org/" class="underline hover:opacity-70">Blender</a> 를 주로 다루며, Blender를 더 선호합니다.
-            </p>
+            <p class="text-neutral-400"><a href="https://www.maxon.net/ko/cinema-4d/" class="underline hover:opacity-70">Cinema 4D</a> 와 <a href="https://www.blender.org/" class="underline hover:opacity-70">Blender</a> 를 주로 다루며, Blender를 더 선호합니다.</p>
           </div>
         </div>
       </div>
@@ -326,7 +302,7 @@
     </div>
   </section>
 
-  <!-- 응 끝 -->
+<!-- 응 끝 -->
 
   <section id="fuckfooter" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center justify-center">
@@ -337,27 +313,14 @@
 </main>
 </script>
 
-  <!-- fuckpopup -->
+<!-- fuckBentoBox -->
 
 <script>
-function openModal(url) {
+    function openModal(url) {
         const modal = document.getElementById('projectModal');
         const iframe = document.getElementById('projectIframe');
-        const modelViewer = document.getElementById('project3D');
         
-        iframe.classList.add('hidden');
-        modelViewer.classList.add('hidden');
-        iframe.src = '';
-        modelViewer.src = '';
-
-        if (url.toLowerCase().endsWith('.glb')) {
-            modelViewer.src = url;
-            modelViewer.classList.remove('hidden');
-        } else {
-            iframe.src = url;
-            iframe.classList.remove('hidden');
-        }
-        
+        iframe.src = url;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
@@ -366,12 +329,10 @@ function openModal(url) {
     function closeModal() {
         const modal = document.getElementById('projectModal');
         const iframe = document.getElementById('projectIframe');
-        const modelViewer = document.getElementById('project3D');
         
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         iframe.src = '';
-        modelViewer.src = ''; 
         document.body.style.overflow = 'auto';
     }
 
@@ -381,8 +342,7 @@ function openModal(url) {
             closeModal();
         }
     }
-</script>
-  
+
 </script>
 </body>
 </html>
