@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>stx4R_Portfolio</title>
+  <title>Portfolio</title>
 
   <link rel="icon" type="image/jpeg" href="static/favicon-16x16.png" />
 
@@ -26,7 +26,7 @@
 <main class="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
 
   <!-- Intro -->
-  <section id="intro" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckintro" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center justify-center px-6">
       <div class="text-center max-w-3xl">
         <h1 class="text-6xl md:text-7xl font-bold mb-6 leading-tight">이상과 상상, 그 이상</h1>
@@ -40,8 +40,15 @@
     </div>
   </section>
 
-  <!-- ment1 -->
-  <section id="philosophy" class="bg-neutral-900 text-white snap-start">
+  <!-- Page 2 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 1차시 ScrollAnimation 실험 -->   
+
+    <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
+    <!-- 좆같은 스크롤 애니메이션 최적화 필요 -->
+     <!-- ㄴ 코드 존나 더러움 -->
+
+  <section id="fuckscrollanimation" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-cyan-400 text-black inline-block w-fit whitespace-nowrap">
@@ -68,16 +75,23 @@
           </div>
         </div>
       </div>
-
       <div class="hidden lg:flex flex-1 items-center justify-center">
         <span class="text-8xl"><img src="static/stx4R_profile.png" alt="Profile" class="w-48 h-48 rounded-full">
-
       </div>
     </div>
   </section>
 
-  <!-- ment2 -->
-  <section id="creative" class="bg-neutral-900 text-white snap-start">
+  <!-- Page 3 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 2차시 HyperLink 실험 -->
+<!-- 2차시 3d 실험 -->    
+
+    <!-- Ctrl + Click 기능으로도 추가 가능한지 실험 필요 -->
+    <!-- ㄴ 근데 어떻게 하는지 모름 ㅅㅂ -->
+
+    <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 -->  
+
+  <section id="fuckhyperlink" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24" px-8 md:px-16 lg:px-24">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-5xl md:text-6xl font-bold mb-8 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #861616;">
@@ -85,6 +99,147 @@
         </h2>
 
         <div class="mt-12 space-y-10">
+          <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
+
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-2xl">⚙️</span>
+              <h3 class="text-xl font-semibold">&lt;Full-Stack Developer/&gt;</h3>
+            </div>
+            <p class="text-neutral-400 mb-2"><a href="https://developer.mozilla.org/ko/docs/Web/HTML" class="underline hover:opacity-70">HTML</a>, <a href="https://developer.mozilla.org/ko/docs/Web/CSS" class="underline hover:opacity-70">CSS</a> 등을 이용하여 프론트엔드를 만듭니다.</p>
+            <p class="text-neutral-400 mb-2"><a href="https://www.python.org/" class="underline hover:opacity-70">Python</a> 언어, 또는 <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript" class="underline hover:opacity-70">JavaScript</a> 를 이용하여 백엔드를 만듭니다.</p>
+            <p class="text-neutral-400">지금까지 괄호를 얼마나 열었는지 기억나지 않습니다.</p>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-2xl cursor-pointer hover:scale-120 transition-transform" 
+                    onclick="openModal('3d-view.html')" 
+                    title="3D 모델 보기">🎨</span>
+              <h3 class="text-xl font-semibold">&lt;3D&Graphic Designer/&gt;</h3>
+            </div>
+            <p class="text-neutral-400 mb-2">툴과 기술을 활용하여 다양한 매체와 플랫폼에서</p>
+            <p class="text-neutral-400 mb-2">3D 모델과 그래픽을 창작합니다.</p>
+            <p class="text-neutral-400">
+              <a href="https://www.maxon.net/ko/cinema-4d/" class="underline hover:opacity-70">Cinema 4D</a> 와 
+              <a href="https://www.blender.org/" class="underline hover:opacity-70">Blender</a> 를 주로 다루며, Blender를 더 선호합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hidden lg:flex flex-1 items-center justify-center">
+        <span class="text-9xl">🌠</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 4 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 3차시 BentoBox 디자이닝 -->   
+
+    <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
+    <!-- 좆같은 exe 파일 어떻게 구동시킬거임 -->
+     <!-- ㄴ py로 변환 -> 웹 -->
+     <!-- ㄴ 걍 다운시킴 -->
+     <!-- 걍 둘다 좆구림 -->
+     <!-- 걍 포기 -->
+
+  <section id="fuckBentoBox" class="bg-neutral-900 text-white snap-start">
+    <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
+      <div class="flex-1 flex flex-col justify-center">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-cyan-400 text-black inline-block w-fit whitespace-nowrap" style="background-color: #E0A800;">
+          Efforts never betray.
+        </h2>
+
+        <div class="mt-12 space-y-8">
+          <div>
+            <h3 class="text-xl font-semibold mb-4">🚮 HowTo</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300"><a href="https://teachablemachine.withgoogle.com/" class="underline hover:opacity-70">Teachable Machine</a> 을 활용한 분리수거 방법 검색</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ⭕</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-semibold mb-4">📝 WhatToDo</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300">P2P BlockChain을 활용한 일정 정리 최적화</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-semibold mb-4">🪑 SeatAutoAllocate</h3>
+            <div class="space-y-2">
+              <p class="text-neutral-300">TTC Algorithm을 활용한 우선순위 자리배치</p>
+              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="hidden lg:flex flex-1 items-center justify-center">
+      <div class="grid grid-cols-2 grid-rows-2 gap-4 w-full max-w-lg aspect-square">
+        <div class="relative row-span-2 group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_HowTo.jpg'); background-color: #2a2a2a;">
+          </div>
+          <div onclick="openModal('https://stx4r.github.io/HowTo/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 text-center">
+            <h3 class="text-xl font-bold mb-2">HowTo</h3>
+            <p class="text-sm text-neutral-300">Teachable Machine</p>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_WTD.jpg'); background-color: #3a3a3a;">
+          </div>
+          <div onclick="openModal('https://stx4r.github.io/WTD/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
+            <h3 class="text-lg font-bold mb-1">WhatToDo</h3>
+            <p class="text-xs text-neutral-300">P2P Block Chain</p>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+              style="background-image: url('static/project_SeatAutoAllocate.jpg'); background-color: #4a4a4a;">
+          </div>
+          <div class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
+            <h3 class="text-lg font-bold mb-1">SeatAutoAllocate</h3>
+            <p class="text-xs text-neutral-300">TTC Algorithm</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+        <div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="relative w-full max-w-5xl h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <div class="absolute top-4 right-4 z-10">
+                <button onclick="closeModal()" class="bg-black/20 hover:bg-black/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                    ✕
+                </button>
+            </div>
+            <iframe id="projectIframe" src="" class="w-full h-full border-none"></iframe>
+        </div>
+    </div>
+  </section>
+
+  <!-- Page 5 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 4차시 Hover 실험 -->   
+
+    <!-- 이건 좋음 -->
+    <!-- ㄴ 디자인은 모름 -->
+  
+  <section id="roadmap" class="bg-neutral-900 text-white snap-start">
+    <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24" px-8 md:px-16 lg:px-24">
+      <div class="flex-1 flex flex-col justify-center">
+        <h2 class="text-5xl md:text-6xl font-bold mb-8 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #0F5132;">
+          Practice makes perfect.
+        </h2>
+
+        <div class="mt-12 space-y-8">
           <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
 
           <div>
@@ -115,94 +270,13 @@
     </div>
   </section>
 
-  <!-- ment3 -->
-  <section id="tenacity" class="bg-neutral-900 text-white snap-start">
-    <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
-      <div class="flex-1 flex flex-col justify-center">
-        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-cyan-400 text-black inline-block w-fit whitespace-nowrap" style="background-color: #E0A800;">
-          Efforts never betray.
-        </h2>
+  <!-- Page 6 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 5차시 Mailto 실험 -->   
 
-        <div class="mt-12 space-y-8">
+    <!-- 아무도 연락 안 할듯  -->
 
-          <div>
-            <h3 class="text-xl font-semibold mb-4">🚮 HowTo</h3>
-            <div class="space-y-2">
-              <p class="text-neutral-300"><a href="https://teachablemachine.withgoogle.com/" class="underline hover:opacity-70">Teachable Machine</a> 을 활용한 분리수거 방법 검색</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ⭕</p>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="text-xl font-semibold mb-4">📝 WhatToDo</h3>
-            <div class="space-y-2">
-              <p class="text-neutral-300">P2P BlockChain을 활용한 일정 정리 최적화</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="text-xl font-semibold mb-4">🪑 SeatAutoAllocate</h3>
-            <div class="space-y-2">
-              <p class="text-neutral-300">TTC Algorithm을 활용한 우선순위 자리배치</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    <div class="hidden lg:flex flex-1 items-center justify-center">
-      <div class="grid grid-cols-2 grid-rows-2 gap-4 w-full max-w-lg aspect-square">
-        
-        <div class="relative row-span-2 group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
-          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-              style="background-image: url('static/project_HowTo.jpg'); background-color: #2a2a2a;">
-          </div>
-          <div onclick="openModal('https://stx4r.github.io/HowTo/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 text-center">
-            <h3 class="text-xl font-bold mb-2">HowTo</h3>
-            <p class="text-sm text-neutral-300">Teachable Machine</p>
-          </div>
-        </div>
-
-        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
-          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-              style="background-image: url('static/project_WTD.jpg'); background-color: #3a3a3a;">
-          </div>
-          <div onclick="openModal('https://stx4r.github.io/WTD/')" class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
-            <h3 class="text-lg font-bold mb-1">WhatToDo</h3>
-            <p class="text-xs text-neutral-300">P2P Block Chain</p>
-          </div>
-        </div>
-
-        <div class="relative group overflow-hidden rounded-[2rem] bg-neutral-800 shadow-xl border border-neutral-700">
-          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-              style="background-image: url('static/project_SeatAutoAllocate.jpg'); background-color: #4a4a4a;">
-          </div>
-          <div class="absolute inset-0 bg-black/70 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-center">
-            <h3 class="text-lg font-bold mb-1">SeatAutoAllocate</h3>
-            <p class="text-xs text-neutral-300">TTC Algorithm</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    </div>
-        <div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="relative w-full max-w-5xl h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
-            <div class="absolute top-4 right-4 z-10">
-                <button onclick="closeModal()" class="bg-black/20 hover:bg-black/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-                    ✕
-                </button>
-            </div>
-            <iframe id="projectIframe" src="" class="w-full h-full border-none"></iframe>
-        </div>
-    </div>
-  </section>
-
-
-  <!-- Contact -->
-  <section id="contact" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckmailto" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-blue-400 text-black inline-block w-fit whitespace-nowrap">
@@ -228,15 +302,19 @@
     </div>
   </section>
 
-  <section id="footer" class="bg-neutral-900 text-white snap-start">
+<!-- 응 끝 -->
+
+  <section id="fuckfooter" class="bg-neutral-900 text-white snap-start">
     <div class="h-screen w-full flex items-center justify-center">
       <p class="text-4xl font-light text-center"><strong>© 2026 stx4R. All rights reserved.</strong></p>
     </div>
   </section>
 
 </main>
-
 </script>
+
+<!-- fuckBentoBox -->
+
 <script>
     function openModal(url) {
         const modal = document.getElementById('projectModal');
@@ -264,6 +342,7 @@
             closeModal();
         }
     }
+
 </script>
 </body>
 </html>
