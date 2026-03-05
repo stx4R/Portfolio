@@ -94,25 +94,47 @@
       </div>
     </section>
 
-    <script>
+<script>
       document.addEventListener('DOMContentLoaded', () => {
         const hoverGroup = document.getElementById('hoverGroup');
         const dynamicWord = document.getElementById('dynamicWord');
         const signalElements = document.querySelectorAll('.signal-word');
         
         let currentColorClass = '';
+        let currentWord = '';
 
-        hoverGroup.addEventListener('mouseenter', () => {
-          const randomIndex = Math.floor(Math.random() * signalElements.length);
-          const chosenElement = signalElements[randomIndex];
-          
-          const text = chosenElement.innerText;
-          const colorClass = chosenElement.getAttribute('data-color');
+        hoverGroup.addEventListener('mousemove', (e) => {
+          let closestElement = null;
+          let minDistance = Infinity;
 
-          dynamicWord.innerText = text;
-          if (colorClass) {
-            dynamicWord.classList.add(colorClass);
-            currentColorClass = colorClass;
+          signalElements.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const distance = Math.hypot(centerX - e.clientX, centerY - e.clientY);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestElement = el;
+            }
+          });
+
+          if (closestElement) {
+            const text = closestElement.innerText;
+            const colorClass = closestElement.getAttribute('data-color');
+
+            if (currentWord !== text) {
+              dynamicWord.innerText = text;
+              
+              if (currentColorClass) {
+                dynamicWord.classList.remove(currentColorClass);
+              }
+              if (colorClass) {
+                dynamicWord.classList.add(colorClass);
+                currentColorClass = colorClass;
+              }
+              currentWord = text;
+            }
           }
         });
 
@@ -122,6 +144,7 @@
             dynamicWord.classList.remove(currentColorClass);
             currentColorClass = '';
           }
+          currentWord = '';
         });
       });
     </script>
