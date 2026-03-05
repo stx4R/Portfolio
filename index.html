@@ -43,6 +43,91 @@
 
   <!-- Page 2 -->
 <!-- 바이브 코딩 탈출기 -->
+<!-- 6차시 Hover 실험 -->   
+
+    <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
+
+    <section id="fuckhover" class="bg-neutral-900 text-white snap-start">
+      <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
+        
+        <div class="flex-1 flex flex-col justify-center">
+          <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-purple-400 text-black inline-block w-fit whitespace-nowrap">
+            About Me.
+          </h2>
+
+          <div class="mt-12 space-y-6">
+            <p class="text-neutral-300 text-xl font-semibold transition-all duration-300">
+              저는 <span id="dynamicWord" class="inline-block font-bold transition-colors duration-300">▢▢▢▢</span>한 사람입니다.
+            </p>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl animate-pulse">🖱️</span>
+              <p class="text-neutral-400">왼쪽 텍스트 영역에 마우스를 올려보세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden lg:flex flex-1 items-center justify-center">
+          <div id="hoverGroup" class="group flex flex-wrap justify-center items-center gap-6 p-10 w-full max-w-2xl cursor-crosshair select-none">
+            
+            <span class="text-2xl font-bold text-neutral-600 transition-all duration-700 group-hover:opacity-10 group-hover:blur-sm group-hover:scale-90">Forgetful</span>
+            <span class="text-xl font-light text-neutral-500 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Rude</span>
+            
+            <span class="signal-word text-3xl font-black text-neutral-400 transition-all duration-500 group-hover:text-cyan-400 group-hover:scale-125 group-hover:-translate-y-2 group-hover:drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] z-10" data-color="text-cyan-400">HardWorking</span>
+            
+            <span class="text-4xl font-black text-neutral-700 transition-all duration-700 group-hover:opacity-10 group-hover:blur-md">Aggressive</span>
+            <span class="text-lg font-medium text-neutral-600 transition-all duration-300 group-hover:opacity-0">Picky</span>
+            
+            <span class="signal-word text-2xl font-bold text-neutral-500 transition-all duration-500 delay-75 group-hover:text-amber-400 group-hover:scale-110 group-hover:translate-x-2 group-hover:drop-shadow-[0_0_15px_rgba(251,191,36,0.8)] z-10" data-color="text-amber-400">Creative</span>
+            
+            <span class="text-3xl font-light text-neutral-500 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Selfish</span>
+            <span class="text-2xl font-bold text-neutral-600 transition-all duration-700 group-hover:opacity-10 group-hover:blur-sm">Timid</span>
+            
+            <span class="signal-word text-4xl font-black text-neutral-400 transition-all duration-500 delay-100 group-hover:text-pink-500 group-hover:scale-125 group-hover:-translate-y-1 group-hover:drop-shadow-[0_0_15px_rgba(236,72,153,0.8)] z-10" data-color="text-pink-500">Capable</span>
+            
+            <span class="text-xl font-bold text-neutral-700 transition-all duration-300 group-hover:opacity-0">Hostile</span>
+            <span class="text-3xl font-medium text-neutral-600 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Conservative</span>
+
+            <span class="signal-word text-2xl font-bold text-neutral-500 transition-all duration-500 delay-150 group-hover:text-emerald-400 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] z-10" data-color="text-emerald-400">Communicative</span>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const hoverGroup = document.getElementById('hoverGroup');
+        const dynamicWord = document.getElementById('dynamicWord');
+        const signalElements = document.querySelectorAll('.signal-word');
+        
+        let currentColorClass = '';
+
+        hoverGroup.addEventListener('mouseenter', () => {
+          const randomIndex = Math.floor(Math.random() * signalElements.length);
+          const chosenElement = signalElements[randomIndex];
+          
+          const text = chosenElement.innerText;
+          const colorClass = chosenElement.getAttribute('data-color');
+
+          dynamicWord.innerText = text;
+          if (colorClass) {
+            dynamicWord.classList.add(colorClass);
+            currentColorClass = colorClass;
+          }
+        });
+
+        hoverGroup.addEventListener('mouseleave', () => {
+          dynamicWord.innerText = '▢▢▢▢';
+          if (currentColorClass) {
+            dynamicWord.classList.remove(currentColorClass);
+            currentColorClass = '';
+          }
+        });
+      });
+    </script>
+
+  <!-- Page 3 -->
+<!-- 바이브 코딩 탈출기 -->
 <!-- 1차시 ScrollAnimation 실험 -->   
 
     <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
@@ -82,7 +167,7 @@
     </div>
   </section>
 
-  <!-- Page 3 -->
+  <!-- Page 4 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 2차시 HyperLink 실험 -->
 <!-- 2차시 3d 실험 -->    
@@ -133,7 +218,7 @@
     </div>
   </section>
 
-  <!-- Page 4 -->
+  <!-- Page 5 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 3차시 BentoBox 디자이닝 -->   
 
@@ -214,7 +299,7 @@
     </div>
     </section>
 
-  <!-- Page 5 -->
+  <!-- Page 6 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 4차시 Hover 실험 -->   
 
@@ -259,7 +344,7 @@
     </div>
   </section>
 
-  <!-- Page 6 -->
+  <!-- Page 7 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 5차시 Mailto 실험 -->   
 
