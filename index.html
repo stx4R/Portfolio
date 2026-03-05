@@ -316,17 +316,17 @@
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div class="relative w-full max-w-5xl h-[80vh] bg-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
-        <div class="absolute top-4 right-4 z-10">
-            <button onclick="closeModal()" class="bg-black/40 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-                ✕
-            </button>
-        </div>
-        
-        <iframe id="projectIframe" src="" class="w-full h-full border-none hidden bg-white"></iframe>
-        
-        <model-viewer id="project3DViewer" src="" class="w-full h-full hidden" camera-controls auto-rotate shadow-intensity="1"></model-viewer>
+  <div class="relative w-full max-w-5xl h-[80vh] bg-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+    <div class="absolute top-4 right-4 z-10">
+      <button onclick="closeModal()" class="bg-black/40 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+        ✕
+      </button>
     </div>
+    
+    <iframe id="projectIframe" src="" class="w-full h-full border-none hidden bg-white"></iframe>
+    
+    <model-viewer id="project3DViewer" src="" class="w-full h-full hidden" camera-controls auto-rotate shadow-intensity="1" environment-image="neutral"></model-viewer>
+  </div>
 </div>
 
 <script>
@@ -359,7 +359,6 @@
         
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-        
         iframe.src = '';
         viewer3d.src = '';
         document.body.style.overflow = 'auto';
