@@ -94,7 +94,7 @@
       </div>
     </section>
 
-<script>
+    <script>
       document.addEventListener('DOMContentLoaded', () => {
         const hoverGroup = document.getElementById('hoverGroup');
         const dynamicWord = document.getElementById('dynamicWord');
@@ -264,7 +264,7 @@
             <h3 class="text-xl font-semibold mb-4">🚮 HowTo</h3>
             <div class="space-y-2">
               <p class="text-neutral-300"><a href="https://teachablemachine.withgoogle.com/" class="underline hover:opacity-70">Teachable Machine</a> 을 활용한 분리수거 방법 검색</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ⭕</p>
+              <p class="text-neutral-300">ㄴ 기존의 복잡한 분리수거 절차를 간단하게 사진 촬영으로 알 수 있습니다.</p>
             </div>
           </div>
 
@@ -272,7 +272,7 @@
             <h3 class="text-xl font-semibold mb-4">📝 WhatToDo</h3>
             <div class="space-y-2">
               <p class="text-neutral-300">P2P BlockChain을 활용한 일정 정리 최적화</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+              <p class="text-neutral-300">ㄴ 직관적인 UI와 기능으로 더 효과적으로 개인적인 일정을 정리할 수 있습니다.</p>
             </div>
           </div>
 
@@ -280,7 +280,7 @@
             <h3 class="text-xl font-semibold mb-4">🪑 SeatAutoAllocate</h3>
             <div class="space-y-2">
               <p class="text-neutral-300">TTC Algorithm을 활용한 우선순위 자리배치</p>
-              <p class="text-neutral-300">ㄴ 추가 탐구 계획 ❌</p>
+              <p class="text-neutral-300">ㄴ 기존의 랜덤성 배치에서 벗어나, 개개인의 선호도를 기반으로 자리를 배치해줍니다.</p>
             </div>
           </div>
         </div>
@@ -324,48 +324,159 @@
 
   <!-- Page 6 -->
 <!-- 바이브 코딩 탈출기 -->
-<!-- 4차시 Hover 실험 -->   
+<!-- 7차시 반응형 UI 실험 -->   
 
     <!-- 이건 좋음 -->
     <!-- ㄴ 디자인은 모름 -->
 
-  <section id="roadmap" class="bg-neutral-900 text-white snap-start">
-    <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
-      <div class="flex-1 flex flex-col justify-center">
-        <h2 class="text-5xl md:text-6xl font-bold mb-8 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #0F5132;">
-          Practice makes perfect.
-        </h2>
+  <section id="fuckinteraction" class="bg-neutral-900 text-white snap-start">
+      <div class="h-screen w-full flex items-center flex-row-reverse px-6 md:px-12 lg:px-20 xl:px-24">
+        
+        <div class="flex-1 flex flex-col justify-center pl-4 sm:pl-8 lg:pl-12">
+          <h2 class="text-5xl md:text-6xl font-bold mb-12 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #0F5132;">
+            Practice makes perfect.
+          </h2>
 
-        <div class="mt-12 space-y-8">
-          <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
-
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-2xl">⚙️</span>
-              <h3 class="text-xl font-semibold">&lt;Full-Stack Developer/&gt;</h3>
+          <div class="flex flex-col gap-8">
+            
+            <div class="roadmap-item group cursor-pointer" data-step="1">
+              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
+                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
+                [01] Ready,
+              </h3>
+              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">뜀박질을 위한, 걸음마 연습</p>
             </div>
-            <p class="text-neutral-400 mb-2"><a href="https://developer.mozilla.org/ko/docs/Web/HTML" class="underline hover:opacity-70">HTML</a>, <a href="https://developer.mozilla.org/ko/docs/Web/CSS" class="underline hover:opacity-70">CSS</a> 등을 이용하여 프론트엔드를 만듭니다.</p>
-            <p class="text-neutral-400 mb-2"><a href="https://www.python.org/" class="underline hover:opacity-70">Python</a> 언어, 또는 <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript" class="underline hover:opacity-70">JavaScript</a> 를 이용하여 백엔드를 만듭니다.</p>
-            <p class="text-neutral-400">지금까지 괄호를 얼마나 열었는지 기억나지 않습니다.</p>
+
+            <div class="roadmap-item group cursor-pointer" data-step="2">
+              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
+                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
+                [02] Get -
+              </h3>
+              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">걸음마를 기초로, 달려보기</p>
+            </div>
+
+            <div class="roadmap-item group cursor-pointer" data-step="3">
+              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
+                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
+                [03] Set -
+              </h3>
+              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">나만의 러닝페이스 찾기</p>
+            </div>
+
+            <div class="roadmap-item group cursor-pointer" data-step="4">
+              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
+                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
+                [04] Go !
+              </h3>
+              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">모든 것을 바탕으로 필사적으로 뛰기</p>
+            </div>
+
           </div>
+        </div>
 
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-2xl">🎨</span>
-              <h3 class="text-xl font-semibold">&lt;3D&Graphic Designer/&gt;</h3>
+        <div class="hidden lg:flex flex-1 items-center justify-center pr-4 lg:pr-8">
+          <div class="w-full max-w-lg aspect-square bg-neutral-950 rounded-2xl p-8 border border-neutral-800 shadow-[0_0_50px_rgba(15,81,50,0.15)] relative overflow-hidden flex flex-col">
+            
+            <div class="absolute top-4 left-4 flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500 opacity-80"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500 opacity-80"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500 opacity-80"></div>
             </div>
-            <p class="text-neutral-400 mb-2">툴과 기술을 활용하여 다양한 매체와 플랫폼에서</p>
-            <p class="text-neutral-400 mb-2">3D 모델과 그래픽을 창작합니다.</p>
-            <p class="text-neutral-400"><a href="https://www.maxon.net/ko/cinema-4d/" class="underline hover:opacity-70">Cinema 4D</a> 와 <a href="https://www.blender.org/" class="underline hover:opacity-70">Blender</a> 를 주로 다루며, Blender를 더 선호합니다.</p>
+
+            <div id="roadmap-display" class="mt-8 flex flex-col h-full transition-opacity duration-300 ease-in-out">
+              <div class="flex-1 flex flex-col justify-center items-center text-center opacity-50">
+                <span class="text-7xl mb-6">🖱️</span>
+                <h3 class="text-2xl font-bold text-white mb-2">우측 리스트에 마우스를 올려보세요</h3>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
-
-      <div class="hidden lg:flex flex-1 items-center justify-center">
-        <span class="text-9xl">🌠</span>
-      </div>
-    </div>
   </section>
+
+  <script>
+    const roadmapData = {
+      '1': {
+        icon: '👟',
+        title: 'Ready,',
+        desc: '뜀박질을 위한, 걸음마 연습',
+        efforts: [
+          'Ⅰ : Python / JavaScript 학습',
+          'Ⅱ : Baekjoon / SWEA 문제 풀이',
+          'Ⅲ : 창의적 사고를 위한 타 프로그램 알고리즘 학습'
+        ]
+      },
+      '2': {
+        icon: '💪',
+        title: 'Get -',
+        desc: '걸음마를 기초로, 달려보기',
+        efforts: [
+          'Ⅰ : 타 프로그램 코드 비교 / 분석',
+          'Ⅱ : Tailwind CSS를 이용한 반응형 UI 개발',
+          'Ⅲ : PY/JS를 기반으로 여러 사이드프로젝트 개발'
+        ]
+      },
+      '3': {
+        icon: '🏋️‍♂️',
+        title: 'Set -',
+        desc: '나만의 러닝페이스 찾기',
+        efforts: [
+          'Ⅰ : Blender, Cinema 4D를 활용한 3D 모델링 제작',
+          'Ⅱ : model-viewer를 활용한 3D 모델링 구현',
+          'Ⅲ : 저사양 기기 최적화를 고려한 파일 경량화 작업'
+        ]
+      },
+      '4': {
+        icon: '🏃‍♂️',
+        title: 'Go !',
+        desc: '모든 것을 바탕으로 필사적으로 뛰기',
+        efforts: [
+          'Ⅰ : NN',
+          'Ⅱ : NN',
+          'Ⅲ : NN'
+        ]
+      }
+    };
+
+    const roadmapItems = document.querySelectorAll('.roadmap-item');
+    const displayArea = document.getElementById('roadmap-display');
+
+    roadmapItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const step = item.getAttribute('data-step');
+        const data = roadmapData[step];
+        
+        displayArea.style.opacity = '0';
+        
+        setTimeout(() => {
+          let listHtml = data.efforts.map(eff => `
+            <li class="flex items-start text-neutral-300 text-sm md:text-base mb-3 leading-relaxed">
+              <span class="text-[#0F5132] font-bold mr-3 mt-0.5">✓</span>
+              <span>${eff}</span>
+            </li>
+          `).join('');
+
+          displayArea.innerHTML = `
+            <div class="flex flex-col justify-center h-full">
+              <div class="text-5xl mb-6">${data.icon}</div>
+              <h3 class="text-3xl font-bold text-white mb-2">${data.title}</h3>
+              <p class="text-[#0F5132] font-semibold mb-8">${data.desc}</p>
+              
+              <div class="bg-neutral-900 rounded-lg p-5 border border-neutral-800">
+                <h4 class="text-neutral-500 text-sm font-bold mb-4 tracking-widest uppercase">My Efforts</h4>
+                <ul class="list-none p-0 m-0">
+                  ${listHtml}
+                </ul>
+              </div>
+            </div>
+          `;
+          
+          displayArea.style.opacity = '1';
+        }, 150); 
+      });
+    });
+  </script>
 
   <!-- Page 7 -->
 <!-- 바이브 코딩 탈출기 -->
