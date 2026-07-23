@@ -7,28 +7,27 @@
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <style>
     body, html {
       font-family: "Pretendard", sans-serif;
     }
 
+    html, body { height: 100%; overflow: hidden; }
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
-    main { -ms-overflow-style: none; scrollbar-width: none; }
-    main > section { scroll-snap-stop: always; }
   </style>
-  <nav id="fuckscrollIndicator" class="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4 hidden md:flex">
-    </nav>
 </head>
 <body class="bg-neutral-900 text-white">
-<main class="w-full h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth">
+<main class="swiper w-full h-screen">
+<div class="swiper-wrapper">
 
 
   
   <!-- Intro -->
 
-  <section id="fuckintro" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckintro" class="bg-neutral-900 text-white swiper-slide">
     <div class="h-screen w-full flex items-center justify-center px-6">
       <div class="text-center max-w-3xl">
         <h1 class="text-6xl md:text-7xl font-bold mb-6 leading-tight">이상과 상상, 그 이상</h1>
@@ -48,8 +47,8 @@
 
     <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
 
-    <section id="fuckhover" class="bg-neutral-900 text-white snap-start">
-      <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
+    <section id="fuckhover" class="bg-neutral-900 text-white swiper-slide">
+      <div class="h-screen w-full flex items-center flex-row-reverse gap-16 px-8 md:px-16 lg:px-24">
         
         <div class="flex-1 flex flex-col justify-center">
           <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-purple-400 text-black inline-block w-fit whitespace-nowrap">
@@ -157,7 +156,7 @@
     <!-- 좆같은 스크롤 애니메이션 최적화 필요 -->
      <!-- ㄴ 코드 존나 더러움 -->
 
-  <section id="fuckscrollanimation" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckscrollanimation" class="bg-neutral-900 text-white swiper-slide">
     <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-cyan-400 text-black inline-block w-fit whitespace-nowrap">
@@ -200,7 +199,7 @@
 
     <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 --> 
 
-  <section id="fuckhyperlink" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckhyperlink" class="bg-neutral-900 text-white swiper-slide">
       <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
         <div class="flex-1 flex flex-col justify-center">
           <h2 class="text-5xl md:text-6xl font-bold mb-4 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #861616;">
@@ -236,14 +235,14 @@
       </div>
 
       <div class="hidden lg:flex flex-1 items-center justify-center">
-        <span class="text-9xl cursor-pointer hover:scale-110 transition-transform duration-300 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" onclick="openModal('static/fuck3d.glb', '3d')" title="클릭해서 3D 모델 보기">🌠</span>
+        <span class="text-9xl">🌠</span>
       </div>
     </div>
   </section>
 
   <!-- Page 5 -->
 
-  <section id="fuckBentoBox" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckBentoBox" class="bg-neutral-900 text-white swiper-slide">
     <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-12">
 
       <!-- title -->
@@ -258,8 +257,8 @@
       </div>
 
       <!-- cards: 남은 공간 전체 활용, 세로 중앙 정렬 -->
-      <div class="flex-1 flex items-center mt-8">
-        <div id="projectsGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 w-full"></div>
+      <div class="flex-1 flex items-start mt-12">
+        <div id="projectsGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full"></div>
       </div>
 
     </div>
@@ -276,6 +275,11 @@
       pink:    { tag: 'bg-pink-950 text-pink-300 border border-pink-800',          accent: '#ec4899' },
       sky:     { tag: 'bg-sky-950 text-sky-300 border border-sky-800',             accent: '#0ea5e9' },
       rose:    { tag: 'bg-rose-950 text-rose-300 border border-rose-800',          accent: '#f43f5e' },
+      violet:  { tag: 'bg-violet-950 text-violet-300 border border-violet-800',    accent: '#8b5cf6' },
+      orange:  { tag: 'bg-orange-950 text-orange-300 border border-orange-800',    accent: '#f97316' },
+      teal:    { tag: 'bg-teal-950 text-teal-300 border border-teal-800',          accent: '#14b8a6' },
+      lime:    { tag: 'bg-lime-950 text-lime-300 border border-lime-800',          accent: '#84cc16' },
+      fuchsia: { tag: 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800', accent: '#d946ef' },
     };
 
     const projects = [
@@ -285,7 +289,6 @@
         tags: ['Motion Capture', 'Deep Learning', 'Discriminative AI'],
         shortDesc: 'Teachable Machine 기반 실시간 이미지 인식으로 분리수거 방법을 즉시 안내하는 AI 웹 앱',
         github: 'https://github.com/stx4R/HowTo',
-        demo: 'https://stx4r.github.io/HowTo/',
         readme: `<h2>개요</h2>
 <p>사진 한 장으로 분리수거 방법을 즉시 알 수 있는 AI 기반 웹 애플리케이션입니다. Google Teachable Machine으로 학습한 분류 모델을 브라우저에서 직접 구동하여 별도 서버 없이 실시간 추론합니다.</p>
 <h2>핵심 기술</h2>
@@ -303,7 +306,6 @@
         tags: ['P2P Blockchain', 'RESTful API', 'NEIS Integration'],
         shortDesc: 'P2P 블록체인 + 학교 API 연동으로 일정 무결성을 보장하는 개인 스케줄 관리 앱',
         github: 'https://github.com/stx4R/WTD',
-        demo: 'https://stx4r.github.io/WTD/',
         readme: `<h2>개요</h2>
 <p>P2P 블록체인 아키텍처로 일정 데이터의 무결성을 보장하고, NEIS·SuperSchool 공식 API와 연동하여 학사 일정을 자동으로 가져오는 개인 스케줄 관리 웹 앱입니다.</p>
 <h2>핵심 기술</h2>
@@ -323,7 +325,6 @@
         tags: ['TTC Algorithm', 'Pareto Efficiency', 'Strategy-proofness'],
         shortDesc: 'Gale-Shapley를 넘어선 Random Endowment TTC로 전략증명적·파레토 최적 자리를 배치하는 시스템',
         github: 'https://github.com/stx4R/SeatAutoAllocate',
-        demo: 'https://stx4r.github.io/SeatAutoAllocate/',
         readme: `<h2>개요</h2>
 <p>기존 랜덤 자리 배치의 한계를 극복하여 학생 개개인의 선호도를 반영하면서도 수학적으로 최적화된 배치를 보장하는 시스템입니다. 경제학의 매칭 이론을 교육 환경에 적용한 프로젝트입니다.</p>
 <h2>알고리즘 설계</h2>
@@ -377,7 +378,6 @@
         tags: ['Next.js', 'Supabase', 'Civic Tech'],
         shortDesc: '100명 대표·12개 동아리가 58일간 참여하는 정책 기반 모의국회 전자 운영 플랫폼',
         github: 'https://github.com/stx4R/MoGuk',
-        demo: 'https://moguk.vercel.app',
         readme: `<h2>개요</h2>
 <p>"보이지 않는 곳에서 보이는 것을 위하여" — 100명의 대표와 12개 동아리가 58일간 참여하는 <strong>제 3회 오량모의국회</strong>의 전자 운영 플랫폼입니다. 정책 발의, 토론, 전자 투표를 하나의 웹 서비스로 통합합니다.</p>
 <h2>핵심 기능</h2>
@@ -428,7 +428,6 @@
         tags: ['XGBoost', 'LightGBM', 'Feature Engineering'],
         shortDesc: 'KBO·MLB 15,000+ 경기 데이터와 앙상블 ML로 야구 관중 수를 예측하는 데이터 분석 플랫폼 (Test R² 0.697)',
         github: 'https://github.com/stx4R/KBO-Prediction',
-        demo: 'https://stx4r.github.io/KBO-Prediction/',
         readme: `<h2>개요</h2>
 <p>"야구 관중 수는 단순한 시계열 트렌드인가, 아니면 날씨·라이벌전·팀 순위 등 복잡한 이벤트들의 상호작용인가?" — KBO 2023–2025년 2,160경기와 MLB 2020–2025년 13,046경기 데이터를 기반으로 앙상블 머신러닝 모델로 관중 수를 예측하는 분석 플랫폼입니다.</p>
 <h2>데이터 파이프라인</h2>
@@ -461,6 +460,144 @@
   <li><strong>시각화:</strong> Matplotlib, Seaborn, Jupyter Notebook</li>
   <li><strong>배포:</strong> GitHub Pages</li>
 </ul>`
+      },
+      {
+        id: 'agdecision', emoji: '⚖️', name: '알고리즘은 객관적인가', subtitle: 'AGDecision',
+        color: 'violet',
+        tags: ['Mixed Methods', 'Algorithmic Bias', 'Statistics'],
+        shortDesc: '질문지법(15명)·면접법(6명) 혼합연구로 "알고리즘 의사결정은 객관적"이라는 통념을 실증 검증한 사회과학 연구',
+        github: 'https://github.com/stx4R/R3P0RT',
+        readme: `<h2>개요</h2>
+<p>"알고리즘 기반 의사결정은 과연 객관적인가"를 질문지법과 면접법을 병행한 혼합연구로 검증한 사회과학 연구입니다. 선행 연구들이 알고리즘 '출력'의 차별을 밝혔다면, 본 연구는 그 차별이 사용자 인식 차원에서 왜 의심 없이 받아들여지는지를 규명합니다.</p>
+<h2>연구 설계</h2>
+<ul>
+  <li><strong>혼합연구(Mixed Methods):</strong> 양적 연구(6개 영역 18문항, 표준화된 5점 리커트 척도)와 질적 연구(반구조화 면접, 공통 질문 4개 + 신뢰 성향별 심화 질문)를 병행하여 두 자료가 서로의 한계를 보완하도록 설계.</li>
+  <li><strong>객관성 확보:</strong> 긍정·부정 진술 혼합, 유도성 표현 배제, 면접 시 연구자 가설 비노출 원칙 적용.</li>
+  <li><strong>통계 검증:</strong> 교차분석과 비모수 검정(Mann-Whitney U)으로 집단 간 차이를 검증.</li>
+</ul>
+<h2>핵심 발견 — 4가지 패턴</h2>
+<ul>
+  <li><strong>이해할수록 덜 신뢰:</strong> 코딩 경험자(작동 이해도 4.0)가 비경험자보다 알고리즘을 덜 신뢰(2.8 vs 4.1). 이해도-신뢰도 상관계수 −0.26, 이해도 집단 차이 p = 0.013.</li>
+  <li><strong>블랙박스 신뢰:</strong> "AI는 객관적이다" 4.13 대비 "작동 과정을 이해한다" 2.53 — 원리를 모르는 상태에서 형성되는 신뢰 양상을 '블랙박스 신뢰'로 개념화.</li>
+  <li><strong>고위험 영역 수용:</strong> 사법 위험도 예측 신뢰(3.73)가 채용·대출·의료보다 높음 — 가장 신중해야 할 판단에서 오히려 근거 없는 신뢰가 수용됨.</li>
+  <li><strong>객관 ≠ 공정:</strong> "객관적이다" 4.13 vs "감정·편견 없이 공정하다" 3.07 — 응답자들은 일관성과 공정성을 직관적으로 구분.</li>
+</ul>
+<h2>종합 분석</h2>
+<p>면접에서 도출한 세 신뢰 유형(부분 신뢰형·강한 신뢰형·강한 불신형)을 캐시 오닐의 『대량살상수학무기』, ProPublica의 COMPAS 분석, Buolamwini &amp; Gebru의 Gender Shades 연구와 교차 분석하여, 알고리즘이 사회의 편향을 학습·증폭해 '객관성'이라는 인증 아래 차별을 재생산한다는 연구 가설을 지지하는 결론을 도출했습니다.</p>
+<h2>의의 및 제언</h2>
+<ul>
+  <li>작동 원리를 이해하는 집단일수록 비판적 수용이 가능 — 알고리즘 리터러시 교육의 필요성.</li>
+  <li>고위험 영역(채용·대출·사법)의 설명 가능성 확보와 인간 최종 검토 의무화 제안.</li>
+  <li>후속 연구: 자체 개발 모델 HowTo의 학습 데이터 양과 오분류율 상관 실험으로 인식 차원의 가설을 기술 차원에서 실증.</li>
+</ul>`
+      },
+      {
+        id: 'bbpre', emoji: '⚾', name: '야구 관중 예측 Ⅱ', subtitle: 'BBPre',
+        color: 'orange',
+        tags: ['CatBoost', 'Ensemble', 'Truncation'],
+        shortDesc: '2023–2026 KBO·MLB 데이터로 관중 수요를 예측하고 매진 시대의 Truncation 문제까지 진단한 ML 리포트 (Test R² 0.671)',
+        github: 'https://github.com/stx4R/R3P0RT',
+        readme: `<h2>개요</h2>
+<p>2023–2026 시즌 KBO 2,584경기와 MLB 14,456경기 데이터로 "어떤 경기에 관중이 몰리는가"를 예측한 머신러닝 리포트입니다. Gradient Boosting 계열 모델(XGBoost·LightGBM·CatBoost)과 앙상블을 시간적 홀드아웃으로 검증하고, 2026 전반기 매진 시즌에서 드러난 Truncation 문제까지 진단했습니다.</p>
+<h2>검증 설계</h2>
+<ul>
+  <li><strong>이중 누수 차단:</strong> 모든 동적 변수(승률·인기도)에 shift(1)을 적용해 경기 이전 정보만 사용하고, 학습(2023–2025)과 테스트(2026 전반기 424경기)를 시간 순서로 완전 분리.</li>
+  <li><strong>특성 공학:</strong> 불쾌지수(DI), 주말·공휴일 가중치, 순위 경쟁도, 최근 10경기 모멘텀, 팀 인기도 확장 평균, 구장 수용인원·점유율, 라이벌전 여부.</li>
+</ul>
+<h2>결과</h2>
+<ul>
+  <li><strong>KBO:</strong> Voting Ensemble이 Test R² 0.671, MAE 2,418명(평균 관중 대비 약 13.4% 오차)으로 최고 성능. 단일 모델 중에서는 CatBoost가 과적합 격차 0.196으로 최소.</li>
+  <li><strong>MLB:</strong> CatBoost 단일 모델이 RMSE 6,941명으로 최적 — 두 리그 모두에서 CatBoost의 안정성 우위를 재확인.</li>
+  <li><strong>특성 중요도:</strong> 홈팀 인기도 23.1% &gt; 최근 10경기 승률 9.8% — 관중 유치는 단기 성적이 아닌 팬 기반(브랜드)의 함수.</li>
+</ul>
+<h2>핵심 발견 — Truncation</h2>
+<p>관측 관중 = min(수요, 수용인원). 매진이 일상화되면 예측 문제가 "수요 예측"에서 "공급 제약"으로 변합니다. 홈팀 인기 경기의 잔차가 체계적으로 음의 방향(예측 &gt; 실제 상한)에 몰리는 패턴은 좌석 공급이 잠재 수요를 제약하고 있다는 정량적 증거입니다.</p>
+<h2>한계 및 확장</h2>
+<ul>
+  <li>매진 경기의 잠재 수요 추정을 위한 Tobit 회귀 등 절단 데이터 방법론 도입.</li>
+  <li>SARIMA(장기 트렌드)와 ML(경기별 이벤트 효과)을 분담하는 하이브리드 구조 설계.</li>
+</ul>`
+      },
+      {
+        id: 'gini', emoji: '🧮', name: '지니계수 공정성 감사', subtitle: 'Gini',
+        color: 'teal',
+        tags: ['Fairness Audit', 'Calculus', 'Optimization'],
+        shortDesc: 'UCI Adult 학습 블라인드 분류기의 성별 격차를 정적분 지표로 드러내고, 미분 최적화로 임계값 t*를 해석적으로 도출한 감사 연구',
+        github: 'https://github.com/stx4R/R3P0RT',
+        readme: `<h2>개요</h2>
+<p>UCI Adult 소득 데이터(32,561건)로 학습한 블라인드 분류기가 성별 격차를 어떻게 재현하는지 두 단계로 감사한 연구입니다. 1단계에서 정적분(로렌츠 곡선·지니계수)으로 표준 지표의 한계를 드러내고, 2단계에서 미분 최적화로 정확도와 공정성을 동시에 고려한 최적 판정 임계값을 해석적으로 도출했습니다.</p>
+<h2>Phase 1 — 지니계수가 숨긴 차별</h2>
+<ul>
+  <li><strong>대리변수 효과:</strong> 성별·인종을 학습에서 완전히 제외(검증 AUC 0.900)했음에도, 모델은 현실 격차(여 10.9% / 남 30.4%)를 거의 그대로 재현(여 11.5% / 남 30.1%).</li>
+  <li><strong>평균 불변성:</strong> 지니계수는 분포의 집중도만 측정해 집단 간 평균 격차에 둔감 — 통합 지니 0.569 하나로는 성차별의 근거를 전혀 찾을 수 없음.</li>
+  <li><strong>격차지수 D:</strong> 두 집단 로렌츠 곡선 사이 넓이로 정의한 D(0.064)가 xⁿ 모델의 닫힌식과 0.06 수준에서 일치하며 격차를 직접 포착.</li>
+</ul>
+<h2>Phase 2 — 공정성 적분 감사기</h2>
+<ul>
+  <li><strong>목적함수 설계:</strong> J(t) = Acc(t) − λD(t)를 정의하고, 미적분의 기본정리(FTC)와 연쇄법칙으로 1계 조건 J′(t*) = 0을 도출.</li>
+  <li><strong>모형 검증:</strong> λ = 0에서 해석해가 베이즈 최적 임계값으로 정확히 환원(Acc′(t*) ≈ 4.6×10⁻¹⁷)되고, 실데이터 격자탐색과 정확도 1.9% 이내로 일치.</li>
+  <li><strong>Trade-off 정량화:</strong> DP 격차를 0.149 → 0.018로 줄이는 데 정확도 약 7%p가 소모되고 t*는 0.98로 포화 — 임계값 조정만으로는 완전한 공정에 도달할 수 없음을 확인.</li>
+</ul>
+<h2>결론</h2>
+<p>D ∝ (p_A − p_B)² — 차별의 근원은 모델 결함이 아닌 기저율 격차(+0.207)입니다. AI 공정성 감사는 단일 지니계수 대신 집단 격차 적분 지표를 병행해야 하며, 후처리(임계값 조정)만으로는 구조적 근원을 건드릴 수 없어 재가중 등 전처리 기법과의 병행이 필요합니다.</p>
+<h2>기술 스택</h2>
+<ul>
+  <li><strong>분석:</strong> Python, scipy(brentq 해석해), scikit-learn(로지스틱 회귀), matplotlib</li>
+  <li><strong>방법론:</strong> 로렌츠 곡선 사다리꼴 적분, 로짓정규 적합, 격자탐색 교차 검증</li>
+</ul>`
+      },
+      {
+        id: 'infgain', emoji: '🌲', name: '로그와 결정 트리', subtitle: 'InfGain',
+        color: 'lime',
+        tags: ['Decision Tree', 'Entropy', 'ID3'],
+        shortDesc: 'Play Tennis 14개 샘플을 손 계산으로 완주하며 로그함수가 결정 트리(ID3)의 분기 기준을 결정하는 원리를 검증한 연구',
+        github: 'https://github.com/stx4R/R3P0RT',
+        readme: `<h2>개요</h2>
+<p>고등학교 수학의 로그함수가 머신러닝 기초 알고리즘인 결정 트리(Decision Tree)의 분기 기준을 어떻게 결정하는지, Play Tennis 데이터셋 14개 샘플을 전 과정 손 계산으로 검증한 연구입니다. 섀넌 엔트로피 → 정보 이득 → ID3 트리 생성까지 추적하고 결과를 실물 모형으로 재구성했습니다.</p>
+<h2>수학적 배경</h2>
+<ul>
+  <li><strong>섀넌 엔트로피:</strong> H(X) = −Σ p log₂ p. 데이터의 불순도를 비트 단위로 측정 — 한 종류뿐이면 0, 두 종류가 균등하면 최대 1비트.</li>
+  <li><strong>밑 2의 의미:</strong> 엔트로피는 "한 샘플의 분류를 알아내는 데 필요한 평균 예/아니오 질문 횟수" — 이진 탐색의 log₂N과 같은 원리.</li>
+  <li><strong>정보 이득:</strong> IG(S, A) = 분기 전 엔트로피 − 분기 후 가중 평균 엔트로피. 클수록 좋은 질문.</li>
+</ul>
+<h2>손 계산 검증</h2>
+<ul>
+  <li>루트 엔트로피 H(S) = 0.940비트 (Yes 9 / No 5) — 초기 불순도가 높은 상태.</li>
+  <li>정보 이득 비교: Outlook 0.246 &gt; Humidity 0.151 &gt; Wind 0.048 &gt; Temperature 0.029 → Outlook이 루트 노드로 선택.</li>
+  <li>Overcast 분기는 엔트로피 0으로 즉시 분류 완료, Sunny 분기는 Humidity(IG 0.971), Rain 분기는 Wind(IG 0.971)가 하위 기준으로 결정.</li>
+</ul>
+<h2>실물 모형</h2>
+<p>트리의 노드를 구(빨강 = H &gt; 0 내부 노드, 파랑 = H = 0 잎 노드)로 부호화하고 경로별 누적 정보 이득(Overcast 0.246 vs 나머지 경로 1.217)을 표기하여, "정보 이득이 큰 특성을 먼저 선택할수록 더 적은 분기로 분류가 끝난다"는 가설이 트리 구조에서 그대로 관찰됨을 시각적·정량적으로 입증했습니다.</p>
+<h2>결론</h2>
+<p>로그는 계산을 빠르게 하는 도구가 아니라 불확실성을 정량화하는 도구이며, 'AI가 학습한다'의 실체가 매 분기마다 엔트로피를 비교해 가장 정보량이 큰 선택을 반복하는 수학적 과정임을 손 계산으로 체감한 연구입니다. 후속 과제로 지니 불순도·Gain Ratio 비교와 scikit-learn 구현 검증, 가지치기(pruning) 탐구를 계획하고 있습니다.</p>`
+      },
+      {
+        id: 'resall', emoji: '🏘️', name: '복지 자원 배분 모델', subtitle: 'ResAll',
+        color: 'fuchsia',
+        tags: ['Orange3', 'Fairness', 'Reweighing'],
+        shortDesc: '코스타리카 빈곤 데이터(PMT)로 지원 대상 가구를 분류하고, Fairness 애드온으로 편향 감사와 Reweighing 완화까지 수행한 프로젝트',
+        github: 'https://github.com/stx4R/R3P0RT',
+        readme: `<h2>개요</h2>
+<p>코스타리카 가구 빈곤 수준 데이터(IADB 대리수단조사, PMT)로 "한정된 복지 예산을 누구에게 배분할 것인가"를 분류 문제로 구현한 프로젝트입니다. Orange3에서 세 모델을 학습·비교하고, 기본 패키지에 없는 Fairness 애드온을 직접 설치해 가구주 성별·지역을 보호속성으로 하는 알고리즘 공정성 감사와 편향 완화(Reweighing)까지 수행했습니다.</p>
+<h2>데이터 및 전처리</h2>
+<ul>
+  <li><strong>PMT 접근:</strong> 소득 증빙이 어려운 환경에서 주거·자산·교육·가구구성 등 관측 가능한 142개 특성 중 해석 가능한 약 20개를 선별.</li>
+  <li><strong>구조화:</strong> 가구주 행만 추출해 1행 = 1가구(약 3,000가구)로 정규화, 4단계 빈곤 등급을 '지원 필요 여부'로 이진화, 식별자·혼합 변수 제외로 데이터 누수 차단.</li>
+  <li><strong>계층 추출:</strong> 클래스·집단 비율을 보존한 70/30 분할 (훈련 2,082 / 테스트 891).</li>
+</ul>
+<h2>모델 비교</h2>
+<ul>
+  <li><strong>성능:</strong> 로지스틱 회귀가 AUC 0.852 · CA 0.783 · F1 0.776으로 최고, 랜덤 포레스트·결정 트리 순.</li>
+  <li><strong>지표 선택:</strong> 복지 맥락에서는 취약 가구를 놓치는 위음성 비용이 과다 지원보다 크므로, 정확도가 아닌 Recall·F1을 핵심 지표로 채택.</li>
+</ul>
+<h2>공정성 감사</h2>
+<ul>
+  <li><strong>정확 ≠ 공정:</strong> 성능 1위 로지스틱 회귀가 공정성 지표(SPD −0.076, DI 0.899)는 최악, 성능 최저 결정 트리가 공정성은 최선 — 성능표만 보고 모델을 고르면 차별을 그대로 배포하게 됨.</li>
+  <li><strong>편향의 출발점:</strong> Dataset Bias 위젯으로 모델 학습 이전 데이터 자체에 DI·SPD 편향이 존재함을 확인 — 편향의 출발점은 알고리즘이 아닌 사회·데이터.</li>
+  <li><strong>완화와 Trade-off:</strong> Reweighing + Weighted Logistic Regression으로 정확도를 일부 양보한 대신 공정성이 개선되는 관계를 정량 관찰하고, 여러 공정성 기준(DI·SPD·AOD·EOD)의 동시 만족이 불가능함까지 확인.</li>
+</ul>
+<h2>결론</h2>
+<p>예측 결과는 처벌이 아닌 지원 대상 발굴에 한해 사용하고 최종 판단에 인간 검토를 두는 것을 전제로, 데이터 정제 → 모델 비교 → 공정성 감사 → 편향 완화의 전 과정을 스스로 설계하며 기술의 윤리적 영향까지 책임지는 AI 설계자의 태도를 경험한 프로젝트입니다.</p>`
       }
     ];
 
@@ -477,7 +614,7 @@
           style="border-left:3px solid ${colorMap[p.color].accent}">
           <div class="flex items-center justify-between gap-1">
             <span class="text-lg leading-none">${p.emoji}</span>
-            <span class="text-[10px] text-neutral-500 font-mono shrink-0">${p.period}</span>
+            ${p.period ? `<span class="text-[10px] text-neutral-500 font-mono shrink-0">${p.period}</span>` : ''}
           </div>
           <div>
             <h3 class="font-bold text-white text-xs leading-tight">${p.name}</h3>
@@ -502,14 +639,6 @@
           <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
           GitHub
         </a>`);
-      if (p.demo) links.push(`
-        <button onclick="openModal('${p.demo}')"
-          class="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-lg border transition-all"
-          style="background-color:${c.accent}18;border-color:${c.accent}55;color:${c.accent}">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-          Live Demo
-        </button>`);
-
       document.getElementById('projectModalAccent').style.backgroundColor = c.accent;
       document.getElementById('projectModalContent').innerHTML = `
         <div class="flex items-start gap-4 mb-5 flex-wrap">
@@ -518,7 +647,7 @@
             <h2 class="text-xl md:text-2xl font-bold text-white leading-tight">${p.name}</h2>
             <p class="text-neutral-400 text-sm mt-0.5">${p.subtitle}</p>
           </div>
-          <span class="text-xs font-mono text-neutral-500 bg-neutral-800 px-3 py-1 rounded-full border border-neutral-700 whitespace-nowrap self-start">${p.period}</span>
+          ${p.period ? `<span class="text-xs font-mono text-neutral-500 bg-neutral-800 px-3 py-1 rounded-full border border-neutral-700 whitespace-nowrap self-start">${p.period}</span>` : ''}
         </div>
         <div class="flex flex-wrap gap-2 mb-5">
           ${p.tags.map(t => tagBadge(t, p.color)).join('')}
@@ -539,6 +668,7 @@
       m.classList.remove('hidden');
       m.classList.add('flex');
       document.body.style.overflow = 'hidden';
+      if (window.pageSwiper) window.pageSwiper.keyboard.disable();
     };
 
     window.closeProjectModal = function() {
@@ -546,6 +676,7 @@
       m.classList.add('hidden');
       m.classList.remove('flex');
       document.body.style.overflow = 'auto';
+      if (window.pageSwiper) window.pageSwiper.keyboard.enable();
     };
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProjectModal(); });
@@ -561,7 +692,7 @@
     <!-- 이건 좋음 -->
     <!-- ㄴ 디자인은 모름 -->
 
-  <section id="fuckinteraction" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckinteraction" class="bg-neutral-900 text-white swiper-slide">
       <div class="h-screen w-full flex items-center flex-row-reverse px-6 md:px-12 lg:px-20 xl:px-24">
         
         <div class="flex-1 flex flex-col justify-center pl-4 sm:pl-8 lg:pl-12">
@@ -715,85 +846,65 @@
 
     <!-- 아무도 연락 안 할듯  -->
 
-<section id="fuckmailto" class="bg-neutral-900 text-white snap-start relative overflow-hidden">
-    <div class="h-screen w-full flex flex-col items-center justify-center px-8 relative z-10">
-      
-      <h2 class="text-4xl md:text-6xl font-bold mb-16 px-4 py-3 bg-blue-500 text-black inline-block w-fit whitespace-nowrap text-center">
-        Feel free to contact.
-      </h2>
+<section id="fuckmailto" class="bg-neutral-900 text-white swiper-slide relative overflow-hidden">
+    <div class="h-screen w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 px-8 md:px-16 lg:px-24 relative z-10">
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl w-full">
-        
-        <a href="mailto:suppuding@gmail.com" class="group flex flex-col items-center justify-center p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
-          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📧</div>
-          <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Gmail</h3>
-          <p class="text-xs text-neutral-500">Send Gmail</p>
-        </a>
+      <div class="flex-1 flex flex-col justify-center w-full">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-blue-500 text-black inline-block w-fit whitespace-nowrap">
+          Feel free to contact.
+        </h2>
 
-        <a href="tel:+821021001648" class="group flex flex-col items-center justify-center p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-green-500 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all duration-300 hover:-translate-y-2">
-          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📱</div>
-          <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Phone</h3>
-          <p class="text-xs text-neutral-500">Call Tel.</p>
-        </a>
+        <div class="mt-12 space-y-6">
+          <p class="text-neutral-300 text-xl font-semibold">새로운 인연과 대화는 언제나 환영합니다.</p>
+          <div class="space-y-2">
+            <p class="text-neutral-400">협업 제안, 프로젝트 문의, 가벼운 질문 모두 좋습니다.</p>
+            <p class="text-neutral-500 text-sm">각 버튼을 누르면 해당 연락처로 바로 연결됩니다.</p>
+          </div>
+        </div>
+      </div>
 
-        <button onclick="copyDiscord('gunfire_reborn')" class="group flex flex-col items-center justify-center p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-indigo-500 hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] transition-all duration-300 hover:-translate-y-2 relative">
-          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🎮</div>
-          <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Discord</h3>
-          <p id="discord-text" class="text-xs text-neutral-500">Copy ID</p>
-        </button>
+      <div class="flex-1 flex items-center justify-center w-full">
+        <div class="grid grid-cols-2 gap-4 md:gap-6 w-full max-w-xl">
 
-        <a href="https://t.me/8615943006" target="_blank" class="group flex flex-col items-center justify-center p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-sky-500 hover:shadow-[0_0_30px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-2">
-          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">✈️</div>
-          <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Telegram</h3>
-          <p class="text-xs text-neutral-500">Send Message</p>
-        </a>
+          <a href="https://github.com/stx4R" target="_blank" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-neutral-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all duration-300 hover:-translate-y-2">
+            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" fill="#ffffff" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Github</h3>
+            <p class="text-xs text-neutral-500">Visit Profile</p>
+          </a>
 
+          <a href="https://github.com/L-INK-dshs" target="_blank" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-sky-500 hover:shadow-[0_0_30px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-2">
+            <img src="static/Organization.png" alt="Organization" class="w-12 h-12 mb-4 object-contain group-hover:scale-110 transition-transform">
+            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Organization</h3>
+            <p class="text-xs text-neutral-500">Visit L-INK-dshs</p>
+          </a>
+
+          <a href="mailto:suppuding@gmail.com" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
+            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 48 48"><path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/></svg>
+            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Gmail</h3>
+            <p class="text-xs text-neutral-500">Send Gmail</p>
+          </a>
+
+          <a href="tel:+821021001648" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-green-500 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all duration-300 hover:-translate-y-2">
+            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><rect width="24" height="24" rx="5.5" fill="#22c55e"/><path fill="#ffffff" transform="translate(4.2 4.2) scale(0.65)" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Phone</h3>
+            <p class="text-xs text-neutral-500">Call Tel.</p>
+          </a>
+
+        </div>
       </div>
     </div>
   </section>
 
-  <script>
-    function copyDiscord(discordId) {
-      navigator.clipboard.writeText(discordId).then(() => {
-        const textElement = document.getElementById('discord-text');
-        const originalText = textElement.innerText;
-        textElement.innerText = '복사 완료! ✅';
-        textElement.classList.add('text-indigo-400', 'font-bold');
-        
-        setTimeout(() => {
-          textElement.innerText = originalText;
-          textElement.classList.remove('text-indigo-400', 'font-bold');
-        }, 2000);
-      });
-    }
-  </script>
-
 <!-- 응 끝 -->
 
-  <section id="fuckfooter" class="bg-neutral-900 text-white snap-start">
+  <section id="fuckfooter" class="bg-neutral-900 text-white swiper-slide">
     <div class="h-screen w-full flex items-center justify-center">
       <p class="text-4xl font-light text-center"><strong>© 2026 stx4R. All rights reserved.</strong></p>
     </div>
   </section>
 
-</main>
-
-<!-- fuck3D -->
-
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-<div id="projectModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-  <div class="relative w-full max-w-5xl h-[80vh] bg-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
-    <div class="absolute top-4 right-4 z-10">
-      <button onclick="closeModal()" class="bg-black/40 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-        ✕
-      </button>
-    </div>
-    
-    <iframe id="projectIframe" src="" class="w-full h-full border-none hidden bg-white"></iframe>
-    
-    <model-viewer id="project3DViewer" src="" class="w-full h-full hidden" camera-controls auto-rotate shadow-intensity="1" environment-image="neutral"></model-viewer>
-  </div>
 </div>
+</main>
 
 <!-- Project Detail Modal -->
 <div id="projectModalOverlay" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
@@ -807,89 +918,37 @@
   </div>
 </div>
 
-<!-- fuckPopup / fuckscrollIndicator -->
-
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    function openModal(source, type = 'iframe') {
-        const modal = document.getElementById('projectModal');
-        const iframe = document.getElementById('projectIframe');
-        const viewer3d = document.getElementById('project3DViewer');
-        
-        if (type === '3d') {
-            iframe.classList.add('hidden');
-            iframe.src = ''; 
-            viewer3d.classList.remove('hidden');
-            viewer3d.src = source;
-        } else {
-            viewer3d.classList.add('hidden');
-            viewer3d.src = ''; 
-            iframe.classList.remove('hidden');
-            iframe.src = source;
-        }
+  const pageSwiper = new Swiper('main.swiper', {
+    direction: 'vertical',
+    effect: 'coverflow',
+    speed: 500,
+    keyboard: { enabled: true }
+  });
+  window.pageSwiper = pageSwiper;
 
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    }
+  let wheelLocked = false;
+  let lastWheelTime = 0;
 
-    function closeModal() {
-        const modal = document.getElementById('projectModal');
-        const iframe = document.getElementById('projectIframe');
-        const viewer3d = document.getElementById('project3DViewer');
-        
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        iframe.src = '';
-        viewer3d.src = '';
-        document.body.style.overflow = 'auto';
-    }
+  pageSwiper.el.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const now = performance.now();
+    const gap = now - lastWheelTime;
+    lastWheelTime = now;
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('projectModal');
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
+    let delta = e.deltaY;
+    if (e.deltaMode === 1) delta *= 40;
+    else if (e.deltaMode === 2) delta *= window.innerHeight;
+    if (Math.abs(delta) < 4) return;
 
-  document.addEventListener('DOMContentLoaded', () => {
-      const mainContainer = document.querySelector('main');
-      const sections = document.querySelectorAll('main > section');
-      const indicatorContainer = document.getElementById('fuckscrollIndicator');
+    if (pageSwiper.animating) { wheelLocked = true; return; }
+    if (wheelLocked && gap < 250) return;
 
-      sections.forEach((sec, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'w-3 h-3 rounded-full bg-neutral-600 cursor-pointer transition-all duration-300 hover:bg-white hover:scale-125 shadow-lg';
-        dot.addEventListener('click', () => {
-          sec.scrollIntoView({ behavior: 'smooth' });         // auto or smooth
-        });
-        
-        indicatorContainer.appendChild(dot);
-      });
-
-      const dots = indicatorContainer.querySelectorAll('div');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const index = Array.from(sections).indexOf(entry.target);
-            dots.forEach((dot, i) => {
-              if (i === index) {
-                dot.classList.add('bg-white', 'scale-125');
-                dot.classList.remove('bg-neutral-600');
-              } else {
-                dot.classList.remove('bg-white', 'scale-125');
-                dot.classList.add('bg-neutral-600');
-              }
-            });
-          }
-        });
-      }, { 
-        root: mainContainer, 
-        threshold: 0.5
-      });
-
-      sections.forEach(sec => observer.observe(sec));
-    });
-
+    wheelLocked = true;
+    if (delta > 0) pageSwiper.slideNext();
+    else pageSwiper.slidePrev();
+  }, { passive: false });
 </script>
 </body>
 </html>
