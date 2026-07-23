@@ -17,9 +17,10 @@
     html, body { height: 100%; overflow: hidden; }
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
-    #stackGallery { overflow: hidden; cursor: grab; touch-action: none; }
-    #stackGallery:active { cursor: grabbing; }
+    #stackGallery { overflow: hidden; }
     #stackGallery canvas { display: block; }
+    #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; will-change: transform, opacity, filter; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
+    #projectWheel .wheel-item--selected { font-weight: 600; }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -243,25 +244,69 @@
     </div>
   </section>
 
-  <!-- Page 5 -->
+  <!-- Page 6 -->
+<!-- 바이브 코딩 탈출기 -->
+<!-- 7차시 반응형 UI 실험 -->
 
-  <section id="fuckBentoBox" class="bg-neutral-900 text-white swiper-slide">
-    <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-12">
+    <!-- 이건 좋음 -->
+    <!-- ㄴ 디자인은 모름 -->
 
-      <!-- title -->
-      <div class="flex-shrink-0">
-        <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 inline-block w-fit whitespace-nowrap" style="background-color:#E0A800;color:#000;">
-          Efforts never betray.
-        </h2>
-        <div class="space-y-2 mt-6">
-          <p class="text-neutral-300">노력이 쌓여 만들어진 프로젝트들입니다.</p>
-          <p class="text-neutral-500 text-sm">각 카드를 클릭하면 상세 정보를 볼 수 있습니다.</p>
+  <section id="fuckinteraction" class="bg-neutral-900 text-white swiper-slide">
+    <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-10">
+
+      <div class="flex-shrink-0 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 text-white inline-block w-fit whitespace-nowrap" style="background-color: #0F5132;">
+            Practice makes perfect.
+          </h2>
+          <div class="space-y-2 mt-6">
+            <p class="text-neutral-300">직접 다루며 익혀 온 기술 스택입니다.</p>
+            <p class="text-neutral-500 text-sm">좌우 버튼을 누르면 기술 스택을 둘러볼 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="flex gap-3 pb-1">
+          <button id="stackPrev" aria-label="이전 기술" class="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 hover:border-neutral-400 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <button id="stackNext" aria-label="다음 기술" class="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 hover:border-neutral-400 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
 
-      <!-- cards: 남은 공간 전체 활용, 세로 중앙 정렬 -->
-      <div class="flex-1 flex items-start mt-12">
-        <div id="projectsGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full"></div>
+      <div id="stackGallery" class="flex-1 mt-2 mb-12 min-h-0 select-none"></div>
+
+    </div>
+  </section>
+
+  <!-- Page 5 -->
+
+  <section id="fuckBentoBox" class="bg-neutral-900 text-white swiper-slide">
+    <div class="h-screen w-full flex flex-col lg:flex-row-reverse items-center justify-center gap-10 lg:gap-16 px-8 md:px-16 lg:px-24">
+
+      <div class="flex-1 flex flex-col justify-center w-full">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 inline-block w-fit whitespace-nowrap" style="background-color:#E0A800;color:#000;">
+          Efforts never betray.
+        </h2>
+        <div class="mt-12 space-y-6">
+          <p class="text-neutral-300 text-xl font-semibold">노력이 쌓여 만들어진 프로젝트들입니다.</p>
+          <div class="space-y-2">
+            <p class="text-neutral-400">위아래 버튼으로 활동을 넘겨볼 수 있습니다.</p>
+            <p class="text-neutral-500 text-sm">가운데 온 활동을 클릭하면 상세 정보가 열립니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 w-full relative h-[45vh] lg:h-[70vh] min-h-0">
+        <div id="projectWheel" class="absolute inset-0 overflow-hidden"></div>
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-10">
+          <button id="wheelUp" aria-label="이전 활동" class="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 hover:border-neutral-400 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+          </button>
+          <button id="wheelDown" aria-label="다음 활동" class="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 hover:border-neutral-400 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -608,28 +653,6 @@
       return `<span class="text-xs px-2 py-0.5 rounded-full ${colorMap[color].tag} font-medium whitespace-nowrap">${tag}</span>`;
     }
 
-    function renderGrid() {
-      const grid = document.getElementById('projectsGrid');
-      grid.innerHTML = projects.map(p => `
-        <div onclick="openProjectModal('${p.id}')"
-          class="group cursor-pointer bg-neutral-800/80 border border-neutral-700 rounded-xl p-3 flex flex-col gap-2
-                 hover:border-neutral-500 hover:-translate-y-0.5 hover:bg-neutral-800 transition-all duration-200"
-          style="border-left:3px solid ${colorMap[p.color].accent}">
-          <div class="flex items-center justify-between gap-1">
-            <span class="text-lg leading-none">${p.emoji}</span>
-            ${p.period ? `<span class="text-[10px] text-neutral-500 font-mono shrink-0">${p.period}</span>` : ''}
-          </div>
-          <div>
-            <h3 class="font-bold text-white text-xs leading-tight">${p.name}</h3>
-            <p class="text-neutral-500 text-[10px] mt-0.5 truncate">${p.subtitle}</p>
-          </div>
-          <div class="flex flex-wrap gap-1">
-            ${p.tags.slice(0,2).map(t => tagBadge(t, p.color)).join('')}
-          </div>
-        </div>
-      `).join('');
-    }
-
     window.openProjectModal = function(id) {
       const p = projects.find(x => x.id === id);
       if (!p) return;
@@ -684,35 +707,95 @@
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProjectModal(); });
 
-    renderGrid();
+    const wheelEl = document.getElementById('projectWheel');
+    const wheelUpBtn = document.getElementById('wheelUp');
+    const wheelDownBtn = document.getElementById('wheelDown');
+    const wheelItems = [];
+    const wheel = { pos: 0, target: 0, selected: 0, raf: null, last: 0, rowH: 50 };
+    const WHEEL_TILT = (6 * Math.PI) / 180;
+    const WHEEL_CURVE = 1;
+    const WHEEL_FADE = 0.25;
+    const WHEEL_MIN_OPACITY = 0.05;
+    const WHEEL_BLUR = 2;
+    const WHEEL_SMOOTHING = 200;
+
+    function measureWheel() {
+      if (!wheelItems[0]) return;
+      const fs = parseFloat(getComputedStyle(wheelItems[0]).fontSize) || 36;
+      wheel.rowH = Math.max(fs * 1.4, 1);
+    }
+
+    function layoutWheel() {
+      const R = wheel.rowH / WHEEL_TILT;
+      wheelItems.forEach((el, i) => {
+        const d = i - wheel.pos;
+        const dist = Math.abs(d);
+        const ang = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, d * WHEEL_TILT));
+        const y = R * Math.sin(ang);
+        const x = -R * (1 - Math.cos(ang)) * WHEEL_CURVE;
+        const rot = (ang * 180) / Math.PI;
+        el.style.transform = `translate(${x.toFixed(2)}px, calc(${y.toFixed(2)}px - 50%)) rotate(${rot.toFixed(3)}deg)`;
+        el.style.opacity = String(Math.max(WHEEL_MIN_OPACITY, 1 - dist * WHEEL_FADE));
+        el.style.filter = `blur(${(dist * WHEEL_BLUR).toFixed(2)}px)`;
+        el.style.setProperty('--wp', Math.max(0, 1 - Math.min(dist, 1)).toFixed(4));
+      });
+    }
+
+    function wheelFrame(now) {
+      const dt = Math.min((now - wheel.last) / 1000, 0.05);
+      wheel.last = now;
+      const k = 1 - Math.exp(-dt / (WHEEL_SMOOTHING / 1000));
+      let next = wheel.pos + (wheel.target - wheel.pos) * k;
+      const settled = Math.abs(wheel.target - next) < 0.001;
+      if (settled) next = wheel.target;
+      wheel.pos = next;
+      layoutWheel();
+      wheel.raf = settled ? null : requestAnimationFrame(wheelFrame);
+    }
+
+    function startWheelLoop() {
+      if (wheel.raf != null) return;
+      wheel.last = performance.now();
+      wheel.raf = requestAnimationFrame(wheelFrame);
+    }
+
+    function setWheelTarget(value) {
+      const v = Math.round(Math.min(Math.max(value, 0), projects.length - 1));
+      wheel.target = v;
+      if (v !== wheel.selected) {
+        wheel.selected = v;
+        wheelItems.forEach((el, i) => el.classList.toggle('wheel-item--selected', i === v));
+      }
+      wheelUpBtn.disabled = v === 0;
+      wheelDownBtn.disabled = v === projects.length - 1;
+      startWheelLoop();
+    }
+
+    function buildWheel() {
+      projects.forEach((p, i) => {
+        const el = document.createElement('div');
+        el.className = 'wheel-item';
+        el.textContent = p.name;
+        el.addEventListener('click', () => {
+          if (i === wheel.selected) openProjectModal(p.id);
+          else setWheelTarget(i);
+        });
+        wheelEl.appendChild(el);
+        wheelItems.push(el);
+      });
+      wheelItems[0].classList.add('wheel-item--selected');
+      wheelUpBtn.disabled = true;
+      measureWheel();
+      layoutWheel();
+    }
+
+    wheelUpBtn.addEventListener('click', () => setWheelTarget(wheel.target - 1));
+    wheelDownBtn.addEventListener('click', () => setWheelTarget(wheel.target + 1));
+    window.addEventListener('resize', () => { measureWheel(); layoutWheel(); });
+
+    buildWheel();
   })();
   </script>
-
-  <!-- Page 6 -->
-<!-- 바이브 코딩 탈출기 -->
-<!-- 7차시 반응형 UI 실험 -->   
-
-    <!-- 이건 좋음 -->
-    <!-- ㄴ 디자인은 모름 -->
-
-  <section id="fuckinteraction" class="bg-neutral-900 text-white swiper-slide">
-    <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-10">
-
-      <div class="flex-shrink-0">
-        <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 text-white inline-block w-fit whitespace-nowrap" style="background-color: #0F5132;">
-          Practice makes perfect.
-        </h2>
-        <div class="space-y-2 mt-6">
-          <p class="text-neutral-300">직접 다루며 익혀 온 기술 스택입니다.</p>
-          <p class="text-neutral-500 text-sm">카드를 잡고 좌우로 드래그하면 갤러리를 둘러볼 수 있습니다.</p>
-        </div>
-      </div>
-
-      <div id="stackGallery" class="flex-1 mt-4 min-h-0 select-none"></div>
-
-    </div>
-  </section>
-
 
   <!-- Page 7 -->
 <!-- 바이브 코딩 탈출기 -->
@@ -838,14 +921,6 @@
 
 <script type="module">
   import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from 'https://cdn.jsdelivr.net/npm/ogl@1/+esm';
-
-  function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  }
 
   function lerp(p1, p2, t) {
     return p1 + (p2 - p1) * t;
@@ -1091,11 +1166,9 @@
   }
 
   class StackGallery {
-    constructor(container, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase }) {
+    constructor(container, { items, bend, textColor, borderRadius, font, scrollEase }) {
       this.container = container;
-      this.scrollSpeed = scrollSpeed;
-      this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0, position: 0 };
-      this.onCheckDebounce = debounce(this.onCheck.bind(this), 200);
+      this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
       this.boundUpdate = this.update.bind(this);
       this.raf = null;
       this.createRenderer();
@@ -1149,28 +1222,9 @@
         });
       });
     }
-    onTouchDown(e) {
-      this.isDown = true;
-      this.scroll.position = this.scroll.current;
-      this.start = e.touches ? e.touches[0].clientX : e.clientX;
-    }
-    onTouchMove(e) {
-      if (!this.isDown) return;
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      const distance = (this.start - x) * (this.scrollSpeed * 0.025);
-      this.scroll.target = this.scroll.position + distance;
-    }
-    onTouchUp() {
-      if (!this.isDown) return;
-      this.isDown = false;
-      this.onCheck();
-    }
-    onCheck() {
+    step(direction) {
       if (!this.medias || !this.medias[0]) return;
-      const width = this.medias[0].width;
-      const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
-      const item = width * itemIndex;
-      this.scroll.target = this.scroll.target < 0 ? -item : item;
+      this.scroll.target += direction * this.medias[0].width;
     }
     onResize() {
       this.screen = {
@@ -1209,12 +1263,6 @@
     }
     addEventListeners() {
       window.addEventListener('resize', this.onResize.bind(this));
-      this.container.addEventListener('mousedown', this.onTouchDown.bind(this));
-      window.addEventListener('mousemove', this.onTouchMove.bind(this));
-      window.addEventListener('mouseup', this.onTouchUp.bind(this));
-      this.container.addEventListener('touchstart', this.onTouchDown.bind(this), { passive: true });
-      window.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: true });
-      window.addEventListener('touchend', this.onTouchUp.bind(this));
     }
   }
 
@@ -1335,9 +1383,13 @@
       textColor: '#ffffff',
       borderRadius: 0.05,
       font: 'bold 30px Pretendard',
-      scrollSpeed: 2,
       scrollEase: 0.05
     });
+
+    const stackPrev = document.getElementById('stackPrev');
+    const stackNext = document.getElementById('stackNext');
+    if (stackPrev) stackPrev.addEventListener('click', () => gallery.step(-1));
+    if (stackNext) stackNext.addEventListener('click', () => gallery.step(1));
 
     const slide = document.getElementById('fuckinteraction');
     const isActive = () => {
