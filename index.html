@@ -928,24 +928,35 @@
   });
   window.pageSwiper = pageSwiper;
 
-  let wheelLocked = false;
-  let lastWheelTime = 0;
+  const scrollings = [];
+  let prevWheelTime = 0;
+  let canScroll = true;
+
+  const average = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
 
   pageSwiper.el.addEventListener('wheel', (e) => {
     e.preventDefault();
-    const now = performance.now();
-    const gap = now - lastWheelTime;
-    lastWheelTime = now;
 
     let delta = e.deltaY;
     if (e.deltaMode === 1) delta *= 40;
     else if (e.deltaMode === 2) delta *= window.innerHeight;
-    if (Math.abs(delta) < 4) return;
+    if (delta === 0) return;
 
-    if (pageSwiper.animating) { wheelLocked = true; return; }
-    if (wheelLocked && gap < 250) return;
+    const now = performance.now();
+    if (now - prevWheelTime > 200) scrollings.length = 0;
+    prevWheelTime = now;
 
-    wheelLocked = true;
+    if (scrollings.length > 149) scrollings.shift();
+    scrollings.push(Math.abs(delta));
+
+    if (!canScroll || pageSwiper.animating) return;
+
+    const averageEnd = average(scrollings.slice(-10));
+    const averageMiddle = average(scrollings.slice(-70));
+    if (averageEnd < averageMiddle) return;
+
+    canScroll = false;
+    setTimeout(() => { canScroll = true; }, 600);
     if (delta > 0) pageSwiper.slideNext();
     else pageSwiper.slidePrev();
   }, { passive: false });
