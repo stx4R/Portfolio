@@ -960,6 +960,7 @@
   const nextBtn = document.getElementById('stackNext');
   const items = [];
   const cards = [];
+  const lastX = [];
   let index = 0;
 
   STACKS.forEach(s => {
@@ -1005,23 +1006,29 @@
     const H = cw / 2;
     const B = ch * 0.18;
     const R = (H * H + B * B) / (2 * B);
+    const n = items.length;
     items.forEach((el, i) => {
       cards[i].style.width = cardW + 'px';
       cards[i].style.height = cardH + 'px';
-      const x = (i - index) * step;
+      let d = i - index;
+      d = ((d % n) + n) % n;
+      if (d > n / 2) d -= n;
+      const x = d * step;
       const ex = Math.min(Math.abs(x), H);
       const arc = R - Math.sqrt(Math.max(R * R - ex * ex, 0));
       const rot = (Math.sign(x) * Math.asin(ex / R) * 180) / Math.PI;
+      const jump = lastX[i] !== undefined && Math.abs(x - lastX[i]) > step * 1.5;
+      el.style.transition = jump ? 'none' : '';
       el.style.width = cardW + 'px';
       el.style.transformOrigin = '50% ' + cardH / 2 + 'px';
       el.style.transform = 'translate(' + (x - cardW / 2) + 'px, ' + (arc - cardH / 2) + 'px) rotate(' + rot.toFixed(3) + 'deg)';
+      lastX[i] = x;
     });
-    prevBtn.disabled = index <= 0;
-    nextBtn.disabled = index >= items.length - 1;
   }
 
   function move(direction) {
-    index = Math.min(Math.max(index + direction, 0), items.length - 1);
+    const n = items.length;
+    index = (((index + direction) % n) + n) % n;
     layout();
   }
 
