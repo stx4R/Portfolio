@@ -17,6 +17,9 @@
     html, body { height: 100%; overflow: hidden; }
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
+    #stackGallery { overflow: hidden; cursor: grab; touch-action: none; }
+    #stackGallery:active { cursor: grabbing; }
+    #stackGallery canvas { display: block; }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -693,152 +696,23 @@
     <!-- ㄴ 디자인은 모름 -->
 
   <section id="fuckinteraction" class="bg-neutral-900 text-white swiper-slide">
-      <div class="h-screen w-full flex items-center flex-row-reverse px-6 md:px-12 lg:px-20 xl:px-24">
-        
-        <div class="flex-1 flex flex-col justify-center pl-4 sm:pl-8 lg:pl-12">
-          <h2 class="text-5xl md:text-6xl font-bold mb-12 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #0F5132;">
-            Practice makes perfect.
-          </h2>
+    <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-10">
 
-          <div class="flex flex-col gap-8">
-            
-            <div class="roadmap-item group cursor-pointer" data-step="1">
-              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
-                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
-                [01] Ready,
-              </h3>
-              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">뜀박질을 위한, 걸음마 연습</p>
-            </div>
-
-            <div class="roadmap-item group cursor-pointer" data-step="2">
-              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
-                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
-                [02] Get -
-              </h3>
-              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">걸음마를 기초로, 달려보기</p>
-            </div>
-
-            <div class="roadmap-item group cursor-pointer" data-step="3">
-              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
-                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
-                [03] Set -
-              </h3>
-              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">나만의 러닝페이스 찾기</p>
-            </div>
-
-            <div class="roadmap-item group cursor-pointer" data-step="4">
-              <h3 class="text-2xl font-bold text-neutral-500 group-hover:text-white transition-all duration-300 flex items-center whitespace-nowrap">
-                <span class="text-[#0F5132] opacity-0 group-hover:opacity-100 transition-opacity mr-3 font-mono text-3xl">></span>
-                [04] Go !
-              </h3>
-              <p class="text-neutral-600 text-sm mt-2 pl-7 group-hover:text-neutral-400 transition-colors">모든 것을 바탕으로 필사적으로 뛰기</p>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="hidden lg:flex flex-1 items-center justify-center pr-4 lg:pr-8">
-          <div class="w-full max-w-lg aspect-square bg-neutral-950 rounded-2xl p-8 border border-neutral-800 shadow-[0_0_50px_rgba(15,81,50,0.15)] relative overflow-hidden flex flex-col">
-            
-            <div class="absolute top-4 left-4 flex gap-2">
-              <div class="w-3 h-3 rounded-full bg-red-500 opacity-80"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500 opacity-80"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500 opacity-80"></div>
-            </div>
-
-            <div id="roadmap-display" class="mt-8 flex flex-col h-full transition-opacity duration-300 ease-in-out">
-              <div class="flex-1 flex flex-col justify-center items-center text-center opacity-50">
-                <h3 class="text-2xl font-bold text-white mb-2">우측 리스트에 마우스를 올려보세요</h3>
-              </div>
-            </div>
-
-          </div>
+      <div class="flex-shrink-0">
+        <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 text-white inline-block w-fit whitespace-nowrap" style="background-color: #0F5132;">
+          Practice makes perfect.
+        </h2>
+        <div class="space-y-2 mt-6">
+          <p class="text-neutral-300">직접 다루며 익혀 온 기술 스택입니다.</p>
+          <p class="text-neutral-500 text-sm">카드를 잡고 좌우로 드래그하면 갤러리를 둘러볼 수 있습니다.</p>
         </div>
       </div>
+
+      <div id="stackGallery" class="flex-1 mt-4 min-h-0 select-none"></div>
+
+    </div>
   </section>
 
-  <script>
-    const roadmapData = {
-      '1': {
-        icon: '👟',
-        title: 'Ready,',
-        desc: '뜀박질을 위한, 걸음마 연습',
-        efforts: [
-          'Ⅰ : Python / JavaScript 학습',
-          'Ⅱ : Baekjoon / SWEA 문제 풀이',
-          'Ⅲ : 창의적 사고를 위한 타 프로그램 알고리즘 학습'
-        ]
-      },
-      '2': {
-        icon: '💪',
-        title: 'Get -',
-        desc: '걸음마를 기초로, 달려보기',
-        efforts: [
-          'Ⅰ : 타 프로그램 코드 비교 / 분석',
-          'Ⅱ : Tailwind CSS를 이용한 반응형 UI 개발',
-          'Ⅲ : PY/JS를 기반으로 여러 사이드프로젝트 개발'
-        ]
-      },
-      '3': {
-        icon: '🏋️‍♂️',
-        title: 'Set -',
-        desc: '나만의 러닝페이스 찾기',
-        efforts: [
-          'Ⅰ : Blender, Cinema 4D를 활용한 3D 모델링 제작',
-          'Ⅱ : model-viewer를 활용한 3D 모델링 구현',
-          'Ⅲ : 저사양 기기 최적화를 고려한 파일 경량화 작업'
-        ]
-      },
-      '4': {
-        icon: '🏃‍♂️',
-        title: 'Go !',
-        desc: '모든 것을 바탕으로 필사적으로 뛰기',
-        efforts: [
-          'Ⅰ : 우수 프로젝트 기반으로 앱 출시',
-          'Ⅱ : 공기업 앱개발 / 해커톤 참가 및 입상',
-          'Ⅲ : 스타트업 개발자'
-        ]
-      }
-    };
-
-    const roadmapItems = document.querySelectorAll('.roadmap-item');
-    const displayArea = document.getElementById('roadmap-display');
-
-    roadmapItems.forEach(item => {
-      item.addEventListener('mouseenter', () => {
-        const step = item.getAttribute('data-step');
-        const data = roadmapData[step];
-        
-        displayArea.style.opacity = '0';
-        
-        setTimeout(() => {
-          let listHtml = data.efforts.map(eff => `
-            <li class="flex items-start text-neutral-300 text-sm md:text-base mb-3 leading-relaxed">
-              <span class="text-[#0F5132] font-bold mr-3 mt-0.5">✓</span>
-              <span>${eff}</span>
-            </li>
-          `).join('');
-
-          displayArea.innerHTML = `
-            <div class="flex flex-col justify-center h-full">
-              <div class="text-5xl mb-6">${data.icon}</div>
-              <h3 class="text-3xl font-bold text-white mb-2">${data.title}</h3>
-              <p class="text-[#0F5132] font-semibold mb-8">${data.desc}</p>
-              
-              <div class="bg-neutral-900 rounded-lg p-5 border border-neutral-800">
-                <h4 class="text-neutral-500 text-sm font-bold mb-4 tracking-widest uppercase">My Efforts</h4>
-                <ul class="list-none p-0 m-0">
-                  ${listHtml}
-                </ul>
-              </div>
-            </div>
-          `;
-          
-          displayArea.style.opacity = '1';
-        }, 150); 
-      });
-    });
-  </script>
 
   <!-- Page 7 -->
 <!-- 바이브 코딩 탈출기 -->
@@ -960,6 +834,529 @@
     if (delta > 0) pageSwiper.slideNext();
     else pageSwiper.slidePrev();
   }, { passive: false });
+</script>
+
+<script type="module">
+  import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from 'https://cdn.jsdelivr.net/npm/ogl@1/+esm';
+
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  function lerp(p1, p2, t) {
+    return p1 + (p2 - p1) * t;
+  }
+
+  function getFontSize(font) {
+    const match = font.match(/(\d+)px/);
+    return match ? parseInt(match[1], 10) : 30;
+  }
+
+  function createTextTexture(gl, text, font, color) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = font;
+    const metrics = context.measureText(text);
+    const textWidth = Math.ceil(metrics.width);
+    const textHeight = Math.ceil(getFontSize(font) * 1.2);
+    canvas.width = textWidth + 20;
+    canvas.height = textHeight + 20;
+    context.font = font;
+    context.fillStyle = color;
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    const texture = new Texture(gl, { generateMipmaps: false });
+    texture.image = canvas;
+    return { texture, width: canvas.width, height: canvas.height };
+  }
+
+  class Title {
+    constructor({ gl, plane, renderer, text, textColor, font }) {
+      this.gl = gl;
+      this.plane = plane;
+      this.renderer = renderer;
+      this.text = text;
+      this.textColor = textColor;
+      this.font = font;
+      this.createMesh();
+    }
+    createMesh() {
+      const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
+      const geometry = new Plane(this.gl);
+      const program = new Program(this.gl, {
+        vertex: `
+          attribute vec3 position;
+          attribute vec2 uv;
+          uniform mat4 modelViewMatrix;
+          uniform mat4 projectionMatrix;
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragment: `
+          precision highp float;
+          uniform sampler2D tMap;
+          varying vec2 vUv;
+          void main() {
+            vec4 color = texture2D(tMap, vUv);
+            if (color.a < 0.1) discard;
+            gl_FragColor = color;
+          }
+        `,
+        uniforms: { tMap: { value: texture } },
+        transparent: true
+      });
+      this.mesh = new Mesh(this.gl, { geometry, program });
+      const aspect = width / height;
+      const textHeight = this.plane.scale.y * 0.15;
+      const textWidth = textHeight * aspect;
+      this.mesh.scale.set(textWidth, textHeight, 1);
+      this.mesh.position.y = -this.plane.scale.y * 0.5 - textHeight * 0.5 - 0.05;
+      this.mesh.setParent(this.plane);
+    }
+  }
+
+  class Media {
+    constructor({ geometry, gl, image, index, length, renderer, scene, screen, text, viewport, bend, textColor, borderRadius, font }) {
+      this.extra = 0;
+      this.geometry = geometry;
+      this.gl = gl;
+      this.image = image;
+      this.index = index;
+      this.length = length;
+      this.renderer = renderer;
+      this.scene = scene;
+      this.screen = screen;
+      this.text = text;
+      this.viewport = viewport;
+      this.bend = bend;
+      this.textColor = textColor;
+      this.borderRadius = borderRadius;
+      this.font = font;
+      this.createShader();
+      this.createMesh();
+      this.createTitle();
+      this.onResize();
+    }
+    createShader() {
+      const texture = new Texture(this.gl, { generateMipmaps: true });
+      this.program = new Program(this.gl, {
+        depthTest: false,
+        depthWrite: false,
+        vertex: `
+          precision highp float;
+          attribute vec3 position;
+          attribute vec2 uv;
+          uniform mat4 modelViewMatrix;
+          uniform mat4 projectionMatrix;
+          uniform float uTime;
+          uniform float uSpeed;
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            vec3 p = position;
+            p.z = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5) * (0.1 + uSpeed * 0.5);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+          }
+        `,
+        fragment: `
+          precision highp float;
+          uniform vec2 uImageSizes;
+          uniform vec2 uPlaneSizes;
+          uniform sampler2D tMap;
+          uniform float uBorderRadius;
+          varying vec2 vUv;
+
+          float roundedBoxSDF(vec2 p, vec2 b, float r) {
+            vec2 d = abs(p) - b;
+            return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
+          }
+
+          void main() {
+            vec2 ratio = vec2(
+              min((uPlaneSizes.x / uPlaneSizes.y) / (uImageSizes.x / uImageSizes.y), 1.0),
+              min((uPlaneSizes.y / uPlaneSizes.x) / (uImageSizes.y / uImageSizes.x), 1.0)
+            );
+            vec2 uv = vec2(
+              vUv.x * ratio.x + (1.0 - ratio.x) * 0.5,
+              vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
+            );
+            vec4 color = texture2D(tMap, uv);
+
+            float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
+
+            float edgeSmooth = 0.002;
+            float alpha = 1.0 - smoothstep(-edgeSmooth, edgeSmooth, d);
+
+            gl_FragColor = vec4(color.rgb, alpha);
+          }
+        `,
+        uniforms: {
+          tMap: { value: texture },
+          uPlaneSizes: { value: [0, 0] },
+          uImageSizes: { value: [0, 0] },
+          uSpeed: { value: 0 },
+          uTime: { value: 100 * Math.random() },
+          uBorderRadius: { value: this.borderRadius }
+        },
+        transparent: true
+      });
+      const img = new Image();
+      img.src = this.image;
+      img.onload = () => {
+        texture.image = img;
+        this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight];
+      };
+    }
+    createMesh() {
+      this.plane = new Mesh(this.gl, { geometry: this.geometry, program: this.program });
+      this.plane.setParent(this.scene);
+    }
+    createTitle() {
+      this.title = new Title({
+        gl: this.gl,
+        plane: this.plane,
+        renderer: this.renderer,
+        text: this.text,
+        textColor: this.textColor,
+        font: this.font
+      });
+    }
+    update(scroll, direction) {
+      this.plane.position.x = this.x - scroll.current - this.extra;
+
+      const x = this.plane.position.x;
+      const H = this.viewport.width / 2;
+
+      if (this.bend === 0) {
+        this.plane.position.y = 0;
+        this.plane.rotation.z = 0;
+      } else {
+        const B_abs = Math.abs(this.bend);
+        const R = (H * H + B_abs * B_abs) / (2 * B_abs);
+        const effectiveX = Math.min(Math.abs(x), H);
+
+        const arc = R - Math.sqrt(R * R - effectiveX * effectiveX);
+        if (this.bend > 0) {
+          this.plane.position.y = -arc;
+          this.plane.rotation.z = -Math.sign(x) * Math.asin(effectiveX / R);
+        } else {
+          this.plane.position.y = arc;
+          this.plane.rotation.z = Math.sign(x) * Math.asin(effectiveX / R);
+        }
+      }
+
+      this.speed = scroll.current - scroll.last;
+      this.program.uniforms.uTime.value += 0.04;
+      this.program.uniforms.uSpeed.value = this.speed;
+
+      const planeOffset = this.plane.scale.x / 2;
+      const viewportOffset = this.viewport.width / 2;
+      this.isBefore = this.plane.position.x + planeOffset < -viewportOffset;
+      this.isAfter = this.plane.position.x - planeOffset > viewportOffset;
+      if (direction === 'right' && this.isBefore) {
+        this.extra -= this.widthTotal;
+        this.isBefore = this.isAfter = false;
+      }
+      if (direction === 'left' && this.isAfter) {
+        this.extra += this.widthTotal;
+        this.isBefore = this.isAfter = false;
+      }
+    }
+    onResize({ screen, viewport } = {}) {
+      if (screen) this.screen = screen;
+      if (viewport) {
+        this.viewport = viewport;
+        if (this.plane.program.uniforms.uViewportSizes) {
+          this.plane.program.uniforms.uViewportSizes.value = [this.viewport.width, this.viewport.height];
+        }
+      }
+      this.scale = this.screen.height / 1500;
+      this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
+      this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
+      this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
+      this.padding = 2;
+      this.width = this.plane.scale.x + this.padding;
+      this.widthTotal = this.width * this.length;
+      this.x = this.width * this.index;
+    }
+  }
+
+  class StackGallery {
+    constructor(container, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase }) {
+      this.container = container;
+      this.scrollSpeed = scrollSpeed;
+      this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0, position: 0 };
+      this.onCheckDebounce = debounce(this.onCheck.bind(this), 200);
+      this.boundUpdate = this.update.bind(this);
+      this.raf = null;
+      this.createRenderer();
+      this.createCamera();
+      this.createScene();
+      this.onResize();
+      this.createGeometry();
+      this.createMedias(items, bend, textColor, borderRadius, font);
+      this.addEventListeners();
+      this.resume();
+    }
+    createRenderer() {
+      this.renderer = new Renderer({
+        alpha: true,
+        antialias: true,
+        dpr: Math.min(window.devicePixelRatio || 1, 2)
+      });
+      this.gl = this.renderer.gl;
+      this.gl.clearColor(0, 0, 0, 0);
+      this.container.appendChild(this.gl.canvas);
+    }
+    createCamera() {
+      this.camera = new Camera(this.gl);
+      this.camera.fov = 45;
+      this.camera.position.z = 20;
+    }
+    createScene() {
+      this.scene = new Transform();
+    }
+    createGeometry() {
+      this.planeGeometry = new Plane(this.gl, { heightSegments: 50, widthSegments: 100 });
+    }
+    createMedias(items, bend, textColor, borderRadius, font) {
+      this.mediasImages = items.concat(items);
+      this.medias = this.mediasImages.map((data, index) => {
+        return new Media({
+          geometry: this.planeGeometry,
+          gl: this.gl,
+          image: data.image,
+          index,
+          length: this.mediasImages.length,
+          renderer: this.renderer,
+          scene: this.scene,
+          screen: this.screen,
+          text: data.text,
+          viewport: this.viewport,
+          bend,
+          textColor,
+          borderRadius,
+          font
+        });
+      });
+    }
+    onTouchDown(e) {
+      this.isDown = true;
+      this.scroll.position = this.scroll.current;
+      this.start = e.touches ? e.touches[0].clientX : e.clientX;
+    }
+    onTouchMove(e) {
+      if (!this.isDown) return;
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const distance = (this.start - x) * (this.scrollSpeed * 0.025);
+      this.scroll.target = this.scroll.position + distance;
+    }
+    onTouchUp() {
+      if (!this.isDown) return;
+      this.isDown = false;
+      this.onCheck();
+    }
+    onCheck() {
+      if (!this.medias || !this.medias[0]) return;
+      const width = this.medias[0].width;
+      const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
+      const item = width * itemIndex;
+      this.scroll.target = this.scroll.target < 0 ? -item : item;
+    }
+    onResize() {
+      this.screen = {
+        width: this.container.clientWidth,
+        height: this.container.clientHeight
+      };
+      if (!this.screen.width || !this.screen.height) return;
+      this.renderer.setSize(this.screen.width, this.screen.height);
+      this.camera.perspective({ aspect: this.screen.width / this.screen.height });
+      const fov = (this.camera.fov * Math.PI) / 180;
+      const height = 2 * Math.tan(fov / 2) * this.camera.position.z;
+      const width = height * this.camera.aspect;
+      this.viewport = { width, height };
+      if (this.medias) {
+        this.medias.forEach(media => media.onResize({ screen: this.screen, viewport: this.viewport }));
+      }
+    }
+    update() {
+      this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
+      const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
+      if (this.medias) {
+        this.medias.forEach(media => media.update(this.scroll, direction));
+      }
+      this.renderer.render({ scene: this.scene, camera: this.camera });
+      this.scroll.last = this.scroll.current;
+      this.raf = window.requestAnimationFrame(this.boundUpdate);
+    }
+    pause() {
+      if (this.raf) {
+        window.cancelAnimationFrame(this.raf);
+        this.raf = null;
+      }
+    }
+    resume() {
+      if (!this.raf) this.raf = window.requestAnimationFrame(this.boundUpdate);
+    }
+    addEventListeners() {
+      window.addEventListener('resize', this.onResize.bind(this));
+      this.container.addEventListener('mousedown', this.onTouchDown.bind(this));
+      window.addEventListener('mousemove', this.onTouchMove.bind(this));
+      window.addEventListener('mouseup', this.onTouchUp.bind(this));
+      this.container.addEventListener('touchstart', this.onTouchDown.bind(this), { passive: true });
+      window.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: true });
+      window.addEventListener('touchend', this.onTouchUp.bind(this));
+    }
+  }
+
+  const CARD_W = 700;
+  const CARD_H = 900;
+  const LOGO_BOX = 380;
+  const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons';
+
+  const TECHS = [
+    { text: 'HTML', logo: DEVICON + '/html5/html5-original.svg' },
+    { text: 'JavaScript', logo: DEVICON + '/javascript/javascript-original.svg' },
+    { text: 'TypeScript', logo: DEVICON + '/typescript/typescript-original.svg' },
+    { text: 'React', logo: DEVICON + '/react/react-original.svg' },
+    { text: 'Next.js', logo: 'https://cdn.simpleicons.org/nextdotjs/ffffff' },
+    { text: 'Tailwind CSS', logo: DEVICON + '/tailwindcss/tailwindcss-original.svg' },
+    { text: 'Node.js', logo: DEVICON + '/nodejs/nodejs-original.svg' },
+    { text: 'Python', logo: DEVICON + '/python/python-original.svg' },
+    { text: 'Java', logo: DEVICON + '/java/java-original.svg' },
+    { text: 'MySQL', logo: DEVICON + '/mysql/mysql-original.svg' },
+    { text: 'Supabase', logo: DEVICON + '/supabase/supabase-original.svg' },
+    { text: 'AWS', logo: DEVICON + '/amazonwebservices/amazonwebservices-plain-wordmark.svg', tint: '#ffffff' },
+    { text: 'Vercel', logo: 'https://cdn.simpleicons.org/vercel/ffffff' },
+    { text: 'Git', logo: DEVICON + '/git/git-original.svg' },
+    { text: 'scikit-learn', logo: DEVICON + '/scikitlearn/scikitlearn-original.svg' },
+    { text: 'Arduino', logo: DEVICON + '/arduino/arduino-original.svg' },
+    { text: 'Blender', logo: DEVICON + '/blender/blender-original.svg' },
+    { text: 'Wireshark', logo: 'https://cdn.simpleicons.org/wireshark/1679A7' },
+    { text: 'Pwnable', terminal: '>_ pwn' }
+  ];
+
+  function makeCard(draw) {
+    const canvas = document.createElement('canvas');
+    canvas.width = CARD_W;
+    canvas.height = CARD_H;
+    const ctx = canvas.getContext('2d');
+    const bg = ctx.createLinearGradient(0, 0, 0, CARD_H);
+    bg.addColorStop(0, '#2b2b2b');
+    bg.addColorStop(1, '#191919');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, CARD_W, CARD_H);
+    draw(ctx);
+    return canvas.toDataURL('image/png');
+  }
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  function drawLogo(ctx, img, tint) {
+    const ratio = Math.min(LOGO_BOX / (img.width || 1), LOGO_BOX / (img.height || 1));
+    const w = Math.round((img.width || 1) * ratio);
+    const h = Math.round((img.height || 1) * ratio);
+    let source = img;
+    if (tint) {
+      const oc = document.createElement('canvas');
+      oc.width = w;
+      oc.height = h;
+      const octx = oc.getContext('2d');
+      octx.drawImage(img, 0, 0, w, h);
+      octx.globalCompositeOperation = 'source-in';
+      octx.fillStyle = tint;
+      octx.fillRect(0, 0, w, h);
+      source = oc;
+    }
+    ctx.drawImage(source, (CARD_W - w) / 2, (CARD_H - h) / 2, w, h);
+  }
+
+  function drawTerminal(ctx, label) {
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 120px Consolas, "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, CARD_W / 2, CARD_H / 2);
+  }
+
+  function drawFallback(ctx, label) {
+    ctx.fillStyle = '#e5e5e5';
+    let size = 80;
+    ctx.font = 'bold ' + size + 'px Pretendard, sans-serif';
+    const width = ctx.measureText(label).width;
+    if (width > 560) size = Math.floor(size * 560 / width);
+    ctx.font = 'bold ' + size + 'px Pretendard, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, CARD_W / 2, CARD_H / 2);
+  }
+
+  function buildItems() {
+    return Promise.all(TECHS.map(async tech => {
+      let image;
+      if (tech.terminal) {
+        image = makeCard(ctx => drawTerminal(ctx, tech.terminal));
+      } else {
+        try {
+          const img = await loadImage(tech.logo);
+          image = makeCard(ctx => drawLogo(ctx, img, tech.tint));
+        } catch {
+          image = makeCard(ctx => drawFallback(ctx, tech.text));
+        }
+      }
+      return { image, text: tech.text };
+    }));
+  }
+
+  document.fonts.ready.then(buildItems).then(items => {
+    const container = document.getElementById('stackGallery');
+    if (!container) return;
+
+    const gallery = new StackGallery(container, {
+      items,
+      bend: 3,
+      textColor: '#ffffff',
+      borderRadius: 0.05,
+      font: 'bold 30px Pretendard',
+      scrollSpeed: 2,
+      scrollEase: 0.05
+    });
+
+    const slide = document.getElementById('fuckinteraction');
+    const isActive = () => {
+      if (!window.pageSwiper) return true;
+      return window.pageSwiper.slides[window.pageSwiper.activeIndex] === slide;
+    };
+    const resumeIfActive = () => {
+      if (isActive()) gallery.resume();
+    };
+    const pauseIfInactive = () => {
+      if (!isActive()) gallery.pause();
+    };
+
+    if (window.pageSwiper) {
+      window.pageSwiper.on('slideChange', resumeIfActive);
+      window.pageSwiper.on('slideChangeTransitionEnd', pauseIfInactive);
+    }
+    pauseIfInactive();
+  });
 </script>
 </body>
 </html>
