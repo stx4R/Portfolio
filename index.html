@@ -19,6 +19,9 @@
     html { scrollbar-width: none; }
     #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; will-change: transform, opacity, filter; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
     #projectWheel .wheel-item--selected { font-weight: 600; }
+    #stackStage .stack-item { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); will-change: transform; }
+    #stackStage .stack-item .stack-card { background: linear-gradient(#2b2b2b, #191919); border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: filter 200ms; }
+    #stackStage .stack-item:hover .stack-card { filter: brightness(1.3); }
   </style>
 </head>
 <body class="bg-neutral-900 text-white">
@@ -272,10 +275,8 @@
         </div>
       </div>
 
-      <div class="flex-1 mt-2 mb-12 min-h-0 flex items-center">
-        <div id="stackViewport" class="w-full overflow-hidden">
-          <div id="stackTrack" class="flex w-max gap-4 py-3 transition-transform duration-500 ease-out will-change-transform"></div>
-        </div>
+      <div class="flex-1 mt-2 mb-12 min-h-0 relative">
+        <div id="stackStage" class="absolute inset-0 overflow-hidden"></div>
       </div>
 
     </div>
@@ -954,68 +955,81 @@
     { name: 'Arduino', logo: DEVICON + '/arduino/arduino-original.svg', url: 'https://www.arduino.cc/' }
   ];
 
-  const track = document.getElementById('stackTrack');
-  const viewport = document.getElementById('stackViewport');
+  const stage = document.getElementById('stackStage');
   const prevBtn = document.getElementById('stackPrev');
   const nextBtn = document.getElementById('stackNext');
+  const items = [];
+  const cards = [];
+  let index = 0;
 
   STACKS.forEach(s => {
     const a = document.createElement('a');
     a.href = s.url;
     a.target = '_blank';
     a.rel = 'noopener';
-    a.className = 'group flex flex-col items-center justify-center gap-4 shrink-0 w-36 h-48 md:w-44 md:h-56 bg-neutral-800 border border-neutral-700 rounded-xl hover:border-neutral-400 hover:bg-neutral-700/60 hover:-translate-y-1 transition-all duration-200';
+    a.className = 'stack-item';
+    const card = document.createElement('div');
+    card.className = 'stack-card';
     if (s.terminal) {
       const t = document.createElement('span');
-      t.className = 'font-mono font-bold text-green-500 text-xl md:text-2xl';
+      t.className = 'font-mono font-bold text-green-500 text-2xl md:text-3xl';
       t.textContent = s.terminal;
-      a.appendChild(t);
+      card.appendChild(t);
     } else {
       const img = document.createElement('img');
       img.src = s.logo;
       img.alt = s.name;
       img.loading = 'lazy';
-      img.className = 'w-14 h-14 md:w-16 md:h-16 object-contain';
+      img.className = 'w-[54%] object-contain';
       if (s.mono) img.style.filter = 'brightness(0) invert(1)';
       img.onerror = () => { img.style.display = 'none'; };
-      a.appendChild(img);
+      card.appendChild(img);
     }
     const label = document.createElement('span');
-    label.className = 'text-sm font-semibold text-neutral-300 group-hover:text-white transition-colors';
+    label.className = 'text-white font-bold text-base md:text-lg';
     label.textContent = s.name;
+    a.appendChild(card);
     a.appendChild(label);
-    track.appendChild(a);
+    stage.appendChild(a);
+    items.push(a);
+    cards.push(card);
   });
 
-  let pos = 0;
+  function layout() {
+    const cw = stage.clientWidth;
+    const ch = stage.clientHeight;
+    if (!cw || !ch) return;
+    const cardH = Math.max(ch * 0.62, 150);
+    const cardW = (cardH * 7) / 9;
+    const step = cardW + ch * 0.12;
+    const H = cw / 2;
+    const B = ch * 0.18;
+    const R = (H * H + B * B) / (2 * B);
+    items.forEach((el, i) => {
+      cards[i].style.width = cardW + 'px';
+      cards[i].style.height = cardH + 'px';
+      const x = (i - index) * step;
+      const ex = Math.min(Math.abs(x), H);
+      const arc = R - Math.sqrt(Math.max(R * R - ex * ex, 0));
+      const rot = (Math.sign(x) * Math.asin(ex / R) * 180) / Math.PI;
+      el.style.width = cardW + 'px';
+      el.style.transformOrigin = '50% ' + cardH / 2 + 'px';
+      el.style.transform = 'translate(' + (x - cardW / 2) + 'px, ' + (arc - cardH / 2) + 'px) rotate(' + rot.toFixed(3) + 'deg)';
+    });
+    prevBtn.disabled = index <= 0;
+    nextBtn.disabled = index >= items.length - 1;
+  }
 
-  function maxPos() {
-    return Math.max(0, track.scrollWidth - viewport.clientWidth);
-  }
-  function stepSize() {
-    const first = track.children[0];
-    if (!first) return 200;
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 16;
-    return first.offsetWidth + gap;
-  }
-  function render() {
-    track.style.transform = 'translateX(' + -pos + 'px)';
-    prevBtn.disabled = pos <= 0;
-    nextBtn.disabled = pos >= maxPos() - 1;
-  }
   function move(direction) {
-    pos = Math.min(Math.max(pos + direction * stepSize(), 0), maxPos());
-    render();
+    index = Math.min(Math.max(index + direction, 0), items.length - 1);
+    layout();
   }
 
   prevBtn.addEventListener('click', () => move(-1));
   nextBtn.addEventListener('click', () => move(1));
-  window.addEventListener('resize', () => {
-    pos = Math.min(pos, maxPos());
-    render();
-  });
+  window.addEventListener('resize', layout);
 
-  render();
+  layout();
 })();
 </script>
 </body>
