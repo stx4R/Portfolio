@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio</title>
+  <title>st4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
@@ -474,45 +474,6 @@
 <p>오프라인 면접의 종이 평가지 한계를 디지털로 대체하여, 면접 종료 직후 결과를 즉시 정리할 수 있도록 설계하였습니다. 동아리 특성에 맞는 평가 항목 커스터마이징을 전제로 확장성을 고려했습니다.</p>`
       },
       {
-        id: 'kbo', emoji: '⚾', name: 'KBO 관중 예측', subtitle: 'KBO-Prediction',
-        period: '2026.05', color: 'rose',
-        tags: ['XGBoost', 'LightGBM', 'Feature Engineering'],
-        shortDesc: 'KBO·MLB 15,000+ 경기 데이터와 앙상블 ML로 야구 관중 수를 예측하는 데이터 분석 플랫폼 (Test R² 0.697)',
-        github: 'https://github.com/stx4R/KBO-Prediction',
-        readme: `<h2>개요</h2>
-<p>"야구 관중 수는 단순한 시계열 트렌드인가, 아니면 날씨·라이벌전·팀 순위 등 복잡한 이벤트들의 상호작용인가?" — KBO 2023–2025년 2,160경기와 MLB 2020–2025년 13,046경기 데이터를 기반으로 앙상블 머신러닝 모델로 관중 수를 예측하는 분석 플랫폼입니다.</p>
-<h2>데이터 파이프라인</h2>
-<ul>
-  <li><strong>멀티 소스 수집:</strong> KBO 공식 데이터 + 기상청 날씨(기온·습도·강수량·풍속) + MLB Stats API 통합.</li>
-  <li><strong>특성 공학 (6개 카테고리):</strong> 불쾌지수(DI) 환경 변수, 주말·공휴일 일정 가중치, 순위 경쟁도(시즌 진행률 × 승률), 최근 10경기 모멘텀, 팀 인기도 확장 평균, 돔 구장 효과.</li>
-  <li><strong>데이터 누수 방지:</strong> 모든 동적 특성에 shift(1) 적용하여 미래 정보 사용 차단.</li>
-</ul>
-<h2>모델 구성</h2>
-<ul>
-  <li><strong>5가지 모델 비교:</strong> XGBoost, LightGBM, CatBoost, Voting Ensemble, Stacking Ensemble.</li>
-  <li><strong>KBO 최고 성능:</strong> Voting Ensemble — Test R² <strong>0.697</strong>, MAE 2,362명.</li>
-  <li><strong>MLB 최고 안정성:</strong> CatBoost — RMSE 7,022명, 과적합 격차 최소(0.154).</li>
-</ul>
-<h2>세이버메트릭스 분석</h2>
-<ul>
-  <li>26,092개 MLB 게임로그에서 OPS, wRC+, WAR, BABIP, ISO 산출.</li>
-  <li>2023 피치클락 도입 후 TTO% 감소·도루 증가 등 규칙 변경 영향 정량화.</li>
-</ul>
-<h2>핵심 인사이트</h2>
-<ul>
-  <li>홈팀 인기도가 관중의 약 25%에 영향 — 브랜드 파워가 단기 성적보다 유의미.</li>
-  <li>고척 돔의 폭염 효과 — DI 높은 8월에 타 구장 대비 차별적 관중 흡입.</li>
-  <li>라이벌전 프리미엄 — 동일 조건 대비 관중 수 유의미한 증가.</li>
-</ul>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>ML:</strong> XGBoost, LightGBM, CatBoost, Scikit-learn</li>
-  <li><strong>데이터:</strong> Python, Pandas, NumPy</li>
-  <li><strong>시각화:</strong> Matplotlib, Seaborn, Jupyter Notebook</li>
-  <li><strong>배포:</strong> GitHub Pages</li>
-</ul>`
-      },
-      {
         id: 'agdecision', emoji: '⚖️', name: 'AGDecision.', subtitle: 'AGDecision',
         color: 'violet',
         tags: ['Mixed Methods', 'Algorithmic Bias', 'Statistics'],
@@ -543,23 +504,41 @@
 </ul>`
       },
       {
-        id: 'bbpre', emoji: '⚾', name: '야구 관중 예측 Ⅱ', subtitle: 'BBPre',
-        color: 'orange',
-        tags: ['CatBoost', 'Ensemble', 'Truncation'],
-        shortDesc: '2023–2026 KBO·MLB 데이터로 관중 수요를 예측하고 매진 시대의 Truncation 문제까지 진단한 ML 리포트 (Test R² 0.671)',
+        id: 'bbpre', emoji: '⚾', name: 'BBPre.', subtitle: 'BBPre',
+        period: '2026.05 ~ 2026.07', color: 'orange',
+        tags: ['Ensemble Learning', 'Feature Engineering', 'Truncation Analysis'],
+        shortDesc: 'KBO·MLB 17,000+ 경기 데이터로 관중 수요를 예측하고, 매진 시대의 Truncation 문제까지 진단한 앙상블 ML 연구 (Test R² 0.671)',
         github: 'https://github.com/stx4R/R3P0RT',
         readme: `<h2>개요</h2>
-<p>2023–2026 시즌 KBO 2,584경기와 MLB 14,456경기 데이터로 "어떤 경기에 관중이 몰리는가"를 예측한 머신러닝 리포트입니다. Gradient Boosting 계열 모델(XGBoost·LightGBM·CatBoost)과 앙상블을 시간적 홀드아웃으로 검증하고, 2026 전반기 매진 시즌에서 드러난 Truncation 문제까지 진단했습니다.</p>
-<h2>검증 설계</h2>
+<p>"야구 관중 수는 단순한 시계열 트렌드인가, 아니면 날씨·라이벌전·팀 순위 등 복잡한 이벤트들의 상호작용인가?" — 이 질문에서 출발해 KBO 2,584경기와 MLB 14,456경기(2023–2026)를 Gradient Boosting 계열 앙상블로 예측한 머신러닝 연구입니다. 1차 분석에서 구축한 예측 파이프라인을 2026 시즌 데이터로 확장·재검증하고, 그 과정에서 드러난 Truncation 문제까지 진단했습니다.</p>
+<h2>연구의 발전 과정</h2>
 <ul>
-  <li><strong>이중 누수 차단:</strong> 모든 동적 변수(승률·인기도)에 shift(1)을 적용해 경기 이전 정보만 사용하고, 학습(2023–2025)과 테스트(2026 전반기 424경기)를 시간 순서로 완전 분리.</li>
-  <li><strong>특성 공학:</strong> 불쾌지수(DI), 주말·공휴일 가중치, 순위 경쟁도, 최근 10경기 모멘텀, 팀 인기도 확장 평균, 구장 수용인원·점유율, 라이벌전 여부.</li>
+  <li><strong>1차 — 예측 가능성 검증:</strong> KBO 2023–2025 2,160경기와 MLB 2020–2025 13,046경기로 5개 모델(XGBoost·LightGBM·CatBoost·Voting·Stacking)을 비교. Voting Ensemble이 Test R² <strong>0.697</strong>, MAE 2,362명으로 관중 수가 예측 가능한 대상임을 확인.</li>
+  <li><strong>2차 — 검증 설계 강화:</strong> 무작위 분할이 아닌 시간적 홀드아웃(학습 2023–2025 / 테스트 2026 전반기 424경기)으로 전환하고 데이터를 17,000경기 규모로 확장. 그 결과 Test R² <strong>0.671</strong> — 수치는 낮아졌지만 미래 시점을 실제로 맞힌 성능이라는 점에서 신뢰도는 오히려 상승.</li>
+  <li><strong>수치 하락의 해석:</strong> 성능 저하가 아니라 검증 난이도의 상승입니다. 낙관적으로 부풀려진 지표를 걷어내는 과정 자체가 이 연구의 핵심 성과입니다.</li>
 </ul>
-<h2>결과</h2>
+<h2>데이터 파이프라인</h2>
+<ul>
+  <li><strong>멀티 소스 수집:</strong> KBO 공식 데이터 + 기상청 날씨(기온·습도·강수량·풍속) + MLB Stats API 통합.</li>
+  <li><strong>특성 공학 (6개 카테고리):</strong> 불쾌지수(DI) 환경 변수, 주말·공휴일 일정 가중치, 순위 경쟁도(시즌 진행률 × 승률), 최근 10경기 모멘텀, 팀 인기도 확장 평균, 구장 수용인원·점유율 및 돔 구장 효과, 라이벌전 여부.</li>
+  <li><strong>이중 누수 차단:</strong> 모든 동적 변수(승률·인기도)에 shift(1)을 적용해 경기 이전 정보만 사용하고, 학습·테스트를 시간 순서로 완전 분리.</li>
+</ul>
+<h2>모델 성능</h2>
 <ul>
   <li><strong>KBO:</strong> Voting Ensemble이 Test R² 0.671, MAE 2,418명(평균 관중 대비 약 13.4% 오차)으로 최고 성능. 단일 모델 중에서는 CatBoost가 과적합 격차 0.196으로 최소.</li>
   <li><strong>MLB:</strong> CatBoost 단일 모델이 RMSE 6,941명으로 최적 — 두 리그 모두에서 CatBoost의 안정성 우위를 재확인.</li>
   <li><strong>특성 중요도:</strong> 홈팀 인기도 23.1% &gt; 최근 10경기 승률 9.8% — 관중 유치는 단기 성적이 아닌 팬 기반(브랜드)의 함수.</li>
+</ul>
+<h2>세이버메트릭스 분석</h2>
+<ul>
+  <li>26,092개 MLB 게임로그에서 OPS, wRC+, WAR, BABIP, ISO 산출.</li>
+  <li>2023 피치클락 도입 후 TTO% 감소·도루 증가 등 규칙 변경 영향 정량화.</li>
+</ul>
+<h2>핵심 인사이트</h2>
+<ul>
+  <li>홈팀 인기도가 관중의 약 25%에 영향 — 브랜드 파워가 단기 성적보다 유의미.</li>
+  <li>고척 돔의 폭염 효과 — DI 높은 8월에 타 구장 대비 차별적 관중 흡입.</li>
+  <li>라이벌전 프리미엄 — 동일 조건 대비 관중 수 유의미한 증가.</li>
 </ul>
 <h2>핵심 발견 — Truncation</h2>
 <p>관측 관중 = min(수요, 수용인원). 매진이 일상화되면 예측 문제가 "수요 예측"에서 "공급 제약"으로 변합니다. 홈팀 인기 경기의 잔차가 체계적으로 음의 방향(예측 &gt; 실제 상한)에 몰리는 패턴은 좌석 공급이 잠재 수요를 제약하고 있다는 정량적 증거입니다.</p>
@@ -567,6 +546,13 @@
 <ul>
   <li>매진 경기의 잠재 수요 추정을 위한 Tobit 회귀 등 절단 데이터 방법론 도입.</li>
   <li>SARIMA(장기 트렌드)와 ML(경기별 이벤트 효과)을 분담하는 하이브리드 구조 설계.</li>
+</ul>
+<h2>기술 스택</h2>
+<ul>
+  <li><strong>ML:</strong> XGBoost, LightGBM, CatBoost, Scikit-learn</li>
+  <li><strong>데이터:</strong> Python, Pandas, NumPy</li>
+  <li><strong>시각화:</strong> Matplotlib, Seaborn, Jupyter Notebook</li>
+  <li><strong>배포:</strong> GitHub Pages</li>
 </ul>`
       },
       {
