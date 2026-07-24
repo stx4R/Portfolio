@@ -119,7 +119,6 @@
       const RAPIER = RapierModule.default ?? RapierModule;
 
       const CARD_GLB = 'static/card.glb';
-      const LANYARD_PNG = 'static/lanyard.png';
 
       const position = [0, 0, 30];
       const gravity = { x: 0, y: -40, z: 0 };
@@ -128,13 +127,10 @@
       const frontImage = 'static/Profile.png';
       const backImage = 'static/Profile.png';
       const imageFit = 'contain';
-      const lanyardImage = 'static/Profile.png';
-      const lanyardWidth = 1;
+      const lanyardColor = 0x000000;
+      const lanyardWidth = 0.5;
 
-      const ropeLength = 1;
-      const bandRepeat = 4;
-      const bandTileLength = (ropeLength * 3) / bandRepeat;
-      const bandTileWidth = lanyardWidth;
+      const ropeLength = 1.4;
 
       const maxSpeed = 50;
       const minSpeed = 0;
@@ -185,12 +181,10 @@
       scene.environment = pmrem.fromScene(envScene, 0.75).texture;
       pmrem.dispose();
 
-      const [gltf, frontTex, backTex, bandBase, bandLogo] = await Promise.all([
+      const [gltf, frontTex, backTex] = await Promise.all([
         new GLTFLoader().loadAsync(CARD_GLB),
         loadImage(frontImage),
-        loadImage(backImage),
-        loadImage(LANYARD_PNG),
-        loadImage(lanyardImage)
+        loadImage(backImage)
       ]);
 
       const nodes = {};
@@ -252,38 +246,8 @@
         return composite;
       }
 
-      function compositeBandTexture() {
-        if (!bandLogo) {
-          const texture = new THREE.Texture(bandBase || document.createElement('canvas'));
-          texture.colorSpace = THREE.SRGBColorSpace;
-          texture.needsUpdate = true;
-          return texture;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.height = 512;
-        canvas.width = Math.round(canvas.height * (bandTileLength / bandTileWidth));
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = bandBase ? '#000000' : '#111111';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const size = Math.min(canvas.width, canvas.height) * 0.78;
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.drawImage(bandLogo, -size / 2, -size / 2, size, size);
-        ctx.restore();
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = 16;
-        return texture;
-      }
-
       const cardMap = compositeCardMap(materials.base.map);
       cardMap.anisotropy = 16;
-
-      const bandTexture = compositeBandTexture();
-      bandTexture.wrapS = THREE.RepeatWrapping;
-      bandTexture.wrapT = THREE.RepeatWrapping;
-      bandTexture.repeat.set(-bandRepeat, 1);
 
       const cardBodyGroup = new THREE.Group();
       const cardVisual = new THREE.Group();
@@ -361,8 +325,7 @@
       let bandSegments = isMobile ? 16 : 32;
       let bandGeometry = new BandGeometry(bandSegments);
       const bandMesh = new THREE.Mesh(bandGeometry, new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        map: bandTexture,
+        color: lanyardColor,
         side: THREE.DoubleSide,
         depthTest: false,
         toneMapped: false
@@ -385,10 +348,10 @@
       }
 
       const fixed = segment(0, 4, 0, true);
-      const j1 = segment(0.5, 4, 0);
-      const j2 = segment(1, 4, 0);
-      const j3 = segment(1.5, 4, 0);
-      const card = segment(2, 4, 0);
+      const j1 = segment(ropeLength * 0.5, 4, 0);
+      const j2 = segment(ropeLength, 4, 0);
+      const j3 = segment(ropeLength * 1.5, 4, 0);
+      const card = segment(ropeLength * 2, 4, 0);
 
       world.createCollider(RAPIER.ColliderDesc.ball(0.1), j1);
       world.createCollider(RAPIER.ColliderDesc.ball(0.1), j2);
@@ -396,9 +359,9 @@
       world.createCollider(RAPIER.ColliderDesc.cuboid(0.8, 1.125, 0.01), card);
 
       const ORIGIN = { x: 0, y: 0, z: 0 };
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), fixed, j1, true);
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), j1, j2, true);
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), j2, j3, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ropeLength, ORIGIN, ORIGIN), fixed, j1, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ropeLength, ORIGIN, ORIGIN), j1, j2, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ropeLength, ORIGIN, ORIGIN), j2, j3, true);
       world.createImpulseJoint(RAPIER.JointData.spherical(ORIGIN, { x: 0, y: 1.5, z: 0 }), j3, card, true);
 
       const curve = new THREE.CatmullRomCurve3([
