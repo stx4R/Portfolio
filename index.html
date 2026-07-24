@@ -127,7 +127,18 @@
       const frontImage = 'static/Profile.png';
       const backImage = 'static/Profile.png';
       const imageFit = 'contain';
-      const lanyardColor = 0x000000;
+      const lanyardWeave = [
+        [0.00, '#3b0764'],
+        [0.06, '#581c87'],
+        [0.15, '#7e22ce'],
+        [0.34, '#a855f7'],
+        [0.50, '#c084fc'],
+        [0.66, '#a855f7'],
+        [0.85, '#7e22ce'],
+        [0.94, '#581c87'],
+        [1.00, '#3b0764']
+      ];
+      const lanyardStitch = '#d8b4fe';
       const lanyardWidth = 0.5;
 
       const ropeLength = 1.4;
@@ -322,10 +333,35 @@
         }
       }
 
+      function weaveTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        lanyardWeave.forEach(stop => gradient.addColorStop(stop[0], stop[1]));
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const thickness = Math.max(2, Math.round(canvas.height * 0.009));
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = lanyardStitch;
+        ctx.fillRect(0, Math.round(canvas.height * 0.11), canvas.width, thickness);
+        ctx.fillRect(0, Math.round(canvas.height * 0.89) - thickness, canvas.width, thickness);
+        ctx.globalAlpha = 1;
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.anisotropy = 16;
+        return texture;
+      }
+
       let bandSegments = isMobile ? 16 : 32;
       let bandGeometry = new BandGeometry(bandSegments);
       const bandMesh = new THREE.Mesh(bandGeometry, new THREE.MeshBasicMaterial({
-        color: lanyardColor,
+        map: weaveTexture(),
         side: THREE.DoubleSide,
         depthTest: false,
         toneMapped: false
