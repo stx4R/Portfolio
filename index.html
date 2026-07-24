@@ -3,11 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>st4R</title>
+  <title>stx4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "rapier": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/+esm"
+    }
+  }
+  </script>
 
   <style>
     body, html {
@@ -60,97 +69,423 @@
             About ME.
           </h2>
 
-          <div class="mt-12 space-y-6">
-            <p class="text-neutral-300 text-xl font-semibold transition-all duration-300">
-              저는 <span id="dynamicWord" class="inline-block font-bold transition-colors duration-300">▢▢▢▢</span>한 사람입니다.
-            </p>
-            <div class="flex items-center gap-3">
-              <p class="text-neutral-400">왼쪽 텍스트 영역에 마우스를 올려보세요.</p>
+          <div class="mt-10">
+            <h3 class="text-3xl md:text-4xl font-bold tracking-tight">stx4R</h3>
+
+            <div class="mt-8 space-y-5">
+              <div>
+                <h4 class="text-lg font-semibold text-neutral-200">&lt;Birth/&gt;</h4>
+                <p class="text-neutral-400 mt-1">2009.10.29</p>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-semibold text-neutral-200">&lt;Residence/&gt;</h4>
+                <p class="text-neutral-400 mt-1">Republic of Korea &mdash; Daejeon</p>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-semibold text-neutral-200">&lt;School/&gt;</h4>
+                <div class="mt-1 space-y-1">
+                  <p class="text-neutral-500"><span class="text-neutral-600 mr-2">前</span>Daejeon Sahmyook Elementary School</p>
+                  <p class="text-neutral-500"><span class="text-neutral-600 mr-2">前</span>Daejeon Sahmyook Middle School</p>
+                  <p class="text-neutral-300"><span class="text-purple-400 mr-2">現</span>Daejeon Daeshin High School</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-semibold text-neutral-200">&lt;Career/&gt;</h4>
+                <p class="text-neutral-400 mt-1">Developer, Designer, AI Engineer</p>
+              </div>
+
+              <div>
+                <h4 class="text-lg font-semibold text-neutral-200">&lt;Communicate/&gt;</h4>
+                <p class="text-neutral-400 mt-1">Korean, English, Chinese, Japanese</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="hidden lg:flex flex-1 items-center justify-center">
-          <div id="hoverGroup" class="group flex flex-wrap justify-center items-center gap-6 p-10 w-full max-w-2xl cursor-crosshair select-none">
-            
-            <span class="text-2xl font-bold text-neutral-600 transition-all duration-700 group-hover:opacity-10 group-hover:blur-sm group-hover:scale-90">Forgetful</span>
-            <span class="text-xl font-light text-neutral-500 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Rude</span>
-            
-            <span class="signal-word text-3xl font-black text-neutral-400 transition-all duration-500 group-hover:text-cyan-400 group-hover:scale-125 group-hover:-translate-y-2 group-hover:drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] z-10" data-color="text-cyan-400">HardWorking</span>
-            
-            <span class="text-4xl font-black text-neutral-700 transition-all duration-700 group-hover:opacity-10 group-hover:blur-md">Aggressive</span>
-            <span class="text-lg font-medium text-neutral-600 transition-all duration-300 group-hover:opacity-0">Picky</span>
-            
-            <span class="signal-word text-2xl font-bold text-neutral-500 transition-all duration-500 delay-75 group-hover:text-amber-400 group-hover:scale-110 group-hover:translate-x-2 group-hover:drop-shadow-[0_0_15px_rgba(251,191,36,0.8)] z-10" data-color="text-amber-400">Creative</span>
-            
-            <span class="text-3xl font-light text-neutral-500 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Selfish</span>
-            <span class="text-2xl font-bold text-neutral-600 transition-all duration-700 group-hover:opacity-10 group-hover:blur-sm">Timid</span>
-            
-            <span class="signal-word text-4xl font-black text-neutral-400 transition-all duration-500 delay-100 group-hover:text-pink-500 group-hover:scale-125 group-hover:-translate-y-1 group-hover:drop-shadow-[0_0_15px_rgba(236,72,153,0.8)] z-10" data-color="text-pink-500">Capable</span>
-            
-            <span class="text-xl font-bold text-neutral-700 transition-all duration-300 group-hover:opacity-0">Hostile</span>
-            <span class="text-3xl font-medium text-neutral-600 transition-all duration-500 group-hover:opacity-10 group-hover:blur-sm">Conservative</span>
-
-            <span class="signal-word text-2xl font-bold text-neutral-500 transition-all duration-500 delay-150 group-hover:text-emerald-400 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] z-10" data-color="text-emerald-400">Communicative</span>
-
-          </div>
+        <div class="hidden lg:flex flex-1 items-center justify-center h-full">
+          <div id="lanyardStage" class="w-full h-full relative cursor-grab active:cursor-grabbing select-none touch-none"></div>
         </div>
       </div>
     </section>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const hoverGroup = document.getElementById('hoverGroup');
-        const dynamicWord = document.getElementById('dynamicWord');
-        const signalElements = document.querySelectorAll('.signal-word');
-        
-        let currentColorClass = '';
-        let currentWord = '';
+    <script type="module">
+    import * as THREE from 'three';
+    import * as RapierModule from 'rapier';
 
-        hoverGroup.addEventListener('mousemove', (e) => {
-          let closestElement = null;
-          let minDistance = Infinity;
+    const stage = document.getElementById('lanyardStage');
+    if (stage) {
+      const RAPIER = RapierModule.default ?? RapierModule;
 
-          signalElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const distance = Math.hypot(centerX - e.clientX, centerY - e.clientY);
+      const CAMERA_POSITION = [0, 1.2, 30];
+      const FOV = 20;
+      const GRAVITY = { x: 0, y: -40, z: 0 };
+      const ANCHOR_Y = 4;
+      const CARD_W = 1.6;
+      const CARD_H = 2.25;
+      const CARD_D = 0.02;
+      const BAND_WIDTH = 1;
+      const BAND_SEGMENTS = 32;
+      const MAX_SPEED = 50;
+      const MIN_SPEED = 0;
 
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestElement = el;
-            }
-          });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearAlpha(0);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.display = 'block';
+      stage.appendChild(renderer.domElement);
 
-          if (closestElement) {
-            const text = closestElement.innerText;
-            const colorClass = closestElement.getAttribute('data-color');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 1000);
+      camera.position.set(CAMERA_POSITION[0], CAMERA_POSITION[1], CAMERA_POSITION[2]);
+      camera.lookAt(0, CAMERA_POSITION[1], 0);
+      scene.add(new THREE.AmbientLight(0xffffff, Math.PI));
 
-            if (currentWord !== text) {
-              dynamicWord.innerText = text;
-              
-              if (currentColorClass) {
-                dynamicWord.classList.remove(currentColorClass);
-              }
-              if (colorClass) {
-                dynamicWord.classList.add(colorClass);
-                currentColorClass = colorClass;
-              }
-              currentWord = text;
-            }
-          }
+      function lightformer(intensity, position, rotation, scale) {
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(1, 1),
+          new THREE.MeshBasicMaterial({ color: new THREE.Color(intensity, intensity, intensity), side: THREE.DoubleSide })
+        );
+        mesh.position.set(position[0], position[1], position[2]);
+        mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+        mesh.scale.set(scale[0], scale[1], scale[2]);
+        return mesh;
+      }
+
+      const envScene = new THREE.Scene();
+      envScene.add(lightformer(2, [0, -1, 5], [0, 0, Math.PI / 3], [100, 0.1, 1]));
+      envScene.add(lightformer(3, [-1, -1, 1], [0, 0, Math.PI / 3], [100, 0.1, 1]));
+      envScene.add(lightformer(3, [1, 1, 1], [0, 0, Math.PI / 3], [100, 0.1, 1]));
+      envScene.add(lightformer(10, [-10, 0, 14], [0, Math.PI / 2, Math.PI / 3], [100, 10, 1]));
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(envScene, 0.75).texture;
+      pmrem.dispose();
+
+      function roundedRect(width, height, radius) {
+        const shape = new THREE.Shape();
+        const x = -width / 2;
+        const y = -height / 2;
+        shape.moveTo(x + radius, y);
+        shape.lineTo(x + width - radius, y);
+        shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+        shape.lineTo(x + width, y + height - radius);
+        shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        shape.lineTo(x + radius, y + height);
+        shape.quadraticCurveTo(x, y + height, x, y + height - radius);
+        shape.lineTo(x, y + radius);
+        shape.quadraticCurveTo(x, y, x + radius, y);
+        return shape;
+      }
+
+      function extrude(shape, depth, bevel) {
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+          depth: depth,
+          curveSegments: 24,
+          bevelEnabled: true,
+          bevelSegments: 3,
+          bevelSize: bevel,
+          bevelThickness: bevel
         });
+        geometry.translate(0, 0, -depth / 2);
+        return geometry;
+      }
 
-        hoverGroup.addEventListener('mouseleave', () => {
-          dynamicWord.innerText = '▢▢▢▢';
-          if (currentColorClass) {
-            dynamicWord.classList.remove(currentColorClass);
-            currentColorClass = '';
-          }
-          currentWord = '';
-        });
+      const profileTexture = new THREE.TextureLoader().load('static/Profile.png');
+      profileTexture.colorSpace = THREE.SRGBColorSpace;
+      profileTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+      const cardGroup = new THREE.Group();
+
+      const cardMesh = new THREE.Mesh(
+        extrude(roundedRect(CARD_W, CARD_H, 0.11), CARD_D, 0.006),
+        new THREE.MeshPhysicalMaterial({
+          color: 0x3f3f46,
+          metalness: 0.8,
+          roughness: 0.9,
+          clearcoat: 1,
+          clearcoatRoughness: 0.15
+        })
+      );
+      cardGroup.add(cardMesh);
+
+      const profileMaterial = new THREE.MeshBasicMaterial({
+        map: profileTexture,
+        transparent: true,
+        toneMapped: false,
+        depthWrite: false
       });
+      const profileSize = 1.2;
+      const profileGeometry = new THREE.PlaneGeometry(profileSize, profileSize * (1280 / 1262));
+
+      const profileFront = new THREE.Mesh(profileGeometry, profileMaterial);
+      profileFront.position.set(0, -0.06, CARD_D / 2 + 0.012);
+      cardGroup.add(profileFront);
+
+      const profileBack = new THREE.Mesh(profileGeometry, profileMaterial);
+      profileBack.position.set(0, -0.06, -CARD_D / 2 - 0.012);
+      profileBack.rotation.y = Math.PI;
+      cardGroup.add(profileBack);
+
+      const metalMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xd6d6d6,
+        metalness: 1,
+        roughness: 0.3,
+        clearcoat: 0.5
+      });
+
+      const clamp = new THREE.Mesh(extrude(roundedRect(0.52, 0.17, 0.06), 0.11, 0.008), metalMaterial);
+      clamp.position.set(0, CARD_H / 2 - 0.01, 0);
+      cardGroup.add(clamp);
+
+      const clip = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.036, 20, 56), metalMaterial);
+      clip.position.set(0, CARD_H / 2 + 0.19, 0);
+      cardGroup.add(clip);
+
+      scene.add(cardGroup);
+
+      function bandTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 128);
+        gradient.addColorStop(0, '#8c8c8c');
+        gradient.addColorStop(0.1, '#ffffff');
+        gradient.addColorStop(0.5, '#eeeeee');
+        gradient.addColorStop(0.9, '#ffffff');
+        gradient.addColorStop(1, '#8c8c8c');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 8, 128);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return texture;
+      }
+
+      class BandGeometry extends THREE.BufferGeometry {
+        constructor(segments) {
+          super();
+          const count = segments + 1;
+          this.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 6), 3));
+          const uv = new Float32Array(count * 4);
+          const index = [];
+          for (let i = 0; i < count; i++) {
+            const u = i / segments;
+            uv[i * 4] = u;
+            uv[i * 4 + 1] = 0;
+            uv[i * 4 + 2] = u;
+            uv[i * 4 + 3] = 1;
+            if (i < segments) {
+              const a = i * 2;
+              index.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+            }
+          }
+          this.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+          this.setIndex(index);
+          this._tangent = new THREE.Vector3();
+          this._toCamera = new THREE.Vector3();
+          this._side = new THREE.Vector3();
+        }
+
+        updatePoints(points, width, cameraPosition) {
+          const array = this.attributes.position.array;
+          const count = points.length;
+          const half = width / 2;
+          for (let i = 0; i < count; i++) {
+            const point = points[i];
+            const prev = points[Math.max(i - 1, 0)];
+            const next = points[Math.min(i + 1, count - 1)];
+            this._tangent.subVectors(next, prev);
+            if (this._tangent.lengthSq() < 1e-10) this._tangent.set(0, 1, 0);
+            this._tangent.normalize();
+            this._toCamera.subVectors(cameraPosition, point).normalize();
+            this._side.crossVectors(this._tangent, this._toCamera);
+            if (this._side.lengthSq() < 1e-10) this._side.set(1, 0, 0);
+            this._side.normalize().multiplyScalar(half);
+            const a = i * 6;
+            array[a] = point.x - this._side.x;
+            array[a + 1] = point.y - this._side.y;
+            array[a + 2] = point.z - this._side.z;
+            array[a + 3] = point.x + this._side.x;
+            array[a + 4] = point.y + this._side.y;
+            array[a + 5] = point.z + this._side.z;
+          }
+          this.attributes.position.needsUpdate = true;
+          this.computeBoundingSphere();
+        }
+      }
+
+      const bandGeometry = new BandGeometry(BAND_SEGMENTS);
+      const bandMesh = new THREE.Mesh(
+        bandGeometry,
+        new THREE.MeshBasicMaterial({
+          map: bandTexture(),
+          side: THREE.DoubleSide,
+          depthTest: false,
+          toneMapped: false
+        })
+      );
+      bandMesh.renderOrder = 1;
+      bandMesh.frustumCulled = false;
+      scene.add(bandMesh);
+
+      await RAPIER.init();
+      const world = new RAPIER.World(GRAVITY);
+      world.timestep = 1 / 60;
+
+      function segment(x, y, z, fixedBody) {
+        const desc = (fixedBody ? RAPIER.RigidBodyDesc.fixed() : RAPIER.RigidBodyDesc.dynamic())
+          .setTranslation(x, y, z)
+          .setLinearDamping(4)
+          .setAngularDamping(4)
+          .setCanSleep(true);
+        return world.createRigidBody(desc);
+      }
+
+      const anchorBody = segment(0, ANCHOR_Y, 0, true);
+      const joint1 = segment(0.5, ANCHOR_Y, 0);
+      const joint2 = segment(1, ANCHOR_Y, 0);
+      const joint3 = segment(1.5, ANCHOR_Y, 0);
+      const cardBody = segment(2, ANCHOR_Y, 0);
+
+      world.createCollider(RAPIER.ColliderDesc.ball(0.1), joint1);
+      world.createCollider(RAPIER.ColliderDesc.ball(0.1), joint2);
+      world.createCollider(RAPIER.ColliderDesc.ball(0.1), joint3);
+      world.createCollider(RAPIER.ColliderDesc.cuboid(CARD_W / 2, CARD_H / 2, CARD_D / 2), cardBody);
+
+      const ORIGIN = { x: 0, y: 0, z: 0 };
+      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), anchorBody, joint1, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), joint1, joint2, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), joint2, joint3, true);
+      world.createImpulseJoint(RAPIER.JointData.spherical(ORIGIN, { x: 0, y: 1.45, z: 0 }), joint3, cardBody, true);
+
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()
+      ]);
+      curve.curveType = 'chordal';
+
+      const smoothed = new WeakMap();
+      const scratch = new THREE.Vector3();
+      const pointerVector = new THREE.Vector3();
+      const pointerDirection = new THREE.Vector3();
+      const pointer = new THREE.Vector2();
+      const raycaster = new THREE.Raycaster();
+      let dragOffset = null;
+
+      function smoothTowards(body, delta) {
+        const translation = body.translation();
+        scratch.set(translation.x, translation.y, translation.z);
+        let lerped = smoothed.get(body);
+        if (!lerped) {
+          lerped = scratch.clone();
+          smoothed.set(body, lerped);
+        }
+        const clamped = Math.max(0.1, Math.min(1, lerped.distanceTo(scratch)));
+        lerped.lerp(scratch, delta * (MIN_SPEED + clamped * (MAX_SPEED - MIN_SPEED)));
+        return lerped;
+      }
+
+      function readPointer(event) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+
+      const canvas = renderer.domElement;
+
+      canvas.addEventListener('pointerdown', event => {
+        readPointer(event);
+        raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObject(cardGroup, true)[0];
+        if (!hit) return;
+        canvas.setPointerCapture(event.pointerId);
+        const translation = cardBody.translation();
+        dragOffset = new THREE.Vector3().copy(hit.point).sub(scratch.set(translation.x, translation.y, translation.z));
+        cardBody.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
+        if (window.pageSwiper) window.pageSwiper.allowTouchMove = false;
+      });
+
+      canvas.addEventListener('pointermove', event => {
+        if (dragOffset) readPointer(event);
+      });
+
+      function endDrag(event) {
+        if (!dragOffset) return;
+        if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+        dragOffset = null;
+        cardBody.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
+        if (window.pageSwiper) window.pageSwiper.allowTouchMove = true;
+      }
+
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+
+      function resize() {
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        if (!width || !height) return;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+      new ResizeObserver(resize).observe(stage);
+      resize();
+
+      let visible = true;
+      new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }, { threshold: 0 }).observe(stage);
+
+      const clock = new THREE.Clock();
+
+      renderer.setAnimationLoop(() => {
+        const delta = Math.min(clock.getDelta(), 0.1);
+        if (!visible || !stage.clientWidth) return;
+
+        if (dragOffset) {
+          pointerVector.set(pointer.x, pointer.y, 0.5).unproject(camera);
+          pointerDirection.copy(pointerVector).sub(camera.position).normalize();
+          pointerVector.add(pointerDirection.multiplyScalar(camera.position.length()));
+          anchorBody.wakeUp();
+          joint1.wakeUp();
+          joint2.wakeUp();
+          joint3.wakeUp();
+          cardBody.wakeUp();
+          cardBody.setNextKinematicTranslation({
+            x: pointerVector.x - dragOffset.x,
+            y: pointerVector.y - dragOffset.y,
+            z: pointerVector.z - dragOffset.z
+          });
+        }
+
+        world.step();
+
+        const smooth1 = smoothTowards(joint1, delta);
+        const smooth2 = smoothTowards(joint2, delta);
+        const tip = joint3.translation();
+        const anchor = anchorBody.translation();
+        curve.points[0].set(tip.x, tip.y, tip.z);
+        curve.points[1].copy(smooth2);
+        curve.points[2].copy(smooth1);
+        curve.points[3].set(anchor.x, anchor.y, anchor.z);
+        bandGeometry.updatePoints(curve.getPoints(BAND_SEGMENTS), BAND_WIDTH, camera.position);
+
+        const translation = cardBody.translation();
+        const rotation = cardBody.rotation();
+        cardGroup.position.set(translation.x, translation.y, translation.z);
+        cardGroup.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+
+        const angular = cardBody.angvel();
+        cardBody.setAngvel({ x: angular.x, y: angular.y - rotation.y * 0.25, z: angular.z }, true);
+
+        renderer.render(scene, camera);
+      });
+    }
     </script>
 
   <!-- Page 3 -->
