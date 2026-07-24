@@ -69,10 +69,10 @@
             About ME.
           </h2>
 
-          <div class="mt-10">
-            <h3 class="text-3xl md:text-4xl font-bold tracking-tight">stx4R</h3>
+          <div class="mt-8">
+            <h3 class="text-2xl md:text-3xl font-bold tracking-tight">stx4R</h3>
 
-            <div class="mt-8 space-y-5">
+            <div class="mt-6 grid grid-cols-2 gap-x-10 gap-y-5">
               <div>
                 <h4 class="text-lg font-semibold text-neutral-200">&lt;Birth/&gt;</h4>
                 <p class="text-neutral-400 mt-1">2009.10.29</p>
@@ -83,7 +83,7 @@
                 <p class="text-neutral-400 mt-1">Republic of Korea &mdash; Daejeon</p>
               </div>
 
-              <div>
+              <div class="col-span-2">
                 <h4 class="text-lg font-semibold text-neutral-200">&lt;School/&gt;</h4>
                 <div class="mt-1 space-y-1">
                   <p class="text-neutral-500"><span class="text-neutral-600 mr-2">前</span>Daejeon Sahmyook Elementary School</p>
@@ -119,15 +119,16 @@
     if (stage) {
       const RAPIER = RapierModule.default ?? RapierModule;
 
-      const CAMERA_POSITION = [0, 1.2, 30];
+      const CAMERA_POSITION = [0, 0.6, 30];
       const FOV = 20;
       const GRAVITY = { x: 0, y: -40, z: 0 };
       const ANCHOR_Y = 4;
       const CARD_W = 1.6;
       const CARD_H = 2.25;
       const CARD_D = 0.02;
-      const BAND_WIDTH = 1;
+      const BAND_WIDTH = 0.5;
       const BAND_SEGMENTS = 32;
+      const ROPE_LENGTH = 1.4;
       const MAX_SPEED = 50;
       const MIN_SPEED = 0;
 
@@ -350,10 +351,10 @@
       }
 
       const anchorBody = segment(0, ANCHOR_Y, 0, true);
-      const joint1 = segment(0.5, ANCHOR_Y, 0);
-      const joint2 = segment(1, ANCHOR_Y, 0);
-      const joint3 = segment(1.5, ANCHOR_Y, 0);
-      const cardBody = segment(2, ANCHOR_Y, 0);
+      const joint1 = segment(ROPE_LENGTH * 0.5, ANCHOR_Y, 0);
+      const joint2 = segment(ROPE_LENGTH, ANCHOR_Y, 0);
+      const joint3 = segment(ROPE_LENGTH * 1.5, ANCHOR_Y, 0);
+      const cardBody = segment(ROPE_LENGTH * 2, ANCHOR_Y, 0);
 
       world.createCollider(RAPIER.ColliderDesc.ball(0.1), joint1);
       world.createCollider(RAPIER.ColliderDesc.ball(0.1), joint2);
@@ -361,9 +362,9 @@
       world.createCollider(RAPIER.ColliderDesc.cuboid(CARD_W / 2, CARD_H / 2, CARD_D / 2), cardBody);
 
       const ORIGIN = { x: 0, y: 0, z: 0 };
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), anchorBody, joint1, true);
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), joint1, joint2, true);
-      world.createImpulseJoint(RAPIER.JointData.rope(1, ORIGIN, ORIGIN), joint2, joint3, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ROPE_LENGTH, ORIGIN, ORIGIN), anchorBody, joint1, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ROPE_LENGTH, ORIGIN, ORIGIN), joint1, joint2, true);
+      world.createImpulseJoint(RAPIER.JointData.rope(ROPE_LENGTH, ORIGIN, ORIGIN), joint2, joint3, true);
       world.createImpulseJoint(RAPIER.JointData.spherical(ORIGIN, { x: 0, y: 1.45, z: 0 }), joint3, cardBody, true);
 
       const curve = new THREE.CatmullRomCurve3([
