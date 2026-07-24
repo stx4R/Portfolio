@@ -124,6 +124,7 @@
       const BAND_WIDTH = 0.5;
       const BAND_SEGMENTS = 32;
       const ROPE_LENGTH = 1.4;
+      const BAND_REPEAT = 4;
       const MAX_SPEED = 50;
       const MIN_SPEED = 0;
 
@@ -192,9 +193,17 @@
         return geometry;
       }
 
-      const profileTexture = new THREE.TextureLoader().load('static/Profile.png');
+      const profileImage = await new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = 'static/Profile.png';
+      });
+
+      const profileTexture = new THREE.Texture(profileImage || document.createElement('canvas'));
       profileTexture.colorSpace = THREE.SRGBColorSpace;
       profileTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      profileTexture.needsUpdate = true;
 
       const cardGroup = new THREE.Group();
 
@@ -245,23 +254,34 @@
 
       scene.add(cardGroup);
 
-      function bandTexture() {
+      function bandTexture(image) {
+        const tileLength = (ROPE_LENGTH * 3) / BAND_REPEAT;
         const canvas = document.createElement('canvas');
-        canvas.width = 8;
-        canvas.height = 128;
+        canvas.height = 200;
+        canvas.width = Math.round(canvas.height * (tileLength / BAND_WIDTH));
         const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 128);
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#8c8c8c');
         gradient.addColorStop(0.1, '#ffffff');
-        gradient.addColorStop(0.5, '#eeeeee');
+        gradient.addColorStop(0.5, '#f4f4f4');
         gradient.addColorStop(0.9, '#ffffff');
         gradient.addColorStop(1, '#8c8c8c');
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 8, 128);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (image) {
+          const size = canvas.height * 0.76;
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(-Math.PI / 2);
+          ctx.drawImage(image, -size / 2, -size / 2, size, size);
+          ctx.restore();
+        }
         const texture = new THREE.CanvasTexture(canvas);
         texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.repeat.set(-BAND_REPEAT, 1);
         texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
         return texture;
       }
 
@@ -322,7 +342,7 @@
       const bandMesh = new THREE.Mesh(
         bandGeometry,
         new THREE.MeshBasicMaterial({
-          map: bandTexture(),
+          map: bandTexture(profileImage),
           side: THREE.DoubleSide,
           depthTest: false,
           toneMapped: false
@@ -520,7 +540,7 @@
         </div>
       </div>
       <div class="hidden lg:flex flex-1 items-center justify-center">
-        <span class="text-8xl"><img src="static/favicon.ico" alt="Profile" class="w-48 h-48 rounded-full"></span>
+        <span class="text-9xl">🗺️</span>
       </div>
     </div>
   </section>
