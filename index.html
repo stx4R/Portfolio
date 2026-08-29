@@ -31,7 +31,7 @@
     #projectWheel .wheel-item--selected { font-weight: 600; }
 
     /* ---- CardSwap 스타일 카드 스택 (디자인 출처: reactbits.dev/components/card-swap) ---- */
-    #projectCardStage .cs-stack { position: absolute; inset: 0; }
+    #projectCardStage .cs-stack { position: absolute; inset: 0 56px 40px 0; }
     #projectCardStage .cs-card {
       position: absolute; inset: 0;
       border-radius: 12px; border: 1px solid #fff; background: #000; overflow: hidden;
@@ -42,7 +42,7 @@
     #projectCardStage .cs-front { height: 100%; display: flex; flex-direction: column; padding: 16px 18px 12px; }
     #projectCardStage .cs-front-head { flex-shrink: 0; padding-bottom: 12px; border-bottom: 1px solid #262626; }
     #projectCardStage .cs-lead { font-size: 12px; line-height: 1.65; color: #a3a3a3; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #1c1c1c; }
-    #projectCardStage .cs-front-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 2px 2px 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); }
+    #projectCardStage .cs-front-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 2px 24px 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); }
     #projectCardStage .cs-front-foot { flex-shrink: 0; margin-top: 8px; padding-top: 10px; border-top: 1px solid #262626; }
 
     #projectCardStage .cs-readme { font-size: 13px; line-height: 1.7; color: #d4d4d4; }
@@ -55,6 +55,7 @@
     #projectCardStage .cs-readme p:last-child { margin-bottom: 0; }
 
     @media (max-width: 1023px) {
+      #projectCardStage .cs-stack { inset: 0 20px 16px 0; }
       #projectCardStage .cs-front { padding: 12px 14px 10px; }
       #projectCardStage .cs-front-head { padding-bottom: 9px; }
       #projectCardStage .cs-readme { font-size: 12px; }
@@ -689,10 +690,10 @@
           <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 inline-block w-fit whitespace-nowrap" style="background-color:#E0A800;color:#000;">
             Efforts never betray.
           </h2>
-          <p class="text-neutral-300 text-xl font-semibold mt-5">노력이 쌓여 만들어진 프로젝트들입니다.</p>
+          <p class="text-neutral-300 text-xl font-semibold mt-7">노력이 쌓여 만들어진 프로젝트들입니다.</p>
         </div>
 
-        <div id="projectCardStage" class="relative w-full mt-4 lg:mt-5 h-[40vh] lg:h-auto lg:flex-1 min-h-0">
+        <div id="projectCardStage" class="relative w-full mt-8 lg:mt-10 h-[40vh] lg:h-auto lg:flex-1 min-h-0">
           <div class="cs-stack">
             <article class="cs-card swiper-no-swiping"></article>
           </div>
