@@ -607,11 +607,11 @@
   <section id="fuckhyperlink" class="bg-neutral-900 text-white swiper-slide">
       <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
         <div class="flex-1 flex flex-col justify-center">
-          <h2 class="text-5xl md:text-6xl font-bold mb-4 px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #861616;">
+          <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 text-white w-fit whitespace-nowrap" style="background-color: #861616;">
             Be creative, Be better.
           </h2>
 
-        <div class="mt-4 space-y-10">
+        <div class="mt-6 space-y-10">
           <p class="text-neutral-300 leading-relaxed">분석적이고 논리적이며 창의적인 것을 추구합니다.</p>
 
           <div>
@@ -690,10 +690,10 @@
           <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 inline-block w-fit whitespace-nowrap" style="background-color:#E0A800;color:#000;">
             Efforts never betray.
           </h2>
-          <p class="text-neutral-300 text-xl font-semibold mt-7">노력이 쌓여 만들어진 프로젝트들입니다.</p>
+          <p class="text-neutral-300 mt-6">노력이 쌓여 만들어진 프로젝트들입니다.</p>
         </div>
 
-        <div id="projectCardStage" class="relative w-full mt-8 lg:mt-10 h-[40vh] lg:h-auto lg:flex-1 min-h-0">
+        <div id="projectCardStage" class="relative w-full mt-6 h-[40vh] lg:h-auto lg:flex-1 min-h-0">
           <div class="cs-stack">
             <article class="cs-card swiper-no-swiping"></article>
           </div>
@@ -1187,15 +1187,12 @@
     <div class="h-screen w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 px-8 md:px-16 lg:px-24 relative z-10">
 
       <div class="flex-1 flex flex-col justify-center w-full">
-        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 bg-blue-500 text-black inline-block w-fit whitespace-nowrap">
+        <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 bg-blue-500 text-black inline-block w-fit whitespace-nowrap">
           Feel free to contact.
         </h2>
 
-        <div class="mt-12 space-y-6">
-          <p class="text-neutral-300 text-xl font-semibold">새로운 인연과 대화는 언제나 환영합니다.</p>
-          <div class="space-y-2">
-            <p class="text-neutral-400">협업 제안, 프로젝트 문의, 가벼운 질문 모두 좋습니다.</p>
-          </div>
+        <div class="space-y-2 mt-6">
+          <p class="text-neutral-300">새로운 인연과 대화는 언제나 환영합니다.</p>
         </div>
       </div>
 
@@ -1248,6 +1245,7 @@
     direction: 'vertical',
     effect: 'coverflow',
     speed: 500,
+    simulateTouch: false,
     keyboard: { enabled: true }
   });
   window.pageSwiper = pageSwiper;
@@ -1379,16 +1377,38 @@
     const cw = stage.clientWidth;
     const ch = stage.clientHeight;
     if (!cw || !ch) return;
-    const cardH = Math.max(ch * 0.62, 150);
-    const cardW = (cardH * 7) / 9;
-    const step = cardW + ch * 0.12;
     const H = cw / 2;
     const B = ch * 0.18;
     const R = (H * H + B * B) / (2 * B);
+    // 아치 끝단의 최대 기울기 — 회전한 라벨이 아래로 얼마나 더 내려가는지 계산에 쓴다
+    const rotMax = Math.asin(Math.min(H / R, 1));
+    const cos = Math.cos(rotMax), sin = Math.sin(rotMax);
+    const denom = 0.5 + cos / 2 + (7 * sin) / 18;
+    // 카드 + 라벨이 스테이지 안에 온전히 들어오는 카드 크기를 찾는다.
+    // 카드가 좁아 라벨이 두 줄로 접히면 아래 여백이 커지므로 실측해서 다시 계산한다.
+    let below = 14 + 28 + 4;
+    let cardH = 0;
+    let cardW = 0;
+    for (let pass = 0; pass < 3; pass++) {
+      cardH = Math.max(Math.min(ch * 0.62, (ch - 4 - B - below * cos) / denom), 72);
+      cardW = (cardH * 7) / 9;
+      items.forEach((el, i) => {
+        cards[i].style.width = cardW + 'px';
+        cards[i].style.height = cardH + 'px';
+        el.style.width = cardW + 'px';
+      });
+      let real = 0;
+      items.forEach(el => { real = Math.max(real, 14 + el.lastElementChild.offsetHeight); });
+      if (real + 4 <= below + 0.5) break;
+      below = real + 4;
+    }
+    const step = cardW + ch * 0.12;
+    // 카드가 아니라 '카드 + 라벨' 묶음 전체를 세로 가운데에 두어 라벨이 잘리지 않게 한다
+    const topExt = cardH / 2 + 4;
+    const bottomExt = B + (cardH / 2 + below) * cos + (cardW / 2) * sin;
+    const shiftY = (topExt - bottomExt) / 2;
     const n = items.length;
     items.forEach((el, i) => {
-      cards[i].style.width = cardW + 'px';
-      cards[i].style.height = cardH + 'px';
       let d = i - index;
       d = ((d % n) + n) % n;
       if (d > n / 2) d -= n;
@@ -1398,9 +1418,8 @@
       const rot = (Math.sign(x) * Math.asin(ex / R) * 180) / Math.PI;
       const jump = lastX[i] !== undefined && Math.abs(x - lastX[i]) > step * 1.5;
       el.style.transition = jump ? 'none' : '';
-      el.style.width = cardW + 'px';
       el.style.transformOrigin = '50% ' + cardH / 2 + 'px';
-      el.style.transform = 'translate(' + (x - cardW / 2) + 'px, ' + (arc - cardH / 2) + 'px) rotate(' + rot.toFixed(3) + 'deg)';
+      el.style.transform = 'translate(' + (x - cardW / 2) + 'px, ' + (arc - cardH / 2 + shiftY) + 'px) rotate(' + rot.toFixed(3) + 'deg)';
       lastX[i] = x;
     });
   }
