@@ -6,7 +6,6 @@
   <title>stx4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <script type="importmap">
   {
@@ -114,7 +113,7 @@
        커버 판에 원형 구멍(iris)을 뚫고, 스크롤을 누적할수록 구멍이 커지며 뒤의 배경이 드러난다. */
     #introStage { --iris-in: 0px; --iris-out: 0px; }
 
-    #introReveal { transform: scale(var(--zoom, 1.12)); transform-origin: 50% 50%; will-change: transform; }
+    #introReveal { transform: scale(var(--zoom, 1.12)); transform-origin: 50% 50%; background: #000; opacity: var(--live, 1); will-change: transform, opacity; }
 
     #introCover {
       background: #171717;
@@ -129,11 +128,13 @@
 
     /* 1번 박스 — 가장 강조되는 헤드라인 */
     #introHead, #introSign {
-      opacity: var(--in, 0);
-      transform: translateY(calc((1 - var(--in, 0)) * 20px));
+      opacity: calc(var(--in, 0) * var(--live, 1));
       filter: blur(calc((1 - var(--in, 0)) * 7px));
       will-change: opacity, transform, filter;
     }
+    /* 목차로 넘어갈 때 위 텍스트는 화면 위로, 아래 텍스트는 화면 아래로 빠진다 */
+    #introHead { transform: translateY(calc((1 - var(--in, 0)) * 20px - var(--exit, 0) * 46vh)); }
+    #introSign { transform: translateY(calc((1 - var(--in, 0)) * 20px + var(--exit, 0) * 46vh)); }
     #introHead .t1 { font-weight: 900; letter-spacing: -0.035em; line-height: 1.14; font-size: clamp(1.9rem, 4.3vw, 4rem); }
     #introHead .t2 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.5; font-size: clamp(0.95rem, 1.6vw, 1.5rem); color: #d4d4d4; margin-top: 0.85rem; }
 
@@ -156,6 +157,103 @@
       }
     }
 
+    /* ---- 페이지 스택 ----
+       모든 페이지를 한자리에 겹쳐두고 컨트롤러가 보일 것만 켠다.
+       전환 중에는 두 장이 동시에 켜져 서로 교차한다. */
+    #stage { position: fixed; inset: 0; overflow: hidden; }
+    .page {
+      position: absolute; inset: 0;
+      opacity: 0; visibility: hidden;
+      will-change: opacity, transform;
+    }
+    .page.is-on { visibility: visible; opacity: 1; }
+    /* 전환 중 뒤에 깔린 페이지가 Globe 클릭을 가로채지 않도록 앞장선 한 장만 입력을 받는다 */
+    .page { pointer-events: none; }
+    .page.is-front { pointer-events: auto; }
+    /* 나가는 페이지가 들어오는 페이지 위에 얹혀야 교차가 자연스럽다.
+       특수 페이지는 웜홀을 타고 맨 위로 올라온다. */
+    #fuckintro  { z-index: 3; }
+    #fuckindex  { z-index: 2; transform-origin: 50% 50%; }
+    #fuckfooter { z-index: 1; }
+    .page--special { z-index: 5; transform-origin: 50% 50%; }
+
+    /* ---- 목차 페이지 ---- */
+    #indexTitle {
+      font-weight: 900; letter-spacing: -0.035em; line-height: 1;
+      font-size: clamp(2.2rem, 5vw, 4.5rem);
+      opacity: calc(var(--in, 1) * var(--live, 1));
+      transform: translateY(calc((1 - var(--in, 1)) * -62vh - var(--exit, 0) * 46vh));
+      will-change: opacity, transform;
+    }
+    #globeField {
+      opacity: calc(var(--in, 1) * var(--live, 1));
+      will-change: opacity;
+    }
+    #globeCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+
+    .globe {
+      position: absolute; left: var(--gx); top: var(--gy);
+      width: var(--gs); height: var(--gs);
+      margin: 0; padding: 0; border: 0; background: transparent;
+      border-radius: 50%; cursor: pointer; touch-action: none;
+      transform: translate(-50%, -50%)
+                 translateY(calc(var(--exit, 0) * var(--gdir, 1) * 42vh))
+                 scale(var(--gk, 1));
+      transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    /* Hover 하이라이트 — 두께 있는 흰 테두리로 Globe 전체를 감싼다 */
+    .globe::before {
+      content: ""; position: absolute; inset: -7px;
+      border-radius: 50%; border: 2px solid #fff;
+      opacity: 0; transition: opacity 200ms ease; pointer-events: none;
+    }
+    .globe.is-hot { --gk: 1.09; }
+    .globe.is-hot::before { opacity: 1; }
+    .globe:focus-visible { outline: none; }
+    .globe:focus-visible::before { opacity: 1; }
+
+    /* ---- Specular Button (디자인 출처: reactbits.dev/components/specular-button)
+       원본은 ogl(WebGL)로 그리지만 여기서는 conic-gradient를 테두리에만 마스킹해 같은 결을 낸다.
+       원본의 autoAnimate 옵션처럼, 커서와 무관하게 버튼이 뜨면 늘 테두리가 돌며 점등한다. ---- */
+    @property --specAngle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+    .globe-label {
+      position: absolute; left: var(--lx); top: var(--ly);
+      transform: translate(-50%, -50%) scale(0.94);
+      display: inline-flex; align-items: center; white-space: nowrap;
+      padding: 0.5rem 1.1rem; border-radius: 999px;
+      font-weight: 700; letter-spacing: -0.01em;
+      font-size: clamp(0.78rem, 1.05vw, 1.02rem);
+      color: var(--ink); background: var(--tone);
+      opacity: 0; pointer-events: none; isolation: isolate;
+      transition: opacity 190ms ease, transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .globe-label.is-on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .globe-label::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+      background: conic-gradient(from var(--specAngle),
+        rgba(255, 255, 255, 0.3) 0deg,
+        rgba(255, 255, 255, 0.3) 6deg,
+        #fff 16deg,
+        rgba(255, 255, 255, 0.3) 56deg,
+        rgba(255, 255, 255, 0.3) 186deg,
+        #fff 196deg,
+        rgba(255, 255, 255, 0.3) 236deg,
+        rgba(255, 255, 255, 0.3) 360deg);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      animation: specSweep 2.6s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes specSweep { to { --specAngle: 360deg; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .globe-label::after { animation: none; }
+      .globe { transition: none; }
+    }
+
     #clickSpark { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -167,15 +265,14 @@
   <script>document.documentElement.classList.add('js-reveal');</script>
 </head>
 <body class="bg-neutral-900 text-white">
-<main class="swiper w-full h-screen">
-<div class="swiper-wrapper">
+<main id="stage" class="w-full h-screen">
 
 
   
   <!-- Intro -->
 
-  <section id="fuckintro" class="bg-neutral-900 text-white swiper-slide">
-    <div id="introStage" class="relative h-screen w-full overflow-hidden bg-black">
+  <section id="fuckintro" class="text-white page" data-page="intro">
+    <div id="introStage" class="relative h-screen w-full overflow-hidden">
 
       <!-- 스크롤 끝에 드러날 최종 화면: Particle Image 배경 + 텍스트 -->
       <div id="introReveal" class="absolute inset-0">
@@ -183,15 +280,18 @@
         <img id="introFallback" class="absolute inset-0 h-full w-full object-cover hidden" alt="" />
         <!-- 좁은 화면에서는 사진이 크게 잘려 밝은 면 위에 글자가 얹히므로, 위아래를 살짝 눌러준다 -->
         <div id="introScrim" class="absolute inset-0 pointer-events-none"></div>
+      </div>
 
+      <!-- 텍스트는 배경과 따로 움직여야 하므로 배경 레이어 밖에 둔다 -->
+      <div id="introText" class="absolute inset-0 pointer-events-none">
         <!-- 1번 박스 -->
-        <div id="introHead" class="absolute right-[5vw] top-[9vh] max-w-[46vw] text-right pointer-events-none">
+        <div id="introHead" class="absolute right-[5vw] top-[9vh] max-w-[46vw] text-right">
           <h1 class="t1">이상과 상상, 그 이상</h1>
           <p class="t2">흥미로운 것을 상상하고 만듭니다.</p>
         </div>
 
         <!-- 2번 박스 -->
-        <div id="introSign" class="absolute left-[5vw] bottom-[9vh] pointer-events-none">
+        <div id="introSign" class="absolute left-[5vw] bottom-[9vh]">
           <p class="s1">Innovative Developer</p>
           <p class="s2">유이준(Yoo Yijun)</p>
         </div>
@@ -238,8 +338,6 @@
     const ease    = t => t * t * (3 - 2 * t);
     const range   = (v, a, b) => clamp01((v - a) / (b - a));
     const runway  = () => Math.max(window.innerHeight, 420) * SCROLL_LENGTH;
-    const atIntro = () => !window.pageSwiper || window.pageSwiper.activeIndex === 0;
-
     function paint(p) {
       const w = stage.clientWidth  || window.innerWidth;
       const h = stage.clientHeight || window.innerHeight;
@@ -267,27 +365,16 @@
     }
     const kick = () => { if (raf === null) raf = requestAnimationFrame(tick); };
 
-    function syncLock() {
-      const sw = window.pageSwiper;
-      if (!sw) return;
-      // 첫 화면이 다 열리기 전에는 스와이프로 페이지를 넘기지 못하게 막는다
-      sw.allowTouchMove = !(sw.activeIndex === 0 && target < 1);
-      // 방향키는 아래에서 직접 처리하므로 첫 화면에서는 Swiper 쪽 키보드를 꺼둔다
-      if (sw.keyboard) { if (sw.activeIndex === 0) sw.keyboard.disable(); else sw.keyboard.enable(); }
-    }
-
     function setTarget(v) {
       const next = clamp01(v);
       if (next >= 1 && target < 1) fullAt = performance.now();
       target = next;
-      syncLock();
       kick();
     }
 
     // 휠 핸들러가 물어보는 창구. true를 돌려주면 페이지를 넘기지 않는다.
     window.introMask = {
       handleWheel(delta) {
-        if (!atIntro()) return false;
         if (delta > 0) {
           // 다 연 직후 같은 관성으로 페이지가 넘어가지 않도록 잠깐 붙잡는다
           if (target >= 1) return performance.now() - fullAt < 420;
@@ -303,45 +390,7 @@
       }
     };
 
-    let touchY = null;
-    stage.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
-    stage.addEventListener('touchmove', e => {
-      if (touchY === null || !atIntro()) return;
-      const y = e.touches[0].clientY;
-      const dy = touchY - y;
-      touchY = y;
-      if (window.introMask.handleWheel(dy * 2.4)) e.preventDefault();
-    }, { passive: false });
-    stage.addEventListener('touchend', () => { touchY = null; }, { passive: true });
-
-    window.addEventListener('keydown', e => {
-      if (!atIntro()) return;
-      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar';
-      const up   = e.key === 'ArrowUp'   || e.key === 'PageUp';
-      if (!down && !up) return;
-      e.preventDefault();
-      if (down) {
-        if (target >= 1 && window.pageSwiper) window.pageSwiper.slideNext();
-        else setTarget(target + 0.14);
-      } else {
-        setTarget(target - 0.14);
-      }
-    });
-
     window.addEventListener('resize', () => paint(current));
-
-    // Swiper는 이 스크립트보다 뒤에서 만들어지므로 준비될 때까지 기다린다
-    (function bind() {
-      const sw = window.pageSwiper;
-      // rAF는 탭이 숨겨져 있으면 멈추므로, 배경 탭에서 열려도 붙도록 setTimeout으로 기다린다
-      if (!sw) { setTimeout(bind, 0); return; }
-      sw.on('slideChange', () => {
-        // 2페이지에서 되돌아오면 다 열린 상태로 맞이하고, 더 올리면 다시 닫힌다
-        if (sw.activeIndex === 0 && target < 1) { target = 1; current = 1; fullAt = performance.now(); paint(1); }
-        syncLock();
-      });
-      syncLock();
-    })();
 
     paint(current);
   })();
@@ -355,6 +404,7 @@
   (() => {
     const stage = document.getElementById('particleImageStage');
     const host  = document.getElementById('introStage');
+    const introPage = document.getElementById('fuckintro');
     if (!stage) return;
 
     const SRC = 'https://images.unsplash.com/photo-1574359587026-daf1bfd26baa?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
@@ -603,9 +653,8 @@
         requestAnimationFrame(frame);
         const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
         last = now;
-        // 첫 화면을 벗어났거나 탭이 숨겨졌으면 GPU를 쉬게 둔다
-        const sw = window.pageSwiper;
-        if (document.hidden || (sw && sw.activeIndex !== 0)) return;
+        // 메인 페이지를 벗어났거나 탭이 숨겨졌으면 GPU를 쉬게 둔다
+        if (document.hidden || !introPage || !introPage.classList.contains('is-on')) return;
         if (!reduce) clock += dt;
         uniforms.uTime.value = clock;
         mouse.x += (aim.x - mouse.x) * 0.12;
@@ -618,13 +667,26 @@
   })();
   </script>
 
+
+  <!-- 목차 페이지 -->
+
+  <section id="fuckindex" class="text-white page" data-page="index">
+    <div class="relative h-screen w-full overflow-hidden">
+      <h2 id="indexTitle" class="absolute left-[5vw] top-[6vh]">Index.</h2>
+      <!-- Globe 버튼과 라벨은 아래 모듈이 주제 목록을 보고 만들어 넣는다 -->
+      <div id="globeField" class="absolute inset-0">
+        <canvas id="globeCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+
   <!-- Page 2 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 6차시 Hover 실험 -->   
 
     <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
 
-    <section id="fuckhover" class="bg-neutral-900 text-white swiper-slide">
+    <section id="fuckhover" class="bg-neutral-900 text-white page page--special">
       <div class="h-screen w-full flex items-center flex-row-reverse gap-16 px-8 md:px-16 lg:px-24">
         
         <div class="flex-1 flex flex-col justify-center">
@@ -978,7 +1040,7 @@
         card.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
         hovered = true;
         applyCursor();
-        if (window.pageSwiper) window.pageSwiper.allowTouchMove = false;
+        if (window.pageNav) window.pageNav.lockInput(true);
       });
 
       canvas.addEventListener('pointermove', event => {
@@ -998,7 +1060,7 @@
         dragged = null;
         card.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
         applyCursor();
-        if (window.pageSwiper) window.pageSwiper.allowTouchMove = true;
+        if (window.pageNav) window.pageNav.lockInput(false);
       }
 
       canvas.addEventListener('pointerup', endDrag);
@@ -1090,7 +1152,7 @@
     <!-- 좆같은 스크롤 애니메이션 최적화 필요 -->
      <!-- ㄴ 코드 존나 더러움 -->
 
-  <section id="fuckscrollanimation" class="bg-neutral-900 text-white swiper-slide">
+  <section id="fuckscrollanimation" class="bg-neutral-900 text-white page page--special">
     <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24 ">
       <div class="flex-1 flex flex-col justify-center">
         <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 inline-block w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#22d3ee; --ink:#000;">
@@ -1130,7 +1192,7 @@
 
     <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 --> 
 
-  <section id="fuckhyperlink" class="bg-neutral-900 text-white swiper-slide">
+  <section id="fuckhyperlink" class="bg-neutral-900 text-white page page--special">
       <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
         <div class="flex-1 flex flex-col justify-center">
           <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#861616; --ink:#fff; --ink0:#fff;">
@@ -1177,7 +1239,7 @@
     <!-- 이건 좋음 -->
     <!-- ㄴ 디자인은 모름 -->
 
-  <section id="fuckinteraction" class="bg-neutral-900 text-white swiper-slide">
+  <section id="fuckinteraction" class="bg-neutral-900 text-white page page--special">
     <div class="h-screen w-full flex flex-col px-8 md:px-16 lg:px-24 pt-28 pb-10">
 
       <div class="flex-shrink-0 flex flex-wrap items-end justify-between gap-6">
@@ -1208,7 +1270,7 @@
 
   <!-- Page 5 -->
 
-  <section id="fuckBentoBox" class="bg-neutral-900 text-white swiper-slide">
+  <section id="fuckBentoBox" class="bg-neutral-900 text-white page page--special">
     <div class="h-screen w-full flex flex-col lg:flex-row-reverse items-center justify-center gap-8 lg:gap-16 px-8 md:px-16 lg:px-24 pt-10 lg:pt-12 pb-6">
 
       <div class="flex-1 flex flex-col w-full min-h-0 lg:h-full">
@@ -1221,7 +1283,7 @@
 
         <div id="projectCardStage" class="relative w-full mt-6 h-[40vh] lg:h-auto lg:flex-1 min-h-0" data-reveal data-delay="300">
           <div class="cs-stack">
-            <article class="cs-card swiper-no-swiping"></article>
+            <article class="cs-card"></article>
           </div>
         </div>
       </div>
@@ -1715,7 +1777,7 @@
 
     <!-- 아무도 연락 안 할듯  -->
 
-<section id="fuckmailto" class="bg-neutral-900 text-white swiper-slide relative overflow-hidden">
+<section id="fuckmailto" class="bg-neutral-900 text-white page page--special relative overflow-hidden">
     <div class="h-screen w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 px-8 md:px-16 lg:px-24 relative z-10">
 
       <div class="flex-1 flex flex-col justify-center w-full">
@@ -1762,81 +1824,17 @@
 
 <!-- 응 끝 -->
 
-  <section id="fuckfooter" class="bg-neutral-900 text-white swiper-slide">
+  <section id="fuckfooter" class="bg-neutral-900 text-white page" data-page="footer">
     <div class="h-screen w-full flex items-center justify-center">
       <p class="text-4xl font-light text-center" data-reveal><strong>© 2026 stx4R. All rights reserved.</strong></p>
     </div>
   </section>
 
-</div>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-  const pageSwiper = new Swiper('main.swiper', {
-    direction: 'vertical',
-    effect: 'coverflow',
-    speed: 500,
-    simulateTouch: false,
-    keyboard: { enabled: true }
-  });
-  window.pageSwiper = pageSwiper;
-
-  const scrollings = [];
-  let prevWheelTime = 0;
-  let canScroll = true;
-
-  const average = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
-
-  pageSwiper.el.addEventListener('wheel', (e) => {
-    // 카드 위에서의 휠은 항상 카드 내부만 스크롤하고, 페이지는 넘기지 않는다
-    const stageEl = e.target instanceof Element ? e.target.closest('#projectCardStage') : null;
-    if (stageEl) {
-      const sc = stageEl.querySelector('[data-scroll-lock]');
-      if (sc && !sc.contains(e.target)) {
-        // 헤더·푸터 등 스크롤 영역 바깥을 굴려도 본문이 움직이도록 위임
-        e.preventDefault();
-        let d = e.deltaY;
-        if (e.deltaMode === 1) d *= 40;
-        else if (e.deltaMode === 2) d *= sc.clientHeight;
-        sc.scrollTop += d;
-      }
-      scrollings.length = 0;
-      return;
-    }
-    e.preventDefault();
-
-    let delta = e.deltaY;
-    if (e.deltaMode === 1) delta *= 40;
-    else if (e.deltaMode === 2) delta *= window.innerHeight;
-    if (delta === 0) return;
-
-    // 첫 화면에서는 스크롤을 페이지 넘김이 아니라 Scroll Mask를 여는 데 먼저 쓴다
-    if (window.introMask && window.introMask.handleWheel(delta)) { scrollings.length = 0; return; }
-
-    const now = performance.now();
-    if (now - prevWheelTime > 200) scrollings.length = 0;
-    prevWheelTime = now;
-
-    if (scrollings.length > 149) scrollings.shift();
-    scrollings.push(Math.abs(delta));
-
-    if (!canScroll || pageSwiper.animating) return;
-
-    const averageEnd = average(scrollings.slice(-10));
-    const averageMiddle = average(scrollings.slice(-70));
-    if (averageEnd < averageMiddle) return;
-
-    canScroll = false;
-    setTimeout(() => { canScroll = true; }, 600);
-    if (delta > 0) pageSwiper.slideNext();
-    else pageSwiper.slidePrev();
-  }, { passive: false });
-</script>
 
 <script>
 // ---- Blur Highlight 재생기 ----
-// 슬라이드가 화면에 들어올 때마다 [data-reveal] 요소를 순서대로 선명하게 만들고,
+// 페이지가 화면에 들어올 때마다 [data-reveal] 요소를 순서대로 선명하게 만들고,
 // [data-hl] 요소는 그 뒤에 강조 배경이 쓸고 지나가게 한다.
 (() => {
   const STEP = 90;   // 그룹 안 형제 사이의 지연(ms)
@@ -1854,25 +1852,770 @@
     el.style.setProperty('--d', el.dataset.delay + 'ms');
   });
 
-  const slides = [...document.querySelectorAll('.swiper-slide')];
-  const marks = s => [...s.querySelectorAll('[data-reveal], [data-hl]')];
-  const play = s => marks(s).forEach(el => el.classList.add('is-in'));
-  const reset = s => marks(s).forEach(el => el.classList.remove('is-in'));
+  const marks = p => [...p.querySelectorAll('[data-reveal], [data-hl]')];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    slides.forEach(play);
-    return;
+  window.playReveals  = p => { if (p) marks(p).forEach(el => el.classList.add('is-in')); };
+  window.resetReveals = p => { if (p && !reduce) marks(p).forEach(el => el.classList.remove('is-in')); };
+
+  if (reduce) document.querySelectorAll('.page').forEach(p => window.playReveals(p));
+})();
+</script>
+
+<script>
+// ---- 페이지 내비게이션 ----
+// 기본 페이지(메인 → 목차 → Footer)는 스크롤을 누적해 서로 교차시키고,
+// 특수 페이지는 목차의 Globe를 눌렀을 때만 웜홀을 타고 드나든다.
+(() => {
+  const stage      = document.getElementById('stage');
+  const intro      = document.getElementById('fuckintro');
+  const introStage = document.getElementById('introStage');
+  const index      = document.getElementById('fuckindex');
+  const footer     = document.getElementById('fuckfooter');
+  if (!stage || !intro || !index || !footer) return;
+
+  const LONG     = 2.6;   // 기본 페이지 사이를 넘기는 데 필요한 스크롤량(화면 높이의 배수)
+  const SMOOTH   = 0.14;  // 목표값을 따라가는 감쇠
+  const WORM_IN  = 950;   // 웜홀로 빨려드는 시간(ms)
+  const WORM_OUT = 780;   // 웜홀을 거꾸로 타고 나오는 시간(ms)
+  const QUICK    = 460;   // 특수 페이지 → Footer
+
+  const reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const clamp   = (v, a, b) => (v < a ? a : v > b ? b : v);
+  const ease    = t => t * t * (3 - 2 * t);
+  const range   = (v, a, b) => clamp01((v - a) / (b - a));
+  const runway  = () => Math.max(window.innerHeight, 420) * LONG;
+
+  let pos = 0, posTarget = 0, raf = null;   // 0 메인 · 1 목차 · 2 Footer
+  let mode = 'base';                        // 'base' | 'special' | 'busy'
+  let special = null;                       // 지금 열려 있는 특수 페이지
+  let worm = { x: 0, y: 0 };                // 웜홀 확대 원점(화면 좌표)
+  let settled = null;                       // 지금 자리잡은 페이지
+  let locked = false;                       // 카드 드래그 중 등, 입력을 잠글 때
+  let specialAt = 0;
+
+  function settle(el) {
+    if (settled === el) return;
+    if (settled) { window.resetReveals(settled); settled.classList.remove('is-front'); }
+    settled = el;
+    if (el) { window.playReveals(el); el.classList.add('is-front'); }
   }
 
-  const sw = window.pageSwiper;
-  play(slides[sw.activeIndex]);
-  sw.on('slideChange', () => play(slides[sw.activeIndex]));
-  // 나가는 슬라이드는 화면에서 완전히 사라진 뒤에 되돌려야 전환 중에 흐려지지 않는다
-  sw.on('slideChangeTransitionEnd', () => {
-    slides.forEach((s, i) => { if (i !== sw.activeIndex) reset(s); });
-  });
-})();
+  function paintBase(p) {
+    const t1 = clamp01(p);        // 메인 → 목차
+    const t2 = clamp01(p - 1);    // 목차 → Footer
 
+    // 웜홀이 남기고 간 확대·투명도가 있으면 걷어낸다
+    if (index.style.transform) { index.style.transition = ''; index.style.transform = ''; index.style.opacity = ''; index.style.transformOrigin = ''; }
+
+    // 메인 페이지: 위 텍스트는 위로, 아래 텍스트는 아래로 빠지고 배경은 옅어진다
+    intro.classList.toggle('is-on', t1 < 0.9);
+    introStage.style.setProperty('--exit', ease(t1).toFixed(4));
+    introStage.style.setProperty('--live', (1 - clamp01(t1 / 0.86)).toFixed(4));
+
+    // 목차 페이지: 'Index.'가 위에서 내려와 자리잡고, 나갈 땐 반대로 빠진다
+    index.classList.toggle('is-on', t1 > 0.001 && t2 < 0.9);
+    index.style.setProperty('--in',   range(t1, 0.26, 1).toFixed(4));
+    index.style.setProperty('--exit', ease(t2).toFixed(4));
+    index.style.setProperty('--live', (1 - clamp01(t2 / 0.86)).toFixed(4));
+
+    // Footer: 앞 페이지가 다 사라진 뒤에 떠오른다
+    if (t2 > 0.001) {
+      footer.classList.add('is-on');
+      footer.style.opacity = range(t2, 0.62, 1).toFixed(4);
+    } else {
+      footer.classList.remove('is-on');
+      footer.style.opacity = '';
+    }
+
+    settle(t2 > 0.5 ? footer : (t1 > 0.5 ? index : intro));
+  }
+
+  function tick() {
+    // 웜홀이 도는 동안에는 기본 흐름이 페이지를 켜고 끄면 안 된다
+    if (mode !== 'base') { raf = null; return; }
+    const d = posTarget - pos;
+    if (Math.abs(d) < 0.0004) { pos = posTarget; paintBase(pos); raf = null; return; }
+    pos += d * SMOOTH;
+    paintBase(pos);
+    raf = requestAnimationFrame(tick);
+  }
+  const kick = () => { if (raf === null) raf = requestAnimationFrame(tick); };
+
+  function setPos(v) { posTarget = clamp(v, 0, 2); kick(); }
+
+  // ---- 입력 ----
+  let holdUntil = 0;
+  function feed(delta) {
+    if (locked || mode === 'busy') return;
+    if (mode === 'special') { specialWheel(delta); return; }
+    // 메인 화면에서는 Scroll Mask가 스크롤을 먼저 가져간다
+    if (posTarget <= 0.0001 && window.introMask && window.introMask.handleWheel(delta)) return;
+
+    const now = performance.now();
+    if (now < holdUntil) return;   // 막 도착한 페이지에서 잠깐 붙잡아 둔다
+    const next = posTarget + delta / runway();
+    // 페이지에 막 닿았으면 일단 그 자리에 세운다. 안 그러면 관성으로 그대로 지나쳐 버린다
+    const lo = Math.floor(posTarget + 1e-6), hi = Math.ceil(posTarget - 1e-6);
+    if (delta > 0 && posTarget < hi && next > hi) { setPos(hi); holdUntil = now + 480; return; }
+    if (delta < 0 && posTarget > lo && next < lo) { setPos(lo); holdUntil = now + 480; return; }
+    setPos(next);
+  }
+
+  function specialWheel(delta) {
+    // 특수 페이지에서는 한 번의 스크롤로 아래는 Footer, 위는 목차로 간다
+    const now = performance.now();
+    if (now - specialAt < 650 || Math.abs(delta) < 8) return;
+    specialAt = now;
+    if (delta > 0) toFooter(); else toIndex();
+  }
+
+  // ---- 웜홀 ----
+  // 시작값을 그 자리에서 확정시켜야 트랜지션이 걸린다. rAF로 미루면 탭이 숨겨졌을 때
+  // 콜백이 정리 타임아웃보다 늦게 깨어나 확대된 상태가 그대로 남는다.
+  const reflow = el => void el.offsetHeight;
+  const clear = el => { el.style.transition = ''; el.style.transform = ''; el.style.opacity = ''; };
+
+  function enterSpecial(el, ox, oy) {
+    mode = 'busy';
+    worm = { x: ox, y: oy };
+    if (window.globeField) window.globeField.freeze(true);
+
+    if (reduce) {
+      index.classList.remove('is-on');
+      el.classList.add('is-on');
+      special = el; mode = 'special'; specialAt = performance.now();
+      settle(el);
+      return;
+    }
+
+    index.style.transformOrigin = ox + 'px ' + oy + 'px';
+    index.style.transition = 'none';
+    index.style.transform = 'scale(1)';
+    index.style.opacity = '1';
+
+    el.classList.add('is-on');
+    el.style.transition = 'none';
+    el.style.transform = 'scale(1.25)';
+    el.style.opacity = '0';
+    if (settled) { window.resetReveals(settled); settled.classList.remove('is-front'); }
+    settled = el;
+    el.classList.add('is-front');
+
+    reflow(index); reflow(el);
+
+    // 빨려드는 쪽은 가속(easeIn), 도착하는 쪽은 감속(easeOut)이라야 웜홀처럼 읽힌다
+    index.style.transition = 'transform ' + WORM_IN + 'ms cubic-bezier(0.66,0,0.86,0),' +
+                             ' opacity ' + WORM_IN + 'ms cubic-bezier(0.5,0,0.9,0.3)';
+    index.style.transform = 'scale(9)';
+    index.style.opacity = '0';
+
+    el.style.transition = 'transform ' + (WORM_IN - 260) + 'ms cubic-bezier(0.16,1,0.3,1) 260ms,' +
+                          ' opacity ' + (WORM_IN - 400) + 'ms ease 300ms';
+    el.style.transform = 'scale(1)';
+    el.style.opacity = '1';
+    window.playReveals(el);
+
+    setTimeout(() => {
+      index.classList.remove('is-on');
+      clear(index);
+      index.style.transformOrigin = '';
+      clear(el);
+      el.classList.add('is-on');
+      special = el; mode = 'special'; specialAt = performance.now();
+    }, WORM_IN + 60);
+  }
+
+  function toIndex() {
+    const el = special;
+    if (!el) return;
+    mode = 'busy';
+
+    index.classList.add('is-on');
+    index.style.setProperty('--in', '1');
+    index.style.setProperty('--exit', '0');
+    index.style.setProperty('--live', '1');
+
+    const done = () => {
+      el.classList.remove('is-on');
+      clear(el); clear(index);
+      index.style.transformOrigin = '';
+      if (window.globeField) window.globeField.freeze(false);
+      special = null; settled = null;
+      pos = posTarget = 1; mode = 'base';
+      paintBase(1);
+    };
+
+    if (reduce) { done(); return; }
+
+    index.style.transformOrigin = worm.x + 'px ' + worm.y + 'px';
+    index.style.transition = 'none';
+    index.style.transform = 'scale(9)';
+    index.style.opacity = '0';
+
+    reflow(index); reflow(el);
+
+    index.style.transition = 'transform ' + WORM_OUT + 'ms cubic-bezier(0.16,1,0.3,1),' +
+                             ' opacity ' + Math.round(WORM_OUT * 0.7) + 'ms ease';
+    index.style.transform = 'scale(1)';
+    index.style.opacity = '1';
+
+    el.style.transition = 'transform ' + Math.round(WORM_OUT * 0.7) + 'ms cubic-bezier(0.66,0,0.86,0),' +
+                          ' opacity ' + Math.round(WORM_OUT * 0.6) + 'ms ease';
+    el.style.transform = 'scale(1.3)';
+    el.style.opacity = '0';
+
+    setTimeout(done, WORM_OUT + 60);
+  }
+
+  function toFooter() {
+    const el = special;
+    if (!el) return;
+    mode = 'busy';
+
+    footer.classList.add('is-on');
+    window.playReveals(footer);
+
+    const done = () => {
+      el.classList.remove('is-on');
+      clear(el);
+      footer.style.transition = '';
+      if (window.globeField) window.globeField.freeze(false);
+      window.resetReveals(el);
+      special = null; settled = footer; footer.classList.add('is-front');
+      pos = posTarget = 2; mode = 'base';
+      paintBase(2);
+    };
+
+    if (reduce) { done(); return; }
+
+    footer.style.transition = 'none';
+    footer.style.opacity = '0';
+
+    reflow(footer); reflow(el);
+
+    footer.style.transition = 'opacity ' + QUICK + 'ms ease ' + Math.round(QUICK * 0.35) + 'ms';
+    footer.style.opacity = '1';
+    el.style.transition = 'transform ' + QUICK + 'ms cubic-bezier(0.4,0,1,1),' +
+                          ' opacity ' + Math.round(QUICK * 0.8) + 'ms ease';
+    el.style.transform = 'scale(0.96)';
+    el.style.opacity = '0';
+
+    setTimeout(done, QUICK + Math.round(QUICK * 0.35) + 60);
+  }
+
+  // ---- 바깥에서 쓰는 창구 ----
+  window.pageNav = {
+    enter(pageId, ox, oy) {
+      if (mode !== 'base' || Math.abs(posTarget - 1) > 0.03) return;
+      const el = document.getElementById(pageId);
+      if (el) enterSpecial(el, ox, oy);
+    },
+    lockInput(v) { locked = !!v; },
+    indexReady() { return mode === 'base' && Math.abs(posTarget - 1) < 0.02 && Math.abs(pos - 1) < 0.08; },
+    where() { return mode === 'special' ? 'special' : (posTarget < 0.5 ? 'intro' : posTarget < 1.5 ? 'index' : 'footer'); }
+  };
+
+  // ---- 휠 ----
+  stage.addEventListener('wheel', e => {
+    // 카드 위에서의 휠은 항상 카드 내부만 스크롤하고, 페이지는 넘기지 않는다
+    const cardStage = e.target instanceof Element ? e.target.closest('#projectCardStage') : null;
+    if (cardStage) {
+      const sc = cardStage.querySelector('[data-scroll-lock]');
+      if (sc && !sc.contains(e.target)) {
+        // 헤더·푸터 등 스크롤 영역 바깥을 굴려도 본문이 움직이도록 위임
+        e.preventDefault();
+        let d = e.deltaY;
+        if (e.deltaMode === 1) d *= 40;
+        else if (e.deltaMode === 2) d *= sc.clientHeight;
+        sc.scrollTop += d;
+      }
+      return;
+    }
+    e.preventDefault();
+    let delta = e.deltaY;
+    if (e.deltaMode === 1) delta *= 40;
+    else if (e.deltaMode === 2) delta *= window.innerHeight;
+    if (delta !== 0) feed(delta);
+  }, { passive: false });
+
+  // ---- 터치 ----
+  let ty = null;
+  stage.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchmove', e => {
+    if (ty === null) return;
+    const y = e.touches[0].clientY;
+    const dy = ty - y;
+    ty = y;
+    if (e.target instanceof Element && e.target.closest('#projectCardStage')) return;
+    e.preventDefault();
+    feed(dy * 2.4);
+  }, { passive: false });
+  stage.addEventListener('touchend', () => { ty = null; }, { passive: true });
+
+  // ---- 키보드 ----
+  window.addEventListener('keydown', e => {
+    const act = document.activeElement;
+    if (act && act.classList && act.classList.contains('globe') && (e.key === ' ' || e.key === 'Enter')) return;
+    const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar';
+    const up   = e.key === 'ArrowUp'   || e.key === 'PageUp';
+    if (!down && !up) return;
+    e.preventDefault();
+    feed((down ? 1 : -1) * window.innerHeight * 0.16);
+  });
+
+  window.addEventListener('resize', () => { if (mode === 'base') paintBase(pos); });
+
+  paintBase(0);
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ---- Globe (디자인 출처: pro.reactbits.dev/docs/components/globe) ----
+// 원본의 점 구체 · 대기권 발광 · 무작위 아크 · 드래그 회전을 그대로 가져오되,
+// 대륙 마스크 대신 구 전체에 고르게 점을 뿌린 추상 행성으로 만들고
+// 아크 색만 주제 박스 색을 따라가게 했다.
+(() => {
+  const field  = document.getElementById('globeField');
+  const canvas = document.getElementById('globeCanvas');
+  const page   = document.getElementById('fuckindex');
+  const title  = document.getElementById('indexTitle');
+  if (!field || !canvas || !page) return;
+
+  const TOPICS = [
+    { page: 'fuckhover',           label: 'About ME.',                 tone: '#c084fc', ink: '#000000' },
+    { page: 'fuckscrollanimation', label: 'I think, therefore, I am.', tone: '#22d3ee', ink: '#000000' },
+    { page: 'fuckhyperlink',       label: 'Be creative, Be better.',   tone: '#861616', ink: '#ffffff' },
+    { page: 'fuckinteraction',     label: 'Practice makes perfect.',   tone: '#0F5132', ink: '#ffffff' },
+    { page: 'fuckBentoBox',        label: 'Efforts never betray.',     tone: '#E0A800', ink: '#000000' },
+    { page: 'fuckmailto',          label: 'Feel free to contact.',     tone: '#3b82f6', ink: '#000000' }
+  ];
+
+  // 한 번 정해 고정한 배치. x·y는 화면 비율(%), s는 지름(vmin)
+  const WIDE = [
+    { x: 36, y: 27, s: 30 }, { x: 63, y: 19, s: 13 }, { x: 85, y: 29, s: 26 },
+    { x: 15, y: 66, s: 34 }, { x: 45, y: 74, s: 15 }, { x: 69, y: 72, s: 25 }
+  ];
+  const TALL = [
+    { x: 30, y: 24, s: 30 }, { x: 74, y: 16, s: 17 }, { x: 73, y: 36, s: 26 },
+    { x: 26, y: 52, s: 34 }, { x: 70, y: 68, s: 20 }, { x: 33, y: 84, s: 28 }
+  ];
+
+  const NEUTRAL   = 0x9ca3af;    // 점과 대기권 색 (원본 neutralColor)
+  const DOTS      = 2600;        // 구 표면 점 개수
+  const ARC_COUNT = 10;          // 한 행성에 동시에 떠 있는 아크 수 (원본 arcCount 기본값)
+  const FOV       = 27;          // 대기권까지 딱 들어차는 화각
+  const TAN_HALF  = Math.tan(FOV * Math.PI / 360);
+  const ARC_SEG   = 110;         // 아크 하나를 이루는 알갱이 수
+  const ARC_DUR   = [2.4, 4.0];  // 아크가 한 번 지나가는 시간(초)
+  const AUTO_SPIN = 0.85;        // 원본 autoRotateSpeed
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const DOT_VERT = [
+    'attribute float aA;',
+    // uWorld는 알갱이의 월드 반지름, uScale은 뷰포트 높이 / (2*tan(fov/2)).
+    // 둘을 거리로 나누면 원근이 반영된 실제 화면 픽셀 크기가 나온다.
+    'uniform float uWorld; uniform float uScale;',
+    'varying float vA;',
+    'void main(){',
+    '  vA = aA;',
+    '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
+    '  gl_Position = projectionMatrix * mv;',
+    '  gl_PointSize = max(1.0, uWorld * uScale / max(0.001, -mv.z));',
+    '}'
+  ].join('\n');
+
+  const DOT_FRAG = [
+    'uniform vec3 uColor; uniform float uHot;',
+    'varying float vA;',
+    'void main(){',
+    '  float m = 1.0 - smoothstep(0.32, 0.5, length(gl_PointCoord - 0.5));',
+    '  if (m * vA <= 0.004) discard;',
+    // uHot을 켜면 밝은 부분(아크의 머리)이 더 타오른다
+    '  gl_FragColor = vec4(uColor * (1.0 + uHot * vA * 0.9), m * vA);',
+    '}'
+  ].join('\n');
+
+  const ATMO_VERT = [
+    'varying vec3 vN; varying vec3 vP;',
+    'void main(){',
+    '  vN = normalize(normalMatrix * normal);',
+    '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
+    '  vP = mv.xyz;',
+    '  gl_Position = projectionMatrix * mv;',
+    '}'
+  ].join('\n');
+
+  const ATMO_FRAG = [
+    'uniform vec3 uColor; uniform float uStrength;',
+    'varying vec3 vN; varying vec3 vP;',
+    'void main(){',
+    // 실루엣 가장자리에서만 밝아지도록 프레넬을 쓴다
+    '  float f = pow(1.0 - abs(dot(normalize(vN), normalize(-vP))), 4.5);',
+    '  gl_FragColor = vec4(uColor, f * uStrength);',
+    '}'
+  ].join('\n');
+
+  function arcColor(hex) {
+    const c = new THREE.Color(hex);
+    const m = Math.max(c.r, c.g, c.b);
+    if (m > 0.001 && m < 0.78) c.multiplyScalar(0.78 / m);
+    return c;
+  }
+
+  function randUnit() {
+    const z = Math.random() * 2 - 1;
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.max(0, 1 - z * z));
+    return new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, z);
+  }
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch (err) {
+    console.warn('[Globe] WebGL 사용 불가', err);
+    return;
+  }
+  renderer.setClearColor(0x000000, 0);
+  renderer.autoClear = false;
+
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+  camera.position.z = 5;
+
+  function buildGlobe(tone) {
+    const scene = new THREE.Scene();
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // 안쪽 불투명 구 — 뒤편의 점과 아크를 가려 행성처럼 보이게 한다
+    group.add(new THREE.Mesh(
+      new THREE.SphereGeometry(0.985, 48, 32),
+      new THREE.MeshBasicMaterial({ color: 0x0b0b0d })
+    ));
+
+    // 표면 점 — 피보나치 나선으로 고르게 뿌린다
+    const dp = new Float32Array(DOTS * 3);
+    const da = new Float32Array(DOTS);
+    for (let i = 0; i < DOTS; i++) {
+      const y = 1 - (i / (DOTS - 1)) * 2;
+      const rr = Math.sqrt(Math.max(0, 1 - y * y));
+      const th = i * 2.399963229728653;
+      // 피보나치 나선 그대로면 격자 무늬가 도드라져 기계처럼 보인다. 살짝 흔들어 준다
+      const jx = (Math.random() - 0.5) * 0.05, jy = (Math.random() - 0.5) * 0.05, jz = (Math.random() - 0.5) * 0.05;
+      const px = Math.cos(th) * rr + jx, py = y + jy, pz = Math.sin(th) * rr + jz;
+      const inv = 1 / Math.hypot(px, py, pz);
+      dp[i * 3] = px * inv; dp[i * 3 + 1] = py * inv; dp[i * 3 + 2] = pz * inv;
+      da[i] = 0.5 + Math.random() * 0.5;
+    }
+    const dg = new THREE.BufferGeometry();
+    dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
+    dg.setAttribute('aA', new THREE.BufferAttribute(da, 1));
+    const dotMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: new THREE.Color(NEUTRAL) }, uWorld: { value: 0.0135 }, uScale: { value: 300 }, uHot: { value: 0 } },
+      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
+      transparent: true, depthWrite: false
+    });
+    group.add(new THREE.Points(dg, dotMat));
+
+    // 대기권 발광
+    group.add(new THREE.Mesh(
+      new THREE.SphereGeometry(1.14, 48, 32),
+      new THREE.ShaderMaterial({
+        uniforms: { uColor: { value: new THREE.Color(NEUTRAL) }, uStrength: { value: 0.62 } },
+        vertexShader: ATMO_VERT, fragmentShader: ATMO_FRAG,
+        side: THREE.BackSide, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+      })
+    ));
+
+    // 아크 — 무작위 두 지점을 잇는 곡선을 머리부터 그려 나간다.
+    // 알갱이를 촘촘히 이어 선처럼 보이게 한다. WebGL 기본 선은 1px에 묶여 굵기를 못 준다.
+    const color = arcColor(tone);
+    const arcs = [];
+    const ap = new Float32Array(ARC_COUNT * ARC_SEG * 3);
+    const aa = new Float32Array(ARC_COUNT * ARC_SEG);
+    const ag = new THREE.BufferGeometry();
+    ag.setAttribute('position', new THREE.BufferAttribute(ap, 3));
+    ag.setAttribute('aA', new THREE.BufferAttribute(aa, 1));
+    const arcMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: color }, uWorld: { value: 0.024 }, uScale: { value: 300 }, uHot: { value: 1 } },
+      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    });
+    const arcPts = new THREE.Points(ag, arcMat);
+    arcPts.frustumCulled = false;
+    group.add(arcPts);
+    for (let i = 0; i < ARC_COUNT; i++) arcs.push({ head: -1, dur: 3, wait: Math.random() * 1.8 });
+
+    // 아크의 양 끝을 표시하는 점
+    const mp = new Float32Array(ARC_COUNT * 2 * 3);
+    const ma = new Float32Array(ARC_COUNT * 2);
+    const mg = new THREE.BufferGeometry();
+    mg.setAttribute('position', new THREE.BufferAttribute(mp, 3));
+    mg.setAttribute('aA', new THREE.BufferAttribute(ma, 1));
+    const markMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: color }, uWorld: { value: 0.058 }, uScale: { value: 300 }, uHot: { value: 0.8 } },
+      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    });
+    const marks = new THREE.Points(mg, markMat);
+    marks.frustumCulled = false;
+    group.add(marks);
+
+    return { scene, group, arcs, ag, mg, dotMat, markMat, arcMat };
+  }
+
+  function respawn(g, i) {
+    const arc = g.arcs[i];
+    const a = randUnit();
+    let b = randUnit();
+    // 두 점이 너무 붙어 있으면 곡선이 뭉개진다
+    for (let n = 0; n < 8 && a.dot(b) > 0.55; n++) b = randUnit();
+    const omega = Math.acos(Math.max(-1, Math.min(1, a.dot(b))));
+    const sinO = Math.sin(omega) || 1e-4;
+    const lift = 0.16 + Math.random() * 0.26;
+
+    const pos = g.ag.attributes.position.array;
+    const base = i * ARC_SEG * 3;
+    for (let k = 0; k < ARC_SEG; k++) {
+      const t = k / (ARC_SEG - 1);
+      const w1 = Math.sin((1 - t) * omega) / sinO;
+      const w2 = Math.sin(t * omega) / sinO;
+      const h = 1 + Math.sin(Math.PI * t) * lift;
+      pos[base + k * 3]     = (a.x * w1 + b.x * w2) * h;
+      pos[base + k * 3 + 1] = (a.y * w1 + b.y * w2) * h;
+      pos[base + k * 3 + 2] = (a.z * w1 + b.z * w2) * h;
+    }
+    g.ag.attributes.position.needsUpdate = true;
+
+    const mp = g.mg.attributes.position.array;
+    mp[i * 6] = a.x; mp[i * 6 + 1] = a.y; mp[i * 6 + 2] = a.z;
+    mp[i * 6 + 3] = b.x; mp[i * 6 + 4] = b.y; mp[i * 6 + 5] = b.z;
+    g.mg.attributes.position.needsUpdate = true;
+
+    arc.head = 0;
+    arc.dur = ARC_DUR[0] + Math.random() * (ARC_DUR[1] - ARC_DUR[0]);
+  }
+
+  // ---- DOM: Globe 버튼과 라벨 ----
+  const items = TOPICS.map(t => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'globe';
+    btn.dataset.page = t.page;
+    btn.setAttribute('aria-label', t.label);
+    field.appendChild(btn);
+
+    const label = document.createElement('span');
+    label.className = 'globe-label';
+    label.textContent = t.label;
+    label.style.setProperty('--tone', t.tone);
+    label.style.setProperty('--ink', t.ink);
+    field.appendChild(label);
+
+    const it = { topic: t, btn, label, cx: 0, cy: 0, r: 1, rx: 0, ry: Math.random() * 6.28, vx: 0, vy: 0, drag: null, moved: 0 };
+    it.globe = buildGlobe(t.tone);
+    for (let i = 0; i < ARC_COUNT; i++) { respawn(it.globe, i); it.globe.arcs[i].head = -1; }
+    return it;
+  });
+
+  const ready = () => window.pageNav && window.pageNav.indexReady();
+
+  function setHot(it, v) {
+    if (v && !ready()) return;
+    it.btn.classList.toggle('is-hot', v);
+    it.label.classList.toggle('is-on', v);
+  }
+
+  items.forEach(it => {
+    it.btn.addEventListener('pointerenter', () => setHot(it, true));
+    it.btn.addEventListener('pointerleave', () => { if (!it.drag) setHot(it, false); });
+    it.btn.addEventListener('focus', () => setHot(it, true));
+    it.btn.addEventListener('blur',  () => setHot(it, false));
+
+    it.btn.addEventListener('pointerdown', e => {
+      if (!ready()) return;
+      it.drag = { x: e.clientX, y: e.clientY, held: false };
+      it.moved = 0;
+    });
+    it.btn.addEventListener('pointermove', e => {
+      if (!it.drag) return;
+      const dx = e.clientX - it.drag.x, dy = e.clientY - it.drag.y;
+      it.drag.x = e.clientX; it.drag.y = e.clientY;
+      it.moved += Math.abs(dx) + Math.abs(dy);
+      it.vy += dx * 0.0009;
+      it.vx += dy * 0.0009;
+      // 진짜 끌기 시작했을 때만 포인터를 붙잡는다. 누르자마자 잡으면 클릭이 흐트러진다
+      if (!it.drag.held && it.moved > 4) {
+        it.drag.held = true;
+        try { it.btn.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+    });
+    const end = e => {
+      if (!it.drag) return;
+      if (it.drag.held) { try { it.btn.releasePointerCapture(e.pointerId); } catch (_) {} }
+      it.drag = null;
+    };
+    it.btn.addEventListener('pointerup', end);
+    it.btn.addEventListener('pointercancel', end);
+
+    it.btn.addEventListener('click', () => {
+      // 돌리려고 끌었을 뿐이면 페이지를 열지 않는다
+      if (it.moved > 6) { it.moved = 0; return; }
+      if (!ready()) return;
+      const r = it.btn.getBoundingClientRect();
+      window.pageNav.enter(it.topic.page, r.left + r.width / 2, r.top + r.height / 2);
+    });
+  });
+
+  // ---- 배치 ----
+  function layout() {
+    const w = field.clientWidth, h = field.clientHeight;
+    if (!w || !h) return;
+    const vmin = Math.min(w, h) / 100;
+    const preset = w / h < 1.05 ? TALL : WIDE;
+    items.forEach((it, i) => {
+      const p = preset[i];
+      const size = p.s * vmin;
+      it.cx = (p.x / 100) * w;
+      it.cy = (p.y / 100) * h;
+      it.r = size / 2;
+      it.btn.style.setProperty('--gx', it.cx.toFixed(1) + 'px');
+      it.btn.style.setProperty('--gy', it.cy.toFixed(1) + 'px');
+      it.btn.style.setProperty('--gs', size.toFixed(1) + 'px');
+      it.btn.style.setProperty('--gdir', it.cy < h / 2 ? '-1' : '1');
+    });
+    placeLabels(w, h);
+  }
+
+  function placeLabels(w, h) {
+    const fr = field.getBoundingClientRect();
+    let tr = null;
+    if (title) {
+      const t = title.getBoundingClientRect();
+      tr = { l: t.left - fr.left, t: t.top - fr.top, r: t.right - fr.left, b: t.bottom - fr.top };
+    }
+    items.forEach(it => {
+      const lw = it.label.offsetWidth || 170;
+      const lh = it.label.offsetHeight || 34;
+      const gap = 16;
+      const cands = [
+        [it.cx, it.cy + it.r + gap + lh / 2],
+        [it.cx, it.cy - it.r - gap - lh / 2],
+        [it.cx + it.r + gap + lw / 2, it.cy],
+        [it.cx - it.r - gap - lw / 2, it.cy]
+      ];
+      let best = cands[0], bestCost = Infinity;
+      for (const c of cands) {
+        const l = c[0] - lw / 2, r = c[0] + lw / 2, t = c[1] - lh / 2, b = c[1] + lh / 2;
+        let cost = 0;
+        cost += (Math.max(0, 10 - l) + Math.max(0, r - (w - 10))) * 60;
+        cost += (Math.max(0, 10 - t) + Math.max(0, b - (h - 10))) * 60;
+        // 다른 Globe를 최대한 가리지 않는 자리를 고른다
+        items.forEach(o => {
+          if (o === it) return;
+          const nx = Math.max(l, Math.min(o.cx, r));
+          const ny = Math.max(t, Math.min(o.cy, b));
+          const d = Math.hypot(o.cx - nx, o.cy - ny);
+          if (d < o.r + 6) cost += (o.r + 6 - d) * 4;
+        });
+        // 'Index.' 글자도 피한다
+        if (tr && l < tr.r + 12 && r > tr.l - 12 && t < tr.b + 12 && b > tr.t - 12) cost += 900;
+        if (cost < bestCost) { bestCost = cost; best = c; }
+      }
+      it.label.style.setProperty('--lx', best[0].toFixed(1) + 'px');
+      it.label.style.setProperty('--ly', best[1].toFixed(1) + 'px');
+    });
+  }
+
+  let cw = 0, ch = 0;
+  function resizeTo(w, h) {
+    if (w === cw && h === ch) return;
+    cw = w; ch = h;
+    const pr = Math.min(window.devicePixelRatio || 1, 2);
+    renderer.setPixelRatio(pr);
+    renderer.setSize(w, h, false);
+  }
+
+  function step(it, dt) {
+    const g = it.globe;
+    if (!it.drag) it.ry += AUTO_SPIN * dt * 0.22;
+    it.ry += it.vy; it.rx += it.vx;
+    it.vy *= 0.90; it.vx *= 0.90;
+    it.rx = Math.max(-0.65, Math.min(0.65, it.rx));
+    g.group.rotation.set(it.rx, it.ry, 0);
+
+    const ma = g.mg.attributes.aA.array;
+    const aa = g.ag.attributes.aA.array;
+    for (let i = 0; i < g.arcs.length; i++) {
+      const arc = g.arcs[i];
+      const base = i * ARC_SEG;
+      if (arc.head < 0) {
+        arc.wait -= dt;
+        if (arc.wait <= 0) respawn(g, i);
+        ma[i * 2] = ma[i * 2 + 1] = 0;
+        for (let k = 0; k < ARC_SEG; k++) aa[base + k] = 0;
+        continue;
+      }
+      arc.head += dt / arc.dur * 1.45;
+      // 머리 앞은 아직 그려지지 않고, 뒤로는 꼬리가 옅어지며 남는다
+      for (let k = 0; k < ARC_SEG; k++) {
+        const d = arc.head - k / (ARC_SEG - 1);
+        aa[base + k] = d < 0 ? 0 : Math.max(0, 1 - d / 0.55);
+      }
+      // 출발점은 머리가 떠나면 옅어지고, 도착점은 머리가 닿을 때 켜진다
+      ma[i * 2]     = Math.max(0, 1 - Math.abs(arc.head) * 1.4);
+      ma[i * 2 + 1] = Math.max(0, 1 - Math.abs(arc.head - 1) * 3.0);
+      if (arc.head > 1.6) { arc.head = -1; arc.wait = 0.2 + Math.random() * 1.5; }
+    }
+    g.mg.attributes.aA.needsUpdate = true;
+    g.ag.attributes.aA.needsUpdate = true;
+  }
+
+  let frozen = false, last = 0;
+  window.globeField = { freeze(v) { frozen = !!v; }, relayout: layout };
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+    last = now;
+    if (frozen || document.hidden || !page.classList.contains('is-on')) return;
+
+    const fr = field.getBoundingClientRect();
+    if (fr.width < 2 || fr.height < 2) return;
+    resizeTo(Math.round(fr.width), Math.round(fr.height));
+
+    renderer.setScissorTest(false);
+    renderer.clear(true, true, false);
+    renderer.setScissorTest(true);
+
+    for (const it of items) {
+      if (!reduce) step(it, dt);
+      const r = it.btn.getBoundingClientRect();
+      const x = r.left - fr.left;
+      const y = fr.height - (r.top - fr.top + r.height);
+      if (r.width < 2 || x + r.width < 0 || x > fr.width || y + r.height < 0 || y > fr.height) continue;
+      // 알갱이 크기는 이 행성이 차지한 뷰포트 높이에 맞춰 다시 잡는다
+      const scale = (r.height * renderer.getPixelRatio()) / (2 * TAN_HALF);
+      it.globe.dotMat.uniforms.uScale.value = scale;
+      it.globe.markMat.uniforms.uScale.value = scale;
+      it.globe.arcMat.uniforms.uScale.value = scale;
+      renderer.setViewport(x, y, r.width, r.height);
+      renderer.setScissor(x, y, r.width, r.height);
+      renderer.render(it.globe.scene, camera);
+    }
+  }
+
+  layout();
+  window.addEventListener('resize', layout);
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
 // ---- ClickSpark (디자인 출처: reactbits.dev/animations/click-spark) ----
 (() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
