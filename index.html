@@ -189,7 +189,7 @@
        Drift Wall이 화면 전체를 덮으므로 카드가 이 뒤로 그대로 지나간다.
        흰 글자가 옅은 카드 위에서도 읽히도록 그림자만 깔아 둔다 */
     #indexBox {
-      display: inline-flex; align-items: center; gap: 0.34em;
+      display: inline-flex; align-items: baseline; gap: 0.34em;
     }
     #folderDock { display: inline-block; width: 1.25em; height: 1em; }
 
@@ -2209,7 +2209,8 @@
   const host  = document.getElementById('indexFolder');
   const layer = document.getElementById('indexFolderLayer');
   const dock  = document.getElementById('folderDock');
-  if (!page || !scene || !wall || !plane || !host || !layer || !dock) return;
+  const title = document.getElementById('indexTitle');
+  if (!page || !scene || !wall || !plane || !host || !layer || !dock || !title) return;
 
   // 주제 텍스트와 주제 박스 색은 각 주제 페이지의 제목에서 그대로 가져왔다
   const CARDS = [
@@ -2279,11 +2280,32 @@
   host.appendChild(folder);
 
   const FOLDER_W = 100, FOLDER_H = 80;                // .folder__back의 고정 크기
+  const FOLDER_TAB = 10 - FOLDER_H * 0.02;            // ::after 꼭지가 back 위로 삐져나온 만큼
+  const FOLDER_VIS_H = FOLDER_H + FOLDER_TAB;         // 눈에 보이는 Folder 전체 높이
+
+  // em 상자는 글자보다 크므로, 'I'의 실제 획 높이를 캔버스로 직접 잰다
+  let dockCap = 0;
+  function syncDock() {
+    const cs = getComputedStyle(title);
+    const fs = parseFloat(cs.fontSize) || 16;
+    let cap = fs * 0.72;
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (ctx) {
+      ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+      const m = ctx.measureText('I');
+      const h = (m.actualBoundingBoxAscent || 0) + (m.actualBoundingBoxDescent || 0);
+      if (h > 1) cap = h;
+    }
+    dockCap = cap;
+    dock.style.height = cap.toFixed(2) + 'px';
+    dock.style.width = (cap * FOLDER_W / FOLDER_VIS_H).toFixed(2) + 'px';
+  }
 
   function centerTarget() {
     const w = scene.clientWidth, h = scene.clientHeight;
-    const s = Math.max(2, Math.min(5.5, Math.min(w * 0.18, h * 0.34) / FOLDER_H));
-    return { x: (w - FOLDER_W * s) / 2, y: (h - FOLDER_H * s) / 2, s };
+    const s = Math.max(1.8, Math.min(4.2, Math.min(w * 0.165, h * 0.30) / FOLDER_VIS_H));
+    // 꼭지까지 포함한 몸통이 화면 한가운데에 오도록 꼭지 높이만큼 내려 앉힌다
+    return { x: (w - FOLDER_W * s) / 2, y: (h - FOLDER_VIS_H * s) / 2 + FOLDER_TAB * s, s };
   }
   function offsetIn(el) {
     let x = 0, y = 0, stop = scene.parentElement;
@@ -2292,8 +2314,8 @@
   }
   function dockTarget() {
     const p = offsetIn(dock);
-    const s = dock.offsetHeight / FOLDER_H;           // 제목 글자 높이에 맞춘다
-    return { x: p.x + (dock.offsetWidth - FOLDER_W * s) / 2, y: p.y, s };
+    const s = dockCap / FOLDER_VIS_H;                 // 'I'의 획 높이에 몸통 전체를 맞춘다
+    return { x: p.x, y: p.y + FOLDER_TAB * s, s };
   }
   function applyFolder(t, animate) {
     host.style.transition = animate && !reduce ? 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
@@ -2526,16 +2548,18 @@
   function layout() {
     const w = scene.clientWidth;
     if (!w) return;
+    syncDock();
     const want = Math.max(150, Math.min(420, (w * OVERSCAN) / COLUMNS - GAP));
     if (!cols.length || Math.abs(want - tileW) > 0.5) buildWall();
     if (mode !== 'busy') applyFolder(mode === 'wall' ? dockTarget() : centerTarget(), false);
   }
 
   fitCardText();
+  syncDock();
   buildWall();
   applyPlane(0, 0);
   requestAnimationFrame(() => applyFolder(centerTarget(), false));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCardText);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitCardText(); layout(); });
   window.addEventListener('resize', layout);
   window.indexScene = { freeze(v) { frozen = !!v; }, relayout: layout };
   requestAnimationFrame(frame);
