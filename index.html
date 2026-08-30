@@ -143,6 +143,7 @@
     #introSign .s2 { font-weight: 600; letter-spacing: -0.01em; font-size: clamp(1rem, 1.5vw, 1.45rem); color: #fafafa; margin-top: 0.3rem; }
 
     #particleImageStage canvas { display: block; width: 100%; height: 100%; }
+    #introPhoto { object-fit: cover; opacity: var(--photo, 0); }
 
     #introScrim { display: none; }
 
@@ -160,7 +161,8 @@
     /* ---- 페이지 스택 ----
        모든 페이지를 한자리에 겹쳐두고 컨트롤러가 보일 것만 켠다.
        전환 중에는 두 장이 동시에 켜져 서로 교차한다. */
-    #stage { position: fixed; inset: 0; overflow: hidden; }
+    /* 페이지가 세로로 넘어갈 때 살짝 눕도록 원근을 준다 */
+    #stage { position: fixed; inset: 0; overflow: hidden; perspective: 1500px; }
     .page {
       position: absolute; inset: 0;
       opacity: 0; visibility: hidden;
@@ -170,12 +172,8 @@
     /* 전환 중 뒤에 깔린 페이지가 Globe 클릭을 가로채지 않도록 앞장선 한 장만 입력을 받는다 */
     .page { pointer-events: none; }
     .page.is-front { pointer-events: auto; }
-    /* 나가는 페이지가 들어오는 페이지 위에 얹혀야 교차가 자연스럽다.
-       특수 페이지는 웜홀을 타고 맨 위로 올라온다. */
-    #fuckintro  { z-index: 3; }
-    #fuckindex  { z-index: 2; transform-origin: 50% 50%; }
-    #fuckfooter { z-index: 1; }
-    .page--special { z-index: 5; transform-origin: 50% 50%; }
+    /* z-index는 내비게이션이 페이지 순서대로 붙인다. 앞 페이지가 위에 얹혀야 교차가 자연스럽다 */
+    .page { transform-origin: 50% 50%; backface-visibility: hidden; }
 
     /* ---- 목차 페이지 ---- */
     #indexTitle {
@@ -276,8 +274,9 @@
 
       <!-- 스크롤 끝에 드러날 최종 화면: Particle Image 배경 + 텍스트 -->
       <div id="introReveal" class="absolute inset-0">
+        <!-- 파티클 뒤에 은은하게 깔리는 원본 사진. 자리는 파티클과 똑같이 맞춘다 -->
+        <img id="introPhoto" class="absolute inset-0 h-full w-full" alt="" />
         <div id="particleImageStage" class="absolute inset-0"></div>
-        <img id="introFallback" class="absolute inset-0 h-full w-full object-cover hidden" alt="" />
         <!-- 좁은 화면에서는 사진이 크게 잘려 밝은 면 위에 글자가 얹히므로, 위아래를 살짝 눌러준다 -->
         <div id="introScrim" class="absolute inset-0 pointer-events-none"></div>
       </div>
@@ -312,8 +311,8 @@
 
   <script>
   // ---- Scroll Mask (디자인 출처: pro.reactbits.dev/docs/components/scroll-mask) ----
-  // 첫 화면에서는 휠·터치·키 입력을 페이지 넘김이 아니라 마스크를 여는 데 먼저 쓴다.
   // 원본의 iris 변형: 화면 중앙에서 원형 구멍이 커지며 뒤 화면이 드러난다.
+  // 진행도는 스스로 쌓지 않고, 페이지 내비게이션이 넘겨주는 값을 그리기만 한다.
   (() => {
     const stage = document.getElementById('introStage');
     if (!stage) return;
@@ -322,22 +321,15 @@
     const head   = document.getElementById('introHead');
     const sign   = document.getElementById('introSign');
 
-    const SCROLL_LENGTH = 3.4;   // 끝까지 여는 데 필요한 스크롤량 (화면 높이의 배수, 원본 기본값 1.7)
-    const SETTLE        = 0.84;  // 활주로의 이 지점에서 마스크가 완전히 열리고, 남은 구간은 여운
-    const SMOOTH        = 0.14;  // 목표값을 따라가는 감쇠
-
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    let target  = reduce ? 1 : 0;
-    let current = target;
-    let raf = null;
-    let fullAt = 0;
+    const SETTLE = 0.84;   // 이 지점에서 마스크가 완전히 열리고, 남은 구간은 여운
 
     const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
-    // 개방률은 smoothstep으로 — ease-out을 쓰면 초반에 다 열려버려 뒤쪽 스크롤이 빈다
-    const ease    = t => t * t * (3 - 2 * t);
-    const range   = (v, a, b) => clamp01((v - a) / (b - a));
-    const runway  = () => Math.max(window.innerHeight, 420) * SCROLL_LENGTH;
+    // 개방률은 smoothstep으로 — ease-out을 쓰면 초반에 다 열려버려 뒤쪽이 빈다
+    const ease  = t => t * t * (3 - 2 * t);
+    const range = (v, a, b) => clamp01((v - a) / (b - a));
+
+    let last = 0;
+
     function paint(p) {
       const w = stage.clientWidth  || window.innerWidth;
       const h = stage.clientHeight || window.innerHeight;
@@ -349,50 +341,16 @@
       stage.style.setProperty('--iris-out', r.toFixed(1) + 'px');
 
       reveal.style.setProperty('--zoom', (1.12 - 0.12 * ease(clamp01(p / SETTLE))).toFixed(4));
-      hello.style.setProperty('--hello', (1 - range(p, 0, 0.16)).toFixed(4));
-      head.style.setProperty('--in', range(p, 0.56, 0.90).toFixed(4));
-      sign.style.setProperty('--in', range(p, 0.68, 1).toFixed(4));
+      hello.style.setProperty('--hello', (1 - range(p, 0, 0.2)).toFixed(4));
+      head.style.setProperty('--in', range(p, 0.5, 0.88).toFixed(4));
+      sign.style.setProperty('--in', range(p, 0.62, 1).toFixed(4));
 
       window.introProgress = p;
     }
 
-    function tick() {
-      const d = target - current;
-      if (Math.abs(d) < 0.0004) { current = target; paint(current); raf = null; return; }
-      current += d * SMOOTH;
-      paint(current);
-      raf = requestAnimationFrame(tick);
-    }
-    const kick = () => { if (raf === null) raf = requestAnimationFrame(tick); };
-
-    function setTarget(v) {
-      const next = clamp01(v);
-      if (next >= 1 && target < 1) fullAt = performance.now();
-      target = next;
-      kick();
-    }
-
-    // 휠 핸들러가 물어보는 창구. true를 돌려주면 페이지를 넘기지 않는다.
-    window.introMask = {
-      handleWheel(delta) {
-        if (delta > 0) {
-          // 다 연 직후 같은 관성으로 페이지가 넘어가지 않도록 잠깐 붙잡는다
-          if (target >= 1) return performance.now() - fullAt < 420;
-          setTarget(target + delta / runway());
-          return true;
-        }
-        if (delta < 0) {
-          if (target <= 0) return false;
-          setTarget(target + delta / runway());
-          return true;
-        }
-        return false;
-      }
-    };
-
-    window.addEventListener('resize', () => paint(current));
-
-    paint(current);
+    window.introMask = { set(p) { last = clamp01(p); paint(last); } };
+    window.addEventListener('resize', () => paint(last));
+    paint(0);
   })();
   </script>
 
@@ -418,6 +376,7 @@
     const CURSOR_STRENGTH  = 0.055;
     const LUMA_CUTOFF      = 0.045;  // 이보다 어두운 픽셀은 파티클로 만들지 않는다
     const SPACING_PX       = 2.4;    // 파티클 간격(대략). 작을수록 촘촘하고 무겁다
+    const IMAGE_OPACITY    = 0.5;    // 파티클 뒤에 깔리는 원본 사진의 농도 (원본 imageOpacity)
     const POINT_SCALE      = 1.15;   // 간격 대비 알갱이 지름. 1보다 크면 서로 겹친다
     const GAMMA            = 1.25;   // 1보다 크면 어두운 곳이 더 눌려 대비가 살아난다
     const GAIN             = 1.3;    // 밝기 배수
@@ -427,12 +386,13 @@
 
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const photo = document.getElementById('introPhoto');
+    // 파티클이 못 뜨면 사진만이라도 온전히 보여 준다
     function fallback() {
-      const el = document.getElementById('introFallback');
-      if (!el) return;
-      el.src = SRC;
-      el.classList.remove('hidden');
+      if (photo) photo.style.setProperty('--photo', '1');
     }
+
+    if (photo) { photo.src = SRC; photo.style.setProperty('--photo', String(IMAGE_OPACITY)); }
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -593,13 +553,14 @@
 
       let renderer;
       try {
-        renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+        renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
       } catch (err) {
         console.warn('[ParticleImage] WebGL 사용 불가', err);
         fallback();
         return;
       }
-      renderer.setClearColor(0x000000, 1);
+      // 뒤에 깔린 사진이 비쳐야 하므로 캔버스는 비워 둔다
+      renderer.setClearColor(0x000000, 0);
       stage.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
@@ -625,10 +586,17 @@
         const slackY = Math.max(0, (fit - 1) / 2);
         const wantX = -(FOCUS_X - 0.5) * imgAspect * fit;
         const wantY = -(0.5 - FOCUS_Y) * fit;
-        uniforms.uOffset.value.set(
-          Math.max(-slackX, Math.min(slackX, wantX)),
-          Math.max(-slackY, Math.min(slackY, wantY))
-        );
+        const offX = Math.max(-slackX, Math.min(slackX, wantX));
+        const offY = Math.max(-slackY, Math.min(slackY, wantY));
+        uniforms.uOffset.value.set(offX, offY);
+
+        // 같은 계산으로 사진도 자리를 잡아, 알갱이와 한 치도 어긋나지 않게 한다
+        if (photo) {
+          const drawH = fit * h, drawW = imgAspect * fit * h;
+          photo.style.objectPosition =
+            (w / 2 - drawW / 2 + offX * h).toFixed(1) + 'px ' +
+            (h / 2 - drawH / 2 - offY * h).toFixed(1) + 'px';
+        }
         // 알갱이 지름은 격자 간격을 따라간다 — 화면이 커져 성겨지면 알갱이도 같이 굵어진다
         uniforms.uSize.value = Math.max(1, (h / rows) * fit * POINT_SCALE);
       }
@@ -1094,14 +1062,16 @@
       window.addEventListener('resize', resize);
       resize();
 
-      let visible = true;
-      new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }, { threshold: 0 }).observe(stage);
+      // 페이지들이 모두 같은 자리에 겹쳐 있어 IntersectionObserver로는 가려진 걸 알 수 없다.
+      // 내비게이션이 켜 둔 페이지인지로 판단해야 물리 연산이 뒤에서 계속 돌지 않는다.
+      const ownPage = stage.closest('.page');
+      const isVisible = () => !document.hidden && (!ownPage || ownPage.classList.contains('is-on'));
 
       const clock = new THREE.Clock();
 
       renderer.setAnimationLoop(() => {
         const delta = Math.min(clock.getDelta(), 0.1);
-        if (!visible || !stage.clientWidth) return;
+        if (!isVisible() || !stage.clientWidth) return;
 
         if (dragged) {
           vec.set(pointer.x, pointer.y, 0.5).unproject(camera);
@@ -1864,36 +1834,40 @@
 
 <script>
 // ---- 페이지 내비게이션 ----
-// 기본 페이지(메인 → 목차 → Footer)는 스크롤을 누적해 서로 교차시키고,
-// 특수 페이지는 목차의 Globe를 눌렀을 때만 웜홀을 타고 드나든다.
+// 스크롤 한 번에 한 걸음씩 옮긴다.
+//   pos 0  첫 인사(Hello World!)      0 → 1  Scroll Mask가 열린다
+//   pos 1  메인(Particle Image)       1 → 2  텍스트가 위아래로 빠지고 목차가 내려온다
+//   pos 2  목차(Index.)               2 → 3  'Index.'가 빠지고 첫 주제가 떠오른다
+//   pos 3~8  각 주제 페이지            그 뒤로는 예전처럼 세로로 넘어간다
+//   pos 9  Footer
+// 목차의 Globe는 해당 주제로 바로 건너뛰는 지름길이고, 도착한 뒤에는 같은 흐름을 탄다.
 (() => {
-  const stage      = document.getElementById('stage');
-  const intro      = document.getElementById('fuckintro');
+  const stage = document.getElementById('stage');
+  const PAGE_IDS = ['fuckintro', 'fuckindex', 'fuckhover', 'fuckscrollanimation',
+                    'fuckhyperlink', 'fuckinteraction', 'fuckBentoBox', 'fuckmailto', 'fuckfooter'];
+  const pages = PAGE_IDS.map(id => document.getElementById(id)).filter(Boolean);
+  const intro = pages[0];
+  const index = pages[1];
   const introStage = document.getElementById('introStage');
-  const index      = document.getElementById('fuckindex');
-  const footer     = document.getElementById('fuckfooter');
-  if (!stage || !intro || !index || !footer) return;
+  if (!stage || !intro || !index || !introStage) return;
 
-  const LONG     = 2.6;   // 기본 페이지 사이를 넘기는 데 필요한 스크롤량(화면 높이의 배수)
-  const SMOOTH   = 0.14;  // 목표값을 따라가는 감쇠
-  const WORM_IN  = 950;   // 웜홀로 빨려드는 시간(ms)
-  const WORM_OUT = 780;   // 웜홀을 거꾸로 타고 나오는 시간(ms)
-  const QUICK    = 460;   // 특수 페이지 → Footer
+  const LAST     = pages.length;   // pos의 최댓값. 마스크 한 걸음이 앞에 더 있다
+  const DUR      = 620;            // 한 걸음에 걸리는 시간(ms)
+  const COOLDOWN = 660;            // 한 번의 휠 제스처가 여러 장을 넘기지 않도록
+  const WORM_IN  = 950;            // 웜홀로 빨려드는 시간(ms)
 
   const reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
   const clamp   = (v, a, b) => (v < a ? a : v > b ? b : v);
   const ease    = t => t * t * (3 - 2 * t);
+  const easeIO  = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const range   = (v, a, b) => clamp01((v - a) / (b - a));
-  const runway  = () => Math.max(window.innerHeight, 420) * LONG;
 
-  let pos = 0, posTarget = 0, raf = null;   // 0 메인 · 1 목차 · 2 Footer
-  let mode = 'base';                        // 'base' | 'special' | 'busy'
-  let special = null;                       // 지금 열려 있는 특수 페이지
-  let worm = { x: 0, y: 0 };                // 웜홀 확대 원점(화면 좌표)
-  let settled = null;                       // 지금 자리잡은 페이지
-  let locked = false;                       // 카드 드래그 중 등, 입력을 잠글 때
-  let specialAt = 0;
+  let pos = 0, from = 0, to = 0, t0 = 0, raf = null;
+  let moving = false, mode = 'base', locked = false, settled = null;
+  const live = new Set();          // 지금 화면에 관여하는 페이지 번호
+
+  pages.forEach((el, i) => { el.style.zIndex = String(30 - i); });
 
   function settle(el) {
     if (settled === el) return;
@@ -1902,93 +1876,111 @@
     if (el) { window.playReveals(el); el.classList.add('is-front'); }
   }
 
-  function paintBase(p) {
-    const t1 = clamp01(p);        // 메인 → 목차
-    const t2 = clamp01(p - 1);    // 목차 → Footer
-
-    // 웜홀이 남기고 간 확대·투명도가 있으면 걷어낸다
-    if (index.style.transform) { index.style.transition = ''; index.style.transform = ''; index.style.opacity = ''; index.style.transformOrigin = ''; }
-
-    // 메인 페이지: 위 텍스트는 위로, 아래 텍스트는 아래로 빠지고 배경은 옅어진다
-    intro.classList.toggle('is-on', t1 < 0.9);
-    introStage.style.setProperty('--exit', ease(t1).toFixed(4));
-    introStage.style.setProperty('--live', (1 - clamp01(t1 / 0.86)).toFixed(4));
-
-    // 목차 페이지: 'Index.'가 위에서 내려와 자리잡고, 나갈 땐 반대로 빠진다
-    index.classList.toggle('is-on', t1 > 0.001 && t2 < 0.9);
-    index.style.setProperty('--in',   range(t1, 0.26, 1).toFixed(4));
-    index.style.setProperty('--exit', ease(t2).toFixed(4));
-    index.style.setProperty('--live', (1 - clamp01(t2 / 0.86)).toFixed(4));
-
-    // Footer: 앞 페이지가 다 사라진 뒤에 떠오른다
-    if (t2 > 0.001) {
-      footer.classList.add('is-on');
-      footer.style.opacity = range(t2, 0.62, 1).toFixed(4);
-    } else {
-      footer.classList.remove('is-on');
-      footer.style.opacity = '';
-    }
-
-    settle(t2 > 0.5 ? footer : (t1 > 0.5 ? index : intro));
+  // 화면에서 물러나는 페이지는 남은 인라인 스타일을 걷어내고 끈다
+  function retire(el) {
+    el.classList.remove('is-on');
+    el.style.transform = '';
+    el.style.opacity = '';
+    el.style.transition = '';
   }
 
-  function tick() {
-    // 웜홀이 도는 동안에는 기본 흐름이 페이지를 켜고 끄면 안 된다
-    if (mode !== 'base') { raf = null; return; }
-    const d = posTarget - pos;
-    if (Math.abs(d) < 0.0004) { pos = posTarget; paintBase(pos); raf = null; return; }
-    pos += d * SMOOTH;
-    paintBase(pos);
-    raf = requestAnimationFrame(tick);
-  }
-  const kick = () => { if (raf === null) raf = requestAnimationFrame(tick); };
-
-  function setPos(v) { posTarget = clamp(v, 0, 2); kick(); }
-
-  // ---- 입력 ----
-  let holdUntil = 0;
-  function feed(delta) {
-    if (locked || mode === 'busy') return;
-    if (mode === 'special') { specialWheel(delta); return; }
-    // 메인 화면에서는 Scroll Mask가 스크롤을 먼저 가져간다
-    if (posTarget <= 0.0001 && window.introMask && window.introMask.handleWheel(delta)) return;
-
-    const now = performance.now();
-    if (now < holdUntil) return;   // 막 도착한 페이지에서 잠깐 붙잡아 둔다
-    const next = posTarget + delta / runway();
-    // 페이지에 막 닿았으면 일단 그 자리에 세운다. 안 그러면 관성으로 그대로 지나쳐 버린다
-    const lo = Math.floor(posTarget + 1e-6), hi = Math.ceil(posTarget - 1e-6);
-    if (delta > 0 && posTarget < hi && next > hi) { setPos(hi); holdUntil = now + 480; return; }
-    if (delta < 0 && posTarget > lo && next < lo) { setPos(lo); holdUntil = now + 480; return; }
-    setPos(next);
+  // 메인 → 목차: 위 텍스트는 위로, 아래 텍스트는 아래로 빠지고 배경은 옅어진다.
+  // 목차의 'Index.'는 그 반대로 위에서 내려온다.
+  function paintIntroToIndex(u) {
+    introStage.style.setProperty('--exit', ease(u).toFixed(4));
+    introStage.style.setProperty('--live', (1 - clamp01(u / 0.82)).toFixed(4));
+    index.style.setProperty('--in', range(u, 0.2, 1).toFixed(4));
+    index.style.setProperty('--exit', '0');
+    index.style.setProperty('--live', '1');
   }
 
-  function specialWheel(delta) {
-    // 특수 페이지에서는 한 번의 스크롤로 아래는 Footer, 위는 목차로 간다
-    const now = performance.now();
-    if (now - specialAt < 650 || Math.abs(delta) < 8) return;
-    specialAt = now;
-    if (delta > 0) toFooter(); else toIndex();
+  // 목차 → 첫 주제: 같은 결로 'Index.'와 Globe가 갈라져 빠진다
+  function paintIndexToNext(u, next) {
+    index.style.setProperty('--in', '1');
+    index.style.setProperty('--exit', ease(u).toFixed(4));
+    index.style.setProperty('--live', (1 - clamp01(u / 0.82)).toFixed(4));
+    if (next) next.style.opacity = range(u, 0.3, 1).toFixed(3);
   }
 
-  // ---- 웜홀 ----
-  // 시작값을 그 자리에서 확정시켜야 트랜지션이 걸린다. rAF로 미루면 탭이 숨겨졌을 때
-  // 콜백이 정리 타임아웃보다 늦게 깨어나 확대된 상태가 그대로 남는다.
+  // 그 밖의 페이지는 예전 방식대로 세로로 넘어간다 (Swiper coverflow의 결)
+  function paintSlide(a, b, u) {
+    const e = ease(u), f = 1 - e;
+    a.style.transform = 'translateY(' + (-e * 100).toFixed(2) + '%) rotateX(' + (e * 44).toFixed(2) +
+                        'deg) translateZ(' + (-e * 110).toFixed(1) + 'px)';
+    a.style.opacity = (1 - clamp01((e - 0.6) / 0.4)).toFixed(3);
+    if (!b || b === a) return;
+    b.style.transform = 'translateY(' + (f * 100).toFixed(2) + '%) rotateX(' + (-f * 44).toFixed(2) +
+                        'deg) translateZ(' + (-f * 110).toFixed(1) + 'px)';
+    b.style.opacity = (1 - clamp01((f - 0.6) / 0.4)).toFixed(3);
+  }
+
+  function paint(p) {
+    if (window.introMask) window.introMask.set(clamp01(p));
+
+    const q = Math.max(0, p - 1);                     // 0 메인 · 1 목차 · 2~7 주제 · 8 Footer
+    const a = Math.min(pages.length - 1, Math.floor(q + 1e-9));
+    const u = clamp01(q - a);
+    const b = Math.min(pages.length - 1, a + 1);
+
+    const want = new Set([a]);
+    if (u > 0.0005 && b !== a) want.add(b);
+    live.forEach(i => { if (!want.has(i)) retire(pages[i]); });
+    want.forEach(i => { pages[i].classList.add('is-on'); });
+    live.clear(); want.forEach(i => live.add(i));
+
+    // 관여하는 두 장은 매 프레임 다시 칠하므로 남은 값이 섞이지 않게 먼저 비운다
+    want.forEach(i => { pages[i].style.transform = ''; pages[i].style.opacity = ''; });
+
+    if (a === 0)      paintIntroToIndex(u);
+    else if (a === 1) paintIndexToNext(u, want.has(b) ? pages[b] : null);
+    else if (u > 0.0005) paintSlide(pages[a], pages[b], u);
+
+    settle(pages[u > 0.5 ? b : a]);
+  }
+
+  function tick(now) {
+    const k = clamp01((now - t0) / DUR);
+    pos = from + (to - from) * easeIO(k);
+    paint(pos);
+    if (k < 1) { raf = requestAnimationFrame(tick); return; }
+    pos = to; paint(pos); moving = false; raf = null;
+  }
+
+  function glide(next) {
+    if (reduce) { pos = from = to = next; paint(pos); moving = false; return; }
+    from = pos; to = next; t0 = performance.now(); moving = true;
+    if (raf === null) raf = requestAnimationFrame(tick);
+  }
+
+  function step(dir) {
+    const next = clamp(Math.round(to) + dir, 0, LAST);
+    if (next === to) return;
+    glide(next);
+  }
+
+  // ---- 웜홀: 목차에서 Globe를 눌러 그 주제로 바로 건너뛴다 ----
   const reflow = el => void el.offsetHeight;
-  const clear = el => { el.style.transition = ''; el.style.transform = ''; el.style.opacity = ''; };
 
-  function enterSpecial(el, ox, oy) {
+  function enterSpecial(el, target, ox, oy) {
     mode = 'busy';
-    worm = { x: ox, y: oy };
     if (window.globeField) window.globeField.freeze(true);
 
-    if (reduce) {
-      index.classList.remove('is-on');
+    const land = () => {
+      index.style.transition = ''; index.style.transform = ''; index.style.opacity = '';
+      index.style.transformOrigin = '';
+      el.style.transition = ''; el.style.transform = ''; el.style.opacity = '';
+      el.style.zIndex = '';
+      pages.forEach((p, i) => { p.style.zIndex = String(30 - i); });
+      if (window.globeField) window.globeField.freeze(false);
+      live.clear(); live.add(target);
+      pages.forEach((p, i) => { if (i !== target) retire(p); });
       el.classList.add('is-on');
-      special = el; mode = 'special'; specialAt = performance.now();
-      settle(el);
-      return;
-    }
+      pos = from = to = target + 1;
+      mode = 'base'; moving = false;
+      paint(pos);
+    };
+
+    if (reduce) { land(); return; }
 
     index.style.transformOrigin = ox + 'px ' + oy + 'px';
     index.style.transition = 'none';
@@ -1996,12 +1988,12 @@
     index.style.opacity = '1';
 
     el.classList.add('is-on');
+    el.style.zIndex = '40';
     el.style.transition = 'none';
     el.style.transform = 'scale(1.25)';
     el.style.opacity = '0';
     if (settled) { window.resetReveals(settled); settled.classList.remove('is-front'); }
-    settled = el;
-    el.classList.add('is-front');
+    settled = el; el.classList.add('is-front');
 
     reflow(index); reflow(el);
 
@@ -2017,107 +2009,33 @@
     el.style.opacity = '1';
     window.playReveals(el);
 
-    setTimeout(() => {
-      index.classList.remove('is-on');
-      clear(index);
-      index.style.transformOrigin = '';
-      clear(el);
-      el.classList.add('is-on');
-      special = el; mode = 'special'; specialAt = performance.now();
-    }, WORM_IN + 60);
-  }
-
-  function toIndex() {
-    const el = special;
-    if (!el) return;
-    mode = 'busy';
-
-    index.classList.add('is-on');
-    index.style.setProperty('--in', '1');
-    index.style.setProperty('--exit', '0');
-    index.style.setProperty('--live', '1');
-
-    const done = () => {
-      el.classList.remove('is-on');
-      clear(el); clear(index);
-      index.style.transformOrigin = '';
-      if (window.globeField) window.globeField.freeze(false);
-      special = null; settled = null;
-      pos = posTarget = 1; mode = 'base';
-      paintBase(1);
-    };
-
-    if (reduce) { done(); return; }
-
-    index.style.transformOrigin = worm.x + 'px ' + worm.y + 'px';
-    index.style.transition = 'none';
-    index.style.transform = 'scale(9)';
-    index.style.opacity = '0';
-
-    reflow(index); reflow(el);
-
-    index.style.transition = 'transform ' + WORM_OUT + 'ms cubic-bezier(0.16,1,0.3,1),' +
-                             ' opacity ' + Math.round(WORM_OUT * 0.7) + 'ms ease';
-    index.style.transform = 'scale(1)';
-    index.style.opacity = '1';
-
-    el.style.transition = 'transform ' + Math.round(WORM_OUT * 0.7) + 'ms cubic-bezier(0.66,0,0.86,0),' +
-                          ' opacity ' + Math.round(WORM_OUT * 0.6) + 'ms ease';
-    el.style.transform = 'scale(1.3)';
-    el.style.opacity = '0';
-
-    setTimeout(done, WORM_OUT + 60);
-  }
-
-  function toFooter() {
-    const el = special;
-    if (!el) return;
-    mode = 'busy';
-
-    footer.classList.add('is-on');
-    window.playReveals(footer);
-
-    const done = () => {
-      el.classList.remove('is-on');
-      clear(el);
-      footer.style.transition = '';
-      if (window.globeField) window.globeField.freeze(false);
-      window.resetReveals(el);
-      special = null; settled = footer; footer.classList.add('is-front');
-      pos = posTarget = 2; mode = 'base';
-      paintBase(2);
-    };
-
-    if (reduce) { done(); return; }
-
-    footer.style.transition = 'none';
-    footer.style.opacity = '0';
-
-    reflow(footer); reflow(el);
-
-    footer.style.transition = 'opacity ' + QUICK + 'ms ease ' + Math.round(QUICK * 0.35) + 'ms';
-    footer.style.opacity = '1';
-    el.style.transition = 'transform ' + QUICK + 'ms cubic-bezier(0.4,0,1,1),' +
-                          ' opacity ' + Math.round(QUICK * 0.8) + 'ms ease';
-    el.style.transform = 'scale(0.96)';
-    el.style.opacity = '0';
-
-    setTimeout(done, QUICK + Math.round(QUICK * 0.35) + 60);
+    setTimeout(land, WORM_IN + 60);
   }
 
   // ---- 바깥에서 쓰는 창구 ----
   window.pageNav = {
     enter(pageId, ox, oy) {
-      if (mode !== 'base' || Math.abs(posTarget - 1) > 0.03) return;
-      const el = document.getElementById(pageId);
-      if (el) enterSpecial(el, ox, oy);
+      if (mode !== 'base' || moving || Math.abs(to - 2) > 0.01) return;
+      const i = PAGE_IDS.indexOf(pageId);
+      const el = pages[i];
+      if (i < 0 || !el) return;
+      enterSpecial(el, i, ox, oy);
     },
     lockInput(v) { locked = !!v; },
-    indexReady() { return mode === 'base' && Math.abs(posTarget - 1) < 0.02 && Math.abs(pos - 1) < 0.08; },
-    where() { return mode === 'special' ? 'special' : (posTarget < 0.5 ? 'intro' : posTarget < 1.5 ? 'index' : 'footer'); }
+    indexReady() { return mode === 'base' && !moving && Math.abs(pos - 2) < 0.01; },
+    where() { return mode !== 'base' ? 'busy' : (pos < 1.5 ? 'intro' : pos < 2.5 ? 'index' : pos > 8.5 ? 'footer' : 'special'); },
+    at() { return pos; },
+    go(dir) { step(dir); }
   };
 
+  const busy = () => locked || moving || mode !== 'base';
+
   // ---- 휠 ----
+  // 관성 스크롤 한 번에 여러 장이 넘어가지 않도록, 예전처럼 감속을 감지해 걸러낸다
+  const scrollings = [];
+  let prevWheelTime = 0, canScroll = true;
+  const average = arr => arr.reduce((x, y) => x + y, 0) / arr.length;
+
   stage.addEventListener('wheel', e => {
     // 카드 위에서의 휠은 항상 카드 내부만 스크롤하고, 페이지는 넘기지 않는다
     const cardStage = e.target instanceof Element ? e.target.closest('#projectCardStage') : null;
@@ -2131,28 +2049,49 @@
         else if (e.deltaMode === 2) d *= sc.clientHeight;
         sc.scrollTop += d;
       }
+      scrollings.length = 0;
       return;
     }
     e.preventDefault();
+
     let delta = e.deltaY;
     if (e.deltaMode === 1) delta *= 40;
     else if (e.deltaMode === 2) delta *= window.innerHeight;
-    if (delta !== 0) feed(delta);
+    if (delta === 0) return;
+
+    const now = performance.now();
+    if (now - prevWheelTime > 200) scrollings.length = 0;
+    prevWheelTime = now;
+    if (scrollings.length > 149) scrollings.shift();
+    scrollings.push(Math.abs(delta));
+
+    if (!canScroll || busy()) return;
+    const averageEnd = average(scrollings.slice(-10));
+    const averageMiddle = average(scrollings.slice(-70));
+    if (averageEnd < averageMiddle) return;
+
+    canScroll = false;
+    setTimeout(() => { canScroll = true; }, COOLDOWN);
+    step(delta > 0 ? 1 : -1);
   }, { passive: false });
 
   // ---- 터치 ----
-  let ty = null;
-  stage.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+  let ty = null, acc = 0;
+  stage.addEventListener('touchstart', e => { ty = e.touches[0].clientY; acc = 0; }, { passive: true });
   stage.addEventListener('touchmove', e => {
     if (ty === null) return;
-    const y = e.touches[0].clientY;
-    const dy = ty - y;
-    ty = y;
     if (e.target instanceof Element && e.target.closest('#projectCardStage')) return;
     e.preventDefault();
-    feed(dy * 2.4);
+    const y = e.touches[0].clientY;
+    acc += ty - y;
+    ty = y;
+    if (Math.abs(acc) < 48 || !canScroll || busy()) return;
+    canScroll = false;
+    setTimeout(() => { canScroll = true; }, COOLDOWN);
+    step(acc > 0 ? 1 : -1);
+    acc = 0;
   }, { passive: false });
-  stage.addEventListener('touchend', () => { ty = null; }, { passive: true });
+  stage.addEventListener('touchend', () => { ty = null; acc = 0; }, { passive: true });
 
   // ---- 키보드 ----
   window.addEventListener('keydown', e => {
@@ -2162,12 +2101,13 @@
     const up   = e.key === 'ArrowUp'   || e.key === 'PageUp';
     if (!down && !up) return;
     e.preventDefault();
-    feed((down ? 1 : -1) * window.innerHeight * 0.16);
+    if (busy()) return;
+    step(down ? 1 : -1);
   });
 
-  window.addEventListener('resize', () => { if (mode === 'base') paintBase(pos); });
+  window.addEventListener('resize', () => { if (mode === 'base') paint(pos); });
 
-  paintBase(0);
+  paint(0);
 })();
 </script>
 
