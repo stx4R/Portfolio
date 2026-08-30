@@ -6,7 +6,6 @@
   <title>stx4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <script type="importmap">
@@ -20,8 +19,20 @@
   </script>
 
   <style>
+    /* ---- Pretendard (static/fonts 로컬 호스팅) ----
+       실제로 쓰이는 굵기만 브라우저가 내려받으므로 9종을 모두 선언해도 부담이 없다 */
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/Pretendard-Regular.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/Pretendard-Medium.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/Pretendard-SemiBold.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/Pretendard-Bold.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/Pretendard-ExtraBold.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/Pretendard-Black.woff2") format("woff2"); }
+
     body, html {
-      font-family: "Pretendard", sans-serif;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     }
 
     html, body { height: 100%; overflow: hidden; }
@@ -98,6 +109,53 @@
     [data-hl-dir="bottom"] { --hl-from: 100% 0%; --hl-pos: left bottom; }
     [data-hl-dir="right"] { --hl-pos: right center; }
 
+    /* ---- Intro: Scroll Mask + Particle Image ----
+       (디자인 출처: pro.reactbits.dev/docs/components/scroll-mask, .../particle-image)
+       커버 판에 원형 구멍(iris)을 뚫고, 스크롤을 누적할수록 구멍이 커지며 뒤의 배경이 드러난다. */
+    #introStage { --iris-in: 0px; --iris-out: 0px; }
+
+    #introReveal { transform: scale(var(--zoom, 1.12)); transform-origin: 50% 50%; will-change: transform; }
+
+    #introCover {
+      background: #171717;
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris-in), #000 var(--iris-out));
+              mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris-in), #000 var(--iris-out));
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+      will-change: -webkit-mask-image, mask-image;
+    }
+
+    #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
+    #introHello { font-weight: 700; letter-spacing: -0.035em; font-size: clamp(2.4rem, 6.6vw, 5.5rem); line-height: 1.05; }
+
+    /* 1번 박스 — 가장 강조되는 헤드라인 */
+    #introHead, #introSign {
+      opacity: var(--in, 0);
+      transform: translateY(calc((1 - var(--in, 0)) * 20px));
+      filter: blur(calc((1 - var(--in, 0)) * 7px));
+      will-change: opacity, transform, filter;
+    }
+    #introHead .t1 { font-weight: 900; letter-spacing: -0.035em; line-height: 1.14; font-size: clamp(1.9rem, 4.3vw, 4rem); }
+    #introHead .t2 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.5; font-size: clamp(0.95rem, 1.6vw, 1.5rem); color: #d4d4d4; margin-top: 0.85rem; }
+
+    /* 2번 박스 — 그 다음 강조 */
+    #introSign .s1 { font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; font-size: clamp(0.7rem, 1vw, 0.95rem); color: #a3a3a3; }
+    #introSign .s2 { font-weight: 600; letter-spacing: -0.01em; font-size: clamp(1rem, 1.5vw, 1.45rem); color: #fafafa; margin-top: 0.3rem; }
+
+    #particleImageStage canvas { display: block; width: 100%; height: 100%; }
+
+    #introScrim { display: none; }
+
+    @media (max-width: 767px) {
+      #introHead { right: 6vw; left: 6vw; top: 7vh; max-width: none; }
+      #introSign { left: 6vw; bottom: 7vh; }
+      #introScrim {
+        display: block;
+        background: linear-gradient(to bottom,
+          rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.35) 22%, rgba(0, 0, 0, 0) 36%,
+          rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.45) 80%, rgba(0, 0, 0, 0.88) 100%);
+      }
+    }
+
     #clickSpark { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -117,18 +175,448 @@
   <!-- Intro -->
 
   <section id="fuckintro" class="bg-neutral-900 text-white swiper-slide">
-    <div class="h-screen w-full flex items-center justify-center px-6">
-      <div class="text-center max-w-3xl" data-reveal-group="60">
-        <h1 class="text-6xl md:text-7xl font-bold mb-6 leading-tight">이상과 상상, 그 이상</h1>
-        <p class="text-lg md:text-2xl text-neutral-400 font-light mb-12">흥미로운 것을 상상하고 만듭니다.</p>
-        <div class="flex justify-center mt-8">
-          <svg class="w-8 h-8 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-            <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-          </svg>
+    <div id="introStage" class="relative h-screen w-full overflow-hidden bg-black">
+
+      <!-- 스크롤 끝에 드러날 최종 화면: Particle Image 배경 + 텍스트 -->
+      <div id="introReveal" class="absolute inset-0">
+        <div id="particleImageStage" class="absolute inset-0"></div>
+        <img id="introFallback" class="absolute inset-0 h-full w-full object-cover hidden" alt="" />
+        <!-- 좁은 화면에서는 사진이 크게 잘려 밝은 면 위에 글자가 얹히므로, 위아래를 살짝 눌러준다 -->
+        <div id="introScrim" class="absolute inset-0 pointer-events-none"></div>
+
+        <!-- 1번 박스 -->
+        <div id="introHead" class="absolute right-[5vw] top-[9vh] max-w-[46vw] text-right pointer-events-none">
+          <h1 class="t1">이상과 상상, 그 이상</h1>
+          <p class="t2">흥미로운 것을 상상하고 만듭니다.</p>
         </div>
+
+        <!-- 2번 박스 -->
+        <div id="introSign" class="absolute left-[5vw] bottom-[9vh] pointer-events-none">
+          <p class="s1">Innovative Developer</p>
+          <p class="s2">유이준(Yoo Yijun)</p>
+        </div>
+      </div>
+
+      <!-- 커버 판. 스크롤을 누적할수록 가운데 뚫린 원이 커지며 위 화면이 드러난다 -->
+      <div id="introCover" class="absolute inset-0 pointer-events-none"></div>
+
+      <!-- 커버 위에 얹는 첫 인사 -->
+      <div id="introHelloLayer" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <p id="introHello">Hello World!</p>
+        <svg class="w-8 h-8 mt-8 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+          <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
       </div>
     </div>
   </section>
+
+  <script>
+  // ---- Scroll Mask (디자인 출처: pro.reactbits.dev/docs/components/scroll-mask) ----
+  // 첫 화면에서는 휠·터치·키 입력을 페이지 넘김이 아니라 마스크를 여는 데 먼저 쓴다.
+  // 원본의 iris 변형: 화면 중앙에서 원형 구멍이 커지며 뒤 화면이 드러난다.
+  (() => {
+    const stage = document.getElementById('introStage');
+    if (!stage) return;
+    const reveal = document.getElementById('introReveal');
+    const hello  = document.getElementById('introHelloLayer');
+    const head   = document.getElementById('introHead');
+    const sign   = document.getElementById('introSign');
+
+    const SCROLL_LENGTH = 3.4;   // 끝까지 여는 데 필요한 스크롤량 (화면 높이의 배수, 원본 기본값 1.7)
+    const SETTLE        = 0.84;  // 활주로의 이 지점에서 마스크가 완전히 열리고, 남은 구간은 여운
+    const SMOOTH        = 0.14;  // 목표값을 따라가는 감쇠
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let target  = reduce ? 1 : 0;
+    let current = target;
+    let raf = null;
+    let fullAt = 0;
+
+    const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+    // 개방률은 smoothstep으로 — ease-out을 쓰면 초반에 다 열려버려 뒤쪽 스크롤이 빈다
+    const ease    = t => t * t * (3 - 2 * t);
+    const range   = (v, a, b) => clamp01((v - a) / (b - a));
+    const runway  = () => Math.max(window.innerHeight, 420) * SCROLL_LENGTH;
+    const atIntro = () => !window.pageSwiper || window.pageSwiper.activeIndex === 0;
+
+    function paint(p) {
+      const w = stage.clientWidth  || window.innerWidth;
+      const h = stage.clientHeight || window.innerHeight;
+      const maxR = Math.hypot(w, h) / 2;
+      const feather = Math.max(60, maxR * 0.12);
+      const r = ease(clamp01(p / SETTLE)) * (maxR + feather);
+
+      stage.style.setProperty('--iris-in', Math.max(0, r - feather).toFixed(1) + 'px');
+      stage.style.setProperty('--iris-out', r.toFixed(1) + 'px');
+
+      reveal.style.setProperty('--zoom', (1.12 - 0.12 * ease(clamp01(p / SETTLE))).toFixed(4));
+      hello.style.setProperty('--hello', (1 - range(p, 0, 0.16)).toFixed(4));
+      head.style.setProperty('--in', range(p, 0.56, 0.90).toFixed(4));
+      sign.style.setProperty('--in', range(p, 0.68, 1).toFixed(4));
+
+      window.introProgress = p;
+    }
+
+    function tick() {
+      const d = target - current;
+      if (Math.abs(d) < 0.0004) { current = target; paint(current); raf = null; return; }
+      current += d * SMOOTH;
+      paint(current);
+      raf = requestAnimationFrame(tick);
+    }
+    const kick = () => { if (raf === null) raf = requestAnimationFrame(tick); };
+
+    function syncLock() {
+      const sw = window.pageSwiper;
+      if (!sw) return;
+      // 첫 화면이 다 열리기 전에는 스와이프로 페이지를 넘기지 못하게 막는다
+      sw.allowTouchMove = !(sw.activeIndex === 0 && target < 1);
+      // 방향키는 아래에서 직접 처리하므로 첫 화면에서는 Swiper 쪽 키보드를 꺼둔다
+      if (sw.keyboard) { if (sw.activeIndex === 0) sw.keyboard.disable(); else sw.keyboard.enable(); }
+    }
+
+    function setTarget(v) {
+      const next = clamp01(v);
+      if (next >= 1 && target < 1) fullAt = performance.now();
+      target = next;
+      syncLock();
+      kick();
+    }
+
+    // 휠 핸들러가 물어보는 창구. true를 돌려주면 페이지를 넘기지 않는다.
+    window.introMask = {
+      handleWheel(delta) {
+        if (!atIntro()) return false;
+        if (delta > 0) {
+          // 다 연 직후 같은 관성으로 페이지가 넘어가지 않도록 잠깐 붙잡는다
+          if (target >= 1) return performance.now() - fullAt < 420;
+          setTarget(target + delta / runway());
+          return true;
+        }
+        if (delta < 0) {
+          if (target <= 0) return false;
+          setTarget(target + delta / runway());
+          return true;
+        }
+        return false;
+      }
+    };
+
+    let touchY = null;
+    stage.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+    stage.addEventListener('touchmove', e => {
+      if (touchY === null || !atIntro()) return;
+      const y = e.touches[0].clientY;
+      const dy = touchY - y;
+      touchY = y;
+      if (window.introMask.handleWheel(dy * 2.4)) e.preventDefault();
+    }, { passive: false });
+    stage.addEventListener('touchend', () => { touchY = null; }, { passive: true });
+
+    window.addEventListener('keydown', e => {
+      if (!atIntro()) return;
+      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar';
+      const up   = e.key === 'ArrowUp'   || e.key === 'PageUp';
+      if (!down && !up) return;
+      e.preventDefault();
+      if (down) {
+        if (target >= 1 && window.pageSwiper) window.pageSwiper.slideNext();
+        else setTarget(target + 0.14);
+      } else {
+        setTarget(target - 0.14);
+      }
+    });
+
+    window.addEventListener('resize', () => paint(current));
+
+    // Swiper는 이 스크립트보다 뒤에서 만들어지므로 준비될 때까지 기다린다
+    (function bind() {
+      const sw = window.pageSwiper;
+      // rAF는 탭이 숨겨져 있으면 멈추므로, 배경 탭에서 열려도 붙도록 setTimeout으로 기다린다
+      if (!sw) { setTimeout(bind, 0); return; }
+      sw.on('slideChange', () => {
+        // 2페이지에서 되돌아오면 다 열린 상태로 맞이하고, 더 올리면 다시 닫힌다
+        if (sw.activeIndex === 0 && target < 1) { target = 1; current = 1; fullAt = performance.now(); paint(1); }
+        syncLock();
+      });
+      syncLock();
+    })();
+
+    paint(current);
+  })();
+  </script>
+
+  <script type="module">
+  import * as THREE from 'three';
+
+  // ---- Particle Image (디자인 출처: pro.reactbits.dev/docs/components/particle-image) ----
+  // 사진의 픽셀을 GPU 파티클로 옮겨 담고, 플로우 필드를 따라 흩어졌다 제자리로 다시 모이게 한다.
+  (() => {
+    const stage = document.getElementById('particleImageStage');
+    const host  = document.getElementById('introStage');
+    if (!stage) return;
+
+    const SRC = 'https://images.unsplash.com/photo-1574359587026-daf1bfd26baa?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+
+    const PARTICLE_OPACITY = 0.9;    // 최대 불투명도
+    const SPEED            = 0.11;   // 플로우 필드가 변해가는 속도
+    const NOISE_SCALE      = 2.4;    // 낮을수록 흐름이 길고 완만해진다
+    const NOISE_STRENGTH   = 0.035;  // 한 생애 동안 밀려나는 거리(사진 높이 기준 비율)
+    const LIFESPAN         = 4.6;    // 초. 이 주기로 제자리에 다시 모인다
+    const CURSOR_RADIUS    = 0.14;
+    const CURSOR_STRENGTH  = 0.055;
+    const LUMA_CUTOFF      = 0.045;  // 이보다 어두운 픽셀은 파티클로 만들지 않는다
+    const SPACING_PX       = 2.4;    // 파티클 간격(대략). 작을수록 촘촘하고 무겁다
+    const POINT_SCALE      = 1.15;   // 간격 대비 알갱이 지름. 1보다 크면 서로 겹친다
+    const GAMMA            = 1.25;   // 1보다 크면 어두운 곳이 더 눌려 대비가 살아난다
+    const GAIN             = 1.3;    // 밝기 배수
+    // 화면이 좁아 사진이 잘릴 때 화면 중앙에 붙잡아 둘 지점(사진 왼쪽 위 기준 비율) — 조각상의 얼굴
+    const FOCUS_X          = 0.37;
+    const FOCUS_Y          = 0.44;
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function fallback() {
+      const el = document.getElementById('introFallback');
+      if (!el) return;
+      el.src = SRC;
+      el.classList.remove('hidden');
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = fallback;
+    img.onload = () => { try { build(img); } catch (err) { console.warn('[ParticleImage]', err); fallback(); } };
+    img.src = SRC;
+
+    function build(image) {
+      const imgAspect = image.naturalWidth / image.naturalHeight;
+
+      // 1) 사진을 격자로 훑어 밝은 픽셀만 파티클로 뽑아낸다
+      const viewH = stage.clientHeight || window.innerHeight;
+      // 좁은 화면에서는 간격을 벌려 알갱이 수를 줄인다
+      const spacing = SPACING_PX * (window.innerWidth < 768 ? 1.2 : 1);
+      const rows = Math.round(Math.min(Math.max(viewH / spacing, 200), 480));
+      const cols = Math.max(2, Math.round(rows * imgAspect));
+
+      const sheet = document.createElement('canvas');
+      sheet.width = cols; sheet.height = rows;
+      const ctx = sheet.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(image, 0, 0, cols, rows);
+      const px = ctx.getImageData(0, 0, cols, rows).data;
+
+      // 커스텀 셰이더는 three의 색공간 변환 청크를 거치지 않고 프레임버퍼에 그대로 쓰인다.
+      // 그러니 색은 sRGB 값 그대로 두고, 대비만 살짝 눌러 흑백 대비를 살린다.
+      const tone = new Float32Array(256);
+      for (let i = 0; i < 256; i++) {
+        tone[i] = Math.min(1, Math.pow(i / 255, GAMMA) * GAIN);
+      }
+
+      const totalCells = cols * rows;
+      const pos  = new Float32Array(totalCells * 3);
+      const col  = new Float32Array(totalCells * 3);
+      const seed = new Float32Array(totalCells);
+      let n = 0;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = (y * cols + x) * 4;
+          const r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
+          if (a < 8) continue;
+          const luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+          if (luma < LUMA_CUTOFF) continue;
+          // 사진 높이를 1로 정규화 — x는 ±aspect/2, y는 ±0.5 범위
+          pos[n * 3]     = ((x + 0.5) / cols - 0.5) * imgAspect;
+          pos[n * 3 + 1] = 0.5 - (y + 0.5) / rows;
+          pos[n * 3 + 2] = 0;
+          col[n * 3]     = tone[r];
+          col[n * 3 + 1] = tone[g];
+          col[n * 3 + 2] = tone[b];
+          seed[n] = Math.random();
+          n++;
+        }
+      }
+      if (n === 0) { fallback(); return; }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos.subarray(0, n * 3), 3));
+      geo.setAttribute('aColor',   new THREE.BufferAttribute(col.subarray(0, n * 3), 3));
+      geo.setAttribute('aSeed',    new THREE.BufferAttribute(seed.subarray(0, n), 1));
+      geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8);
+
+      // 2) 파티클을 움직이는 일은 전부 정점 셰이더에서 — CPU는 손대지 않는다
+      const uniforms = {
+        uTime:           { value: 0 },
+        uSpeed:          { value: SPEED },
+        uNoiseScale:     { value: NOISE_SCALE },
+        uNoiseStrength:  { value: reduce ? 0 : NOISE_STRENGTH },
+        uLifespan:       { value: LIFESPAN },
+        uSize:           { value: 2 },
+        uOpacity:        { value: PARTICLE_OPACITY },
+        uPixelRatio:     { value: 1 },
+        uFit:            { value: 1 },
+        uOffset:         { value: new THREE.Vector2(0, 0) },
+        uMotion:         { value: reduce ? 0 : 1 },
+        uMouse:          { value: new THREE.Vector2(1e3, 1e3) },
+        uCursorRadius:   { value: CURSOR_RADIUS },
+        uCursorStrength: { value: CURSOR_STRENGTH }
+      };
+
+      const VERT = [
+        'attribute vec3 aColor;',
+        'attribute float aSeed;',
+        'uniform float uTime, uSpeed, uNoiseScale, uNoiseStrength, uLifespan;',
+        'uniform float uSize, uOpacity, uPixelRatio, uFit, uMotion;',
+        'uniform float uCursorRadius, uCursorStrength;',
+        'uniform vec2 uMouse, uOffset;',
+        'varying vec3 vColor;',
+        'varying float vAlpha;',
+        '// Simplex noise 3D - Ashima Arts / Stefan Gustavson (MIT)',
+        'vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}',
+        'vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}',
+        'vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}',
+        'vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}',
+        'float snoise(vec3 v){',
+        '  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);',
+        '  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);',
+        '  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g;',
+        '  vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);',
+        '  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;',
+        '  i=mod289(i);',
+        '  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));',
+        '  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;',
+        '  vec4 j=p-49.0*floor(p*ns.z*ns.z);',
+        '  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);',
+        '  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);',
+        '  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);',
+        '  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));',
+        '  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;',
+        '  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);',
+        '  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));',
+        '  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;',
+        '  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;',
+        '  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));',
+        '}',
+        'void main(){',
+        '  float life = fract(uTime / uLifespan + aSeed);',
+        '  vec2 home = position.xy * uFit + uOffset;',
+        '  vec2 p = home;',
+        '  float t = uTime * uSpeed;',
+        '  // 플로우 필드를 세 걸음 따라간다 - 노이즈 값이 곧 진행 방향의 각도가 된다',
+        '  for (int i = 0; i < 3; i++) {',
+        '    float a = snoise(vec3(p * uNoiseScale, t)) * 6.2831853;',
+        '    p += vec2(cos(a), sin(a)) * (uNoiseStrength * life / 3.0);',
+        '  }',
+        '  vec2 d = p - uMouse;',
+        '  float dist = length(d);',
+        '  if (dist < uCursorRadius) {',
+        '    p += normalize(d + vec2(1e-5)) * (1.0 - dist / uCursorRadius) * uCursorStrength;',
+        '  }',
+        '  float fade = smoothstep(0.0, 0.10, life) * (1.0 - smoothstep(0.55, 1.0, life));',
+        '  vColor = aColor;',
+        '  vAlpha = uOpacity * mix(1.0, fade, uMotion);',
+        '  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);',
+        '  gl_PointSize = uSize * uPixelRatio;',
+        '}'
+      ].join('\n');
+
+      const FRAG = [
+        'varying vec3 vColor;',
+        'varying float vAlpha;',
+        'void main(){',
+        '  float a = 1.0 - smoothstep(0.35, 0.5, length(gl_PointCoord - 0.5));',
+        '  if (a <= 0.002) discard;',
+        '  gl_FragColor = vec4(vColor, vAlpha * a);',
+        '}'
+      ].join('\n');
+
+      const material = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader: VERT,
+        fragmentShader: FRAG,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+      } catch (err) {
+        console.warn('[ParticleImage] WebGL 사용 불가', err);
+        fallback();
+        return;
+      }
+      renderer.setClearColor(0x000000, 1);
+      stage.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.add(new THREE.Points(geo, material));
+      const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 10);
+      camera.position.z = 1;
+
+      function resize() {
+        const w = stage.clientWidth  || window.innerWidth;
+        const h = stage.clientHeight || window.innerHeight;
+        const aspect = w / h;
+        camera.left = -aspect / 2; camera.right = aspect / 2;
+        camera.top = 0.5; camera.bottom = -0.5;
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(w, h, false);
+        // 사진이 화면을 꽉 채우도록(cover) 확대 배율을 잡는다
+        const fit = Math.max(1, aspect / imgAspect);
+        uniforms.uFit.value = fit;
+        uniforms.uPixelRatio.value = renderer.getPixelRatio();
+        // 잘려나가는 쪽으로 여유가 있으면 초점(얼굴)이 화면 중앙에 오도록 밀어준다
+        const slackX = Math.max(0, (imgAspect * fit - aspect) / 2);
+        const slackY = Math.max(0, (fit - 1) / 2);
+        const wantX = -(FOCUS_X - 0.5) * imgAspect * fit;
+        const wantY = -(0.5 - FOCUS_Y) * fit;
+        uniforms.uOffset.value.set(
+          Math.max(-slackX, Math.min(slackX, wantX)),
+          Math.max(-slackY, Math.min(slackY, wantY))
+        );
+        // 알갱이 지름은 격자 간격을 따라간다 — 화면이 커져 성겨지면 알갱이도 같이 굵어진다
+        uniforms.uSize.value = Math.max(1, (h / rows) * fit * POINT_SCALE);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // 3) 커서 상호작용 - 화면 좌표를 카메라 좌표로 옮겨 넘긴다
+      const mouse = { x: 1e3, y: 1e3 };
+      const aim   = { x: 1e3, y: 1e3 };
+      if (host) {
+        host.addEventListener('pointermove', e => {
+          const r = host.getBoundingClientRect();
+          aim.x = ((e.clientX - r.left) / r.width - 0.5) * (r.width / r.height);
+          aim.y = 0.5 - (e.clientY - r.top) / r.height;
+          if (mouse.x > 999) { mouse.x = aim.x; mouse.y = aim.y; }
+        }, { passive: true });
+        host.addEventListener('pointerleave', () => { aim.x = 1e3; aim.y = 1e3; mouse.x = 1e3; mouse.y = 1e3; }, { passive: true });
+      }
+
+      let clock = 0, last = 0;
+      function frame(now) {
+        requestAnimationFrame(frame);
+        const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+        last = now;
+        // 첫 화면을 벗어났거나 탭이 숨겨졌으면 GPU를 쉬게 둔다
+        const sw = window.pageSwiper;
+        if (document.hidden || (sw && sw.activeIndex !== 0)) return;
+        if (!reduce) clock += dt;
+        uniforms.uTime.value = clock;
+        mouse.x += (aim.x - mouse.x) * 0.12;
+        mouse.y += (aim.y - mouse.y) * 0.12;
+        uniforms.uMouse.value.set(mouse.x, mouse.y);
+        renderer.render(scene, camera);
+      }
+      requestAnimationFrame(frame);
+    }
+  })();
+  </script>
 
   <!-- Page 2 -->
 <!-- 바이브 코딩 탈출기 -->
@@ -1322,6 +1810,9 @@
     if (e.deltaMode === 1) delta *= 40;
     else if (e.deltaMode === 2) delta *= window.innerHeight;
     if (delta === 0) return;
+
+    // 첫 화면에서는 스크롤을 페이지 넘김이 아니라 Scroll Mask를 여는 데 먼저 쓴다
+    if (window.introMask && window.introMask.handleWheel(delta)) { scrollings.length = 0; return; }
 
     const now = performance.now();
     if (now - prevWheelTime > 200) scrollings.length = 0;
