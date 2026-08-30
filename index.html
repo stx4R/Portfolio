@@ -180,20 +180,18 @@
       position: absolute; left: 7vw; top: 26vh; z-index: 2; pointer-events: none;
       font-weight: 900; letter-spacing: -0.035em; line-height: 1;
       font-size: clamp(2.2rem, 5vw, 4.5rem);
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.7);
       opacity: calc(var(--in, 1) * var(--live, 1));
       transform: translateY(calc((1 - var(--in, 1)) * -62vh - var(--exit, 0) * 46vh));
       will-change: opacity, transform;
     }
-    /* ---- 목차 : 제목과 그 옆에 접히는 Folder를 감싸는 상자 ----
-       Drift Wall이 화면 전체를 덮으므로, 이 상자 넓이만큼 벽을 도려내 글자 자리를 비운다 */
+    /* ---- 목차 : 제목과 그 옆에 접히는 Folder를 나란히 놓는 줄 ----
+       Drift Wall이 화면 전체를 덮으므로 카드가 이 뒤로 그대로 지나간다.
+       흰 글자가 옅은 카드 위에서도 읽히도록 그림자만 깔아 둔다 */
     #indexBox {
       display: inline-flex; align-items: center; gap: 0.34em;
-      padding: 0.14em 0.30em;
-      border: 2px solid transparent; border-radius: 0;
-      transition: border-color 420ms ease;
     }
-    #indexBox.is-boxed { border-color: #d4d4d4; pointer-events: auto; }
-    #folderDock { display: inline-block; width: 1.25em; height: 1em; pointer-events: none; }
+    #folderDock { display: inline-block; width: 1.25em; height: 1em; }
 
     #indexScene {
       position: absolute; inset: 0; z-index: 1;
@@ -212,22 +210,11 @@
       pointer-events: auto; will-change: transform;
     }
 
-    /* 벽에서 상자 자리를 빼내는 마스크. 같은 크기 두 장을 XOR해 가운데만 뚫는다 */
     #indexWall {
       position: absolute; inset: 0;
       opacity: 0; pointer-events: none;
       transform: translateY(calc(var(--exit, 0) * 42vh));
       transition: opacity 420ms ease;
-      -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-      -webkit-mask-size: 100% 100%, var(--hole-w, 0px) var(--hole-h, 0px);
-      -webkit-mask-position: 0 0, var(--hole-x, 0px) var(--hole-y, 0px);
-      -webkit-mask-repeat: no-repeat, no-repeat;
-      -webkit-mask-composite: xor;
-      mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-      mask-size: 100% 100%, var(--hole-w, 0px) var(--hole-h, 0px);
-      mask-position: 0 0, var(--hole-x, 0px) var(--hole-y, 0px);
-      mask-repeat: no-repeat, no-repeat;
-      mask-composite: exclude;
     }
     #indexWall.is-open { opacity: 1; pointer-events: auto; }
 
@@ -252,7 +239,7 @@
     }
     .idx-card__sub {
       display: block; white-space: nowrap;
-      font-weight: 400; line-height: 1.2; color: #4a4a4a;
+      font-weight: 700; line-height: 1.2; color: #3d3d3d;
       font-size: calc(var(--cw) * var(--idx-sub-k, 0.045));
     }
     /* 서류 세 장은 .folder__back(100px) 대비 70·80·90% 폭을 갖는다 */
@@ -272,16 +259,6 @@
     .folder:hover .paper { transform: translate(-50%, 0%); }
     .folder:hover .folder__front { transform: skew(15deg) scaleY(0.6); }
     .folder:hover .right { transform: skew(-15deg) scaleY(0.6); }
-
-    .folder.open { transform: translateY(-8px); }
-    .folder.open .paper:nth-child(1) { transform: translate(-120%, -70%) rotateZ(-15deg); }
-    .folder.open .paper:nth-child(1):hover { transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1); }
-    .folder.open .paper:nth-child(2) { transform: translate(10%, -70%) rotateZ(15deg); height: 80%; }
-    .folder.open .paper:nth-child(2):hover { transform: translate(10%, -70%) rotateZ(15deg) scale(1.1); }
-    .folder.open .paper:nth-child(3) { transform: translate(-50%, -100%) rotateZ(5deg); height: 80%; }
-    .folder.open .paper:nth-child(3):hover { transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1); }
-    .folder.open .folder__front { transform: skew(15deg) scaleY(0.6); }
-    .folder.open .right { transform: skew(-15deg) scaleY(0.6); }
 
     /* 카드가 벽으로 떠나 있는 동안에는 서류가 비어 있어야 앞뒤가 맞는다 */
     .folder.is-emptied .paper { opacity: 0; }
@@ -423,7 +400,7 @@
 
         <!-- 2번 박스 -->
         <div id="introSign" class="absolute left-[5vw] bottom-[9vh]">
-          <p class="s1">Innovative Developer</p>
+          <p class="s1">Creative Developer</p>
           <p class="s2">유이준(Yoo Yijun)</p>
         </div>
       </div>
@@ -852,7 +829,7 @@
       const imageFit = 'contain';
       const lanyardImage = 'static/DSHS.png';
       const lanyardColor = 0xffffff;
-      const lanyardWidth = 1;
+      const lanyardWidth = 0.3;
       const lanyardRepeat = -4;
 
       const ropeLength = 1.4;
@@ -1450,7 +1427,6 @@
     const projects = [
       {
         id: 'howto', name: 'HowTo',
-        period: '2025.09 ~ 2025.12',
         shortDesc: 'Teachable Machine 기반 실시간 이미지 인식으로 분리수거 방법을 즉시 안내하는 AI 웹 앱',
         github: 'https://github.com/stx4R/HowTo',
         readme: `<h2>개요</h2>
@@ -1466,7 +1442,6 @@
       },
       {
         id: 'wtd', name: 'Plan-ME',
-        period: '2025.05 ~ 2025.06',
         shortDesc: 'P2P 블록체인 + 학교 API 연동으로 일정 무결성을 보장하는 개인 스케줄 관리 앱',
         github: 'https://github.com/stx4R/WTD',
         readme: `<h2>개요</h2>
@@ -1484,7 +1459,6 @@
       },
       {
         id: 'seat', name: 'SeatAutoAllocate',
-        period: '2025.03',
         shortDesc: 'Gale-Shapley를 넘어선 Random Endowment TTC로 전략증명적·파레토 최적 자리를 배치하는 시스템',
         github: 'https://github.com/stx4R/SeatAutoAllocate',
         readme: `<h2>개요</h2>
@@ -1500,7 +1474,6 @@
       },
       {
         id: 'fitness', name: 'PigScape',
-        period: '2025.03 ~ 2025.07',
         shortDesc: '개인 신체 데이터 + InBody 측정값을 통합하여 BMR을 정밀 계산하고 맞춤형 운동 프로그램을 생성하는 헬스케어 앱',
         readme: `<h2>개요</h2>
 <p>나이·성별·키·몸무게 등의 기초 신체 정보에 InBody 측정 데이터(근육량, 체지방률, 체수분량 등)를 결합하여 개인별 정밀 기초대사량(BMR)을 산출하고, 목표에 맞춘 운동 프로그램을 자동 생성하는 헬스케어 웹 앱입니다.</p>
@@ -1514,7 +1487,6 @@
       },
       {
         id: 'population', name: 'PopInT',
-        period: '2026.04',
         shortDesc: '동물 순위제(Pecking Order)를 방향 그래프로 모델링하고 서열을 자동 분석하는 교육용 시각화 툴',
         readme: `<h2>개요</h2>
 <p>생물학의 순위제(Pecking Order) 현상을 그래프 이론으로 수학적 모델링하고, 인터랙티브 방향 그래프로 시각화·분석하는 교육용 웹 애플리케이션입니다. 생명과학과 컴퓨터 과학의 융합을 목표로 합니다.</p>
@@ -1534,7 +1506,6 @@
       },
       {
         id: 'moguk', name: 'MoGuk',
-        period: '2026.04 ~ 2026.05',
         shortDesc: '100명 대표·12개 동아리가 58일간 참여하는 정책 기반 모의국회 전자 운영 플랫폼',
         github: 'https://github.com/stx4R/MoGuk',
         readme: `<h2>개요</h2>
@@ -1558,7 +1529,6 @@
       },
       {
         id: 'link', name: 'L-INK Interview',
-        period: '2026.03',
         shortDesc: 'L-INK 동아리 온라인 면접 평가 시스템 — 지원자별 평가 항목 수집·집계·시각화 웹앱',
         github: 'https://github.com/stx4R/L-INK',
         readme: `<h2>개요</h2>
@@ -1610,7 +1580,6 @@
       },
       {
         id: 'bbpre', name: 'BBPre.',
-        period: '2026.05 ~ 2026.07',
         shortDesc: 'KBO·MLB 17,000+ 경기 데이터로 관중 수요를 예측하고, 매진 시대의 Truncation 문제까지 진단한 앙상블 ML 연구 (Test R² 0.671)',
         github: 'https://github.com/stx4R/R3P0RT',
         readme: `<h2>개요</h2>
@@ -1747,22 +1716,11 @@
       </a>`;
     }
 
-    function accentBar(h) {
-      return `<span class="inline-block w-1 ${h} rounded-sm shrink-0" style="background-color:#a6a6a6"></span>`;
-    }
-
     function frontCardHTML(p) {
       return `
         <div class="cs-front">
           <div class="cs-front-head">
-            <div class="flex items-center gap-3">
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg md:text-xl font-bold text-white leading-tight flex items-center gap-2">
-                  ${accentBar('h-4')}<span class="truncate">${p.name}</span>
-                </h3>
-              </div>
-              ${p.period ? `<span class="text-[10px] font-mono text-neutral-500 border border-neutral-700 rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">${p.period}</span>` : ''}
-            </div>
+            <h3 class="text-lg md:text-xl font-bold text-white leading-tight truncate">${p.name}</h3>
           </div>
           <div class="cs-front-body" data-scroll-lock>
             <p class="cs-lead">${p.shortDesc}</p>
@@ -2250,9 +2208,8 @@
   const plane = document.getElementById('driftPlane');
   const host  = document.getElementById('indexFolder');
   const layer = document.getElementById('indexFolderLayer');
-  const box   = document.getElementById('indexBox');
   const dock  = document.getElementById('folderDock');
-  if (!page || !scene || !wall || !plane || !host || !layer || !box || !dock) return;
+  if (!page || !scene || !wall || !plane || !host || !layer || !dock) return;
 
   // 주제 텍스트와 주제 박스 색은 각 주제 페이지의 제목에서 그대로 가져왔다
   const CARDS = [
@@ -2265,7 +2222,8 @@
   ];
 
   // Drift Wall 원본 설정값. 열 수만 6으로 두어 열마다 다른 주제가 흐르게 했다
-  const COLUMNS = 6;
+  const COLUMNS = 7;
+  const OVERSCAN = 1.24;                  // 판이 화면보다 넉넉히 넓어야 좌우 끝이 비지 않는다
   const GAP = 18, TILT = 16, TURN = -14, ROLL = 0, DEPTH = 120;
   const SPEED = 42, VARIANCE = 0.45, PARALLAX = 0.6, DIM = 0.55;
   const PAUSE_ON_HOVER = false;
@@ -2294,7 +2252,6 @@
     probe.style.fontWeight = '700';
     probe.style.padding = '0.28em 0.5em';
     CARDS.forEach(c => { probe.textContent = c.title; tw = Math.max(tw, probe.getBoundingClientRect().width); });
-    probe.style.fontWeight = '400';
     probe.style.padding = '0';
     CARDS.forEach(c => { probe.textContent = c.sub; sw = Math.max(sw, probe.getBoundingClientRect().width); });
     probe.remove();
@@ -2346,14 +2303,30 @@
   // ---- Drift Wall ----
   let tileW = 0, tileH = 0;
   const cols = [];
+  const orders = [];
+
+  // 열마다 여섯 장을 다른 순서로 물려야 벽을 봤을 때 같은 열이 되풀이되지 않는다.
+  // 한 번 정한 순서는 창 크기가 바뀌어도 유지한다
+  function columnOrder(c) {
+    if (!orders[c]) {
+      const a = CARDS.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      orders[c] = a;
+    }
+    return orders[c];
+  }
 
   function buildWall() {
     const w = scene.clientWidth, h = scene.clientHeight;
     if (!w || !h) return;
-    tileW = Math.max(150, Math.min(420, (w * 1.06) / COLUMNS - GAP));
+    tileW = Math.max(150, Math.min(420, (w * OVERSCAN) / COLUMNS - GAP));
     tileH = Math.round(tileW * TILE_RATIO);
     const unit = tileH + GAP;
-    const copies = Math.max(2, Math.ceil((h * 1.6) / unit) + 1);
+    const copyHeight = unit * CARDS.length;
+    const copies = Math.max(2, Math.ceil((h * 1.6) / copyHeight) + 1);
 
     dw.style.setProperty('--dw-tile-w', tileW.toFixed(1) + 'px');
     dw.style.setProperty('--dw-tile-h', tileH + 'px');
@@ -2363,31 +2336,33 @@
     plane.innerHTML = '';
     cols.length = 0;
     for (let c = 0; c < COLUMNS; c++) {
-      const card = CARDS[c % CARDS.length];
+      const order = columnOrder(c);
       const col = document.createElement('div');
       col.className = 'drift-wall__col';
       const track = document.createElement('div');
       track.className = 'drift-wall__track';
       let html = '';
       for (let k = 0; k < copies; k++) {
-        // 같은 카드가 여러 벌 도는 것이므로 키보드와 낭독기에는 첫 벌만 내보낸다
-        const a11y = k === 0
-          ? 'tabindex="0" role="button" aria-label="' + card.title + '"'
-          : 'aria-hidden="true"';
-        html += '<div class="drift-wall__tile" data-tile-id="' + c + '-' + k + '" data-col="' + c +
-                '" data-page="' + card.page + '" ' + a11y + '>' +
-                  '<span class="drift-wall__inner">' + cardMarkup(card) +
-                    '<span class="drift-wall__overlay" aria-hidden="true"></span>' +
-                  '</span>' +
-                '</div>';
+        order.forEach((card, i) => {
+          // 같은 카드가 벽 곳곳에서 도는 것이므로 키보드와 낭독기에는 첫 열의 첫 벌만 내보낸다
+          const a11y = c === 0 && k === 0
+            ? 'tabindex="0" role="button" aria-label="' + card.title + '"'
+            : 'aria-hidden="true"';
+          html += '<div class="drift-wall__tile" data-tile-id="' + c + '-' + k + '-' + i + '" data-col="' + c +
+                  '" data-page="' + card.page + '" ' + a11y + '>' +
+                    '<span class="drift-wall__inner">' + cardMarkup(card) +
+                      '<span class="drift-wall__overlay" aria-hidden="true"></span>' +
+                    '</span>' +
+                  '</div>';
+        });
       }
       track.innerHTML = html;
       col.appendChild(track);
       plane.appendChild(col);
       cols.push({
         track,
-        copyHeight: unit,
-        offset: unit * ((c * 0.37) % 1),
+        copyHeight,
+        offset: copyHeight * ((c * 0.37) % 1),
         velocity: 0,
         base: SPEED * columnFactor(c, VARIANCE) * (c % 2 === 0 ? 1 : -1)
       });
@@ -2475,15 +2450,6 @@
     openTile(tile);
   });
 
-  // 제목 상자가 앉을 자리만큼 벽을 도려낸다
-  function updateHole() {
-    const p = offsetIn(box);
-    wall.style.setProperty('--hole-x', p.x + 'px');
-    wall.style.setProperty('--hole-y', p.y + 'px');
-    wall.style.setProperty('--hole-w', box.offsetWidth + 'px');
-    wall.style.setProperty('--hole-h', box.offsetHeight + 'px');
-  }
-
   // ---- 흩뿌리기 : 화면 한가운데(= Folder가 있던 자리)에서 제자리로, 되돌릴 땐 그 역순 ----
   let scatterAnims = [];
   function scatter(dir) {
@@ -2525,17 +2491,13 @@
     if (mode !== 'folder') return;
     mode = 'busy';
     clearLater();
-    folder.classList.add('open');
-    later(() => {
-      folder.classList.add('is-emptied');
-      layer.style.setProperty('--fdir', '-46');       // 접힌 Folder는 제목을 따라 위로 빠진다
-      applyFolder(dockTarget(), true);
-      box.classList.add('is-boxed');
-      wall.classList.add('is-open');
-      requestAnimationFrame(() => { updateHole(); scatter('in'); });
-      folder.setAttribute('aria-label', '주제 목록 닫기');
-      later(() => { mode = 'wall'; }, reduce ? 0 : 1120);
-    }, reduce ? 0 : 1000);
+    folder.classList.add('is-emptied');
+    layer.style.setProperty('--fdir', '-46');         // 접힌 Folder는 제목을 따라 위로 빠진다
+    applyFolder(dockTarget(), true);
+    wall.classList.add('is-open');
+    requestAnimationFrame(() => scatter('in'));
+    folder.setAttribute('aria-label', '주제 목록 닫기');
+    later(() => { mode = 'wall'; }, reduce ? 0 : 1120);
   }
 
   function closeWall() {
@@ -2550,8 +2512,6 @@
     folder.setAttribute('aria-label', '주제 목록 열기');
     later(() => {
       wall.classList.remove('is-open');
-      box.classList.remove('is-boxed');
-      folder.classList.remove('open');
       mode = 'folder';
     }, reduce ? 0 : 1120);
   }
@@ -2566,16 +2526,15 @@
   function layout() {
     const w = scene.clientWidth;
     if (!w) return;
-    const want = Math.max(150, Math.min(420, (w * 1.06) / COLUMNS - GAP));
+    const want = Math.max(150, Math.min(420, (w * OVERSCAN) / COLUMNS - GAP));
     if (!cols.length || Math.abs(want - tileW) > 0.5) buildWall();
     if (mode !== 'busy') applyFolder(mode === 'wall' ? dockTarget() : centerTarget(), false);
-    updateHole();
   }
 
   fitCardText();
   buildWall();
   applyPlane(0, 0);
-  requestAnimationFrame(() => { applyFolder(centerTarget(), false); updateHole(); });
+  requestAnimationFrame(() => applyFolder(centerTarget(), false));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCardText);
   window.addEventListener('resize', layout);
   window.indexScene = { freeze(v) { frozen = !!v; }, relayout: layout };
