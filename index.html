@@ -177,11 +177,17 @@
 
     /* ---- 목차 페이지 ---- */
     #indexTitle {
+      position: absolute; left: 5vw; top: 6vh;
       font-weight: 900; letter-spacing: -0.035em; line-height: 1;
       font-size: clamp(2.2rem, 5vw, 4.5rem);
       opacity: calc(var(--in, 1) * var(--live, 1));
       transform: translateY(calc((1 - var(--in, 1)) * -62vh - var(--exit, 0) * 46vh));
       will-change: opacity, transform;
+    }
+    /* Globe 배치가 WIDE로 넘어가는 가로비(1.05)와 같은 경계에서만 아래로 내린다.
+       세로 화면의 TALL 배치는 첫 Globe가 그 자리에 있어 글자가 묻힌다 */
+    @media (min-aspect-ratio: 105 / 100) {
+      #indexTitle { left: 7vw; top: 26vh; }
     }
     #globeField {
       opacity: calc(var(--in, 1) * var(--live, 1));
@@ -640,7 +646,7 @@
 
   <section id="fuckindex" class="text-white page" data-page="index">
     <div class="relative h-screen w-full overflow-hidden">
-      <h2 id="indexTitle" class="absolute left-[5vw] top-[6vh]">Index.</h2>
+      <h2 id="indexTitle" class="absolute">Index.</h2>
       <!-- Globe 버튼과 라벨은 아래 모듈이 주제 목록을 보고 만들어 넣는다 -->
       <div id="globeField" class="absolute inset-0">
         <canvas id="globeCanvas"></canvas>
@@ -717,8 +723,10 @@
       const frontImage = 'static/Profile.png';
       const backImage = 'static/Profile.png';
       const imageFit = 'contain';
-      const lanyardColor = 0x000000;
-      const lanyardWidth = 0.5;
+      const lanyardImage = 'static/DSHS.png';
+      const lanyardColor = 0xffffff;
+      const lanyardWidth = 1;
+      const lanyardRepeat = -4;
 
       const ropeLength = 1.4;
 
@@ -727,6 +735,10 @@
 
       const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
       const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
+      // ReactBits lanyard.png의 실측값 : 1025x250 검정 띠 한가운데에 175x159 로고가 한 번 박혀 있고,
+      // 그 띠를 repeat -4로 되풀이해 로고가 줄에 여러 개 이어진 것처럼 보인다.
+      const BAND_TEX = { w: 1025, h: 250 };
+      const BAND_LOGO_H = 159;
       const CLEAN_PATCH = { x: 0, y: 1290, w: 800, h: 380 };
 
       let isMobile = window.innerWidth < 768;
@@ -771,10 +783,11 @@
       scene.environment = pmrem.fromScene(envScene, 0.75).texture;
       pmrem.dispose();
 
-      const [gltf, frontTex, backTex] = await Promise.all([
+      const [gltf, frontTex, backTex, bandTex] = await Promise.all([
         new GLTFLoader().loadAsync(CARD_GLB),
         loadImage(frontImage),
-        loadImage(backImage)
+        loadImage(backImage),
+        loadImage(lanyardImage)
       ]);
 
       const nodes = {};
@@ -912,10 +925,42 @@
         }
       }
 
+      // 띠는 길이 방향으로 repeat 횟수만큼 접혀 붙으므로 텍스처가 그만큼 가로로 눌린다.
+      // ReactBits 로고는 가로로 긴 마크라 티가 나지 않지만 DSHS 배지는 정원형이라
+      // 눌리는 배수만큼 텍스처 안에서 미리 늘려 두어야 줄 위에서 제 비율로 선다.
+      // 세로 크기는 원본 로고 자리(159px)와 같게 두어 줄에서 보이는 크기 자체는 원본과 같다.
+      function buildBandTexture(logo) {
+        if (!logo) return null;
+        const canvas = document.createElement('canvas');
+        canvas.width = BAND_TEX.w;
+        canvas.height = BAND_TEX.h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, BAND_TEX.w, BAND_TEX.h);
+
+        const bandLength = ropeLength * 3;
+        const squeeze = (BAND_TEX.w / BAND_TEX.h) * (Math.abs(lanyardRepeat) * lanyardWidth) / bandLength;
+        const dh = BAND_LOGO_H;
+        const dw = Math.min(dh * (logo.width / logo.height) * squeeze, BAND_TEX.w * 0.9);
+        ctx.drawImage(logo, (BAND_TEX.w - dw) / 2, (BAND_TEX.h - dh) / 2, dw, dh);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(lanyardRepeat, 1);
+        texture.anisotropy = 16;
+        texture.needsUpdate = true;
+        return texture;
+      }
+
+      const bandMap = buildBandTexture(bandTex);
+
       let bandSegments = isMobile ? 16 : 32;
       let bandGeometry = new BandGeometry(bandSegments);
       const bandMesh = new THREE.Mesh(bandGeometry, new THREE.MeshBasicMaterial({
-        color: lanyardColor,
+        color: bandMap ? lanyardColor : 0x000000,
+        map: bandMap,
         side: THREE.DoubleSide,
         depthTest: false,
         toneMapped: false
