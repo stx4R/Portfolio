@@ -169,7 +169,7 @@
       will-change: opacity, transform;
     }
     .page.is-on { visibility: visible; opacity: 1; }
-    /* 전환 중 뒤에 깔린 페이지가 Globe 클릭을 가로채지 않도록 앞장선 한 장만 입력을 받는다 */
+    /* 전환 중 뒤에 깔린 페이지가 클릭을 가로채지 않도록 앞장선 한 장만 입력을 받는다 */
     .page { pointer-events: none; }
     .page.is-front { pointer-events: auto; }
     /* z-index는 내비게이션이 페이지 순서대로 붙인다. 앞 페이지가 위에 얹혀야 교차가 자연스럽다 */
@@ -177,85 +177,211 @@
 
     /* ---- 목차 페이지 ---- */
     #indexTitle {
-      position: absolute; left: 5vw; top: 6vh;
+      position: absolute; left: 7vw; top: 26vh; z-index: 2; pointer-events: none;
       font-weight: 900; letter-spacing: -0.035em; line-height: 1;
       font-size: clamp(2.2rem, 5vw, 4.5rem);
       opacity: calc(var(--in, 1) * var(--live, 1));
       transform: translateY(calc((1 - var(--in, 1)) * -62vh - var(--exit, 0) * 46vh));
       will-change: opacity, transform;
     }
-    /* Globe 배치가 WIDE로 넘어가는 가로비(1.05)와 같은 경계에서만 아래로 내린다.
-       세로 화면의 TALL 배치는 첫 Globe가 그 자리에 있어 글자가 묻힌다 */
-    @media (min-aspect-ratio: 105 / 100) {
-      #indexTitle { left: 7vw; top: 26vh; }
+    /* ---- 목차 : 제목과 그 옆에 접히는 Folder를 감싸는 상자 ----
+       Drift Wall이 화면 전체를 덮으므로, 이 상자 넓이만큼 벽을 도려내 글자 자리를 비운다 */
+    #indexBox {
+      display: inline-flex; align-items: center; gap: 0.34em;
+      padding: 0.14em 0.30em;
+      border: 2px solid transparent; border-radius: 0;
+      transition: border-color 420ms ease;
     }
-    #globeField {
+    #indexBox.is-boxed { border-color: #d4d4d4; pointer-events: auto; }
+    #folderDock { display: inline-block; width: 1.25em; height: 1em; pointer-events: none; }
+
+    #indexScene {
+      position: absolute; inset: 0; z-index: 1;
       opacity: calc(var(--in, 1) * var(--live, 1));
       will-change: opacity;
     }
-    #globeCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-
-    .globe {
-      position: absolute; left: var(--gx); top: var(--gy);
-      width: var(--gs); height: var(--gs);
-      margin: 0; padding: 0; border: 0; background: transparent;
-      border-radius: 50%; cursor: pointer; touch-action: none;
-      transform: translate(-50%, -50%)
-                 translateY(calc(var(--exit, 0) * var(--gdir, 1) * 42vh))
-                 scale(var(--gk, 1));
-      transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    /* 목차를 뜰 때 제목은 위로, 벽은 아래로 갈라진다.
+       접힌 Folder는 제목을 따라가야 하므로 --fdir로 방향을 뒤집어 준다 */
+    #indexFolderLayer {
+      position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      opacity: calc(var(--in, 1) * var(--live, 1));
+      transform: translateY(calc(var(--exit, 0) * var(--fdir, 42) * 1vh));
     }
-    /* Hover 하이라이트 — 두께 있는 흰 테두리로 Globe 전체를 감싼다 */
-    .globe::before {
-      content: ""; position: absolute; inset: -7px;
-      border-radius: 50%; border: 2px solid #fff;
-      opacity: 0; transition: opacity 200ms ease; pointer-events: none;
+    #indexFolder {
+      position: absolute; left: 0; top: 0; transform-origin: 0 0;
+      pointer-events: auto; will-change: transform;
     }
-    .globe.is-hot { --gk: 1.09; }
-    .globe.is-hot::before { opacity: 1; }
-    .globe:focus-visible { outline: none; }
-    .globe:focus-visible::before { opacity: 1; }
 
-    /* ---- Specular Button (디자인 출처: reactbits.dev/components/specular-button)
-       원본은 ogl(WebGL)로 그리지만 여기서는 conic-gradient를 테두리에만 마스킹해 같은 결을 낸다.
-       원본의 autoAnimate 옵션처럼, 커서와 무관하게 버튼이 뜨면 늘 테두리가 돌며 점등한다. ---- */
-    @property --specAngle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-
-    .globe-label {
-      position: absolute; left: var(--lx); top: var(--ly);
-      transform: translate(-50%, -50%) scale(0.94);
-      display: inline-flex; align-items: center; white-space: nowrap;
-      padding: 0.5rem 1.1rem; border-radius: 999px;
-      font-weight: 700; letter-spacing: -0.01em;
-      font-size: clamp(0.78rem, 1.05vw, 1.02rem);
-      color: var(--ink); background: var(--tone);
-      opacity: 0; pointer-events: none; isolation: isolate;
-      transition: opacity 190ms ease, transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
-    }
-    .globe-label.is-on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    .globe-label::after {
-      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
-      background: conic-gradient(from var(--specAngle),
-        rgba(255, 255, 255, 0.3) 0deg,
-        rgba(255, 255, 255, 0.3) 6deg,
-        #fff 16deg,
-        rgba(255, 255, 255, 0.3) 56deg,
-        rgba(255, 255, 255, 0.3) 186deg,
-        #fff 196deg,
-        rgba(255, 255, 255, 0.3) 236deg,
-        rgba(255, 255, 255, 0.3) 360deg);
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    /* 벽에서 상자 자리를 빼내는 마스크. 같은 크기 두 장을 XOR해 가운데만 뚫는다 */
+    #indexWall {
+      position: absolute; inset: 0;
+      opacity: 0; pointer-events: none;
+      transform: translateY(calc(var(--exit, 0) * 42vh));
+      transition: opacity 420ms ease;
+      -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+      -webkit-mask-size: 100% 100%, var(--hole-w, 0px) var(--hole-h, 0px);
+      -webkit-mask-position: 0 0, var(--hole-x, 0px) var(--hole-y, 0px);
+      -webkit-mask-repeat: no-repeat, no-repeat;
       -webkit-mask-composite: xor;
-              mask-composite: exclude;
-      animation: specSweep 2.6s linear infinite;
-      pointer-events: none;
+      mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+      mask-size: 100% 100%, var(--hole-w, 0px) var(--hole-h, 0px);
+      mask-position: 0 0, var(--hole-x, 0px) var(--hole-y, 0px);
+      mask-repeat: no-repeat, no-repeat;
+      mask-composite: exclude;
     }
-    @keyframes specSweep { to { --specAngle: 360deg; } }
+    #indexWall.is-open { opacity: 1; pointer-events: auto; }
+
+    /* ---- 카드 : Folder의 서류와 Drift Wall의 타일이 같은 물건이다 ----
+       주제는 'stx4R'과 같은 굵기(700)에 주제 박스 색을 그대로 깔고, 부주제는 본문과 같은 굵기.
+       여백과 글씨는 모두 카드 폭(--cw)에 비례하므로, 서류든 타일이든 같은 비율로 앉는다 */
+    .idx-card {
+      --cw: 100px;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: calc(var(--cw) * 0.04);
+      padding: calc(var(--cw) * 0.06) calc(var(--cw) * 0.08);
+      background: #d7d7d7; border-radius: inherit; overflow: hidden;
+      text-align: center; user-select: none;
+    }
+    .idx-card__title {
+      display: inline-block; white-space: nowrap;
+      font-weight: 700; line-height: 1.15;
+      font-size: calc(var(--cw) * var(--idx-title-k, 0.065));
+      padding: 0.28em 0.5em;
+      background: var(--hl); color: var(--ink);
+    }
+    .idx-card__sub {
+      display: block; white-space: nowrap;
+      font-weight: 400; line-height: 1.2; color: #4a4a4a;
+      font-size: calc(var(--cw) * var(--idx-sub-k, 0.045));
+    }
+    /* 서류 세 장은 .folder__back(100px) 대비 70·80·90% 폭을 갖는다 */
+    .paper:nth-child(1) .idx-card { --cw: 70px; }
+    .paper:nth-child(2) .idx-card { --cw: 80px; }
+    .paper:nth-child(3) .idx-card { --cw: 90px; }
+    .drift-wall__inner .idx-card { --cw: var(--dw-tile-w); }
+
+    /* ---- Folder (디자인 출처: reactbits.dev/components/folder) ---- */
+    .folder {
+      --folder-color: #FFCC7B;
+      --folder-back-color: #EABB71;
+      transition: all 0.2s ease-in;
+      cursor: pointer;
+    }
+    .folder:hover { transform: translateY(-8px); }
+    .folder:hover .paper { transform: translate(-50%, 0%); }
+    .folder:hover .folder__front { transform: skew(15deg) scaleY(0.6); }
+    .folder:hover .right { transform: skew(-15deg) scaleY(0.6); }
+
+    .folder.open { transform: translateY(-8px); }
+    .folder.open .paper:nth-child(1) { transform: translate(-120%, -70%) rotateZ(-15deg); }
+    .folder.open .paper:nth-child(1):hover { transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1); }
+    .folder.open .paper:nth-child(2) { transform: translate(10%, -70%) rotateZ(15deg); height: 80%; }
+    .folder.open .paper:nth-child(2):hover { transform: translate(10%, -70%) rotateZ(15deg) scale(1.1); }
+    .folder.open .paper:nth-child(3) { transform: translate(-50%, -100%) rotateZ(5deg); height: 80%; }
+    .folder.open .paper:nth-child(3):hover { transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1); }
+    .folder.open .folder__front { transform: skew(15deg) scaleY(0.6); }
+    .folder.open .right { transform: skew(-15deg) scaleY(0.6); }
+
+    /* 카드가 벽으로 떠나 있는 동안에는 서류가 비어 있어야 앞뒤가 맞는다 */
+    .folder.is-emptied .paper { opacity: 0; }
+
+    .folder__back {
+      position: relative; width: 100px; height: 80px;
+      background: var(--folder-back-color);
+      border-radius: 0px 10px 10px 10px;
+    }
+    .folder__back::after {
+      position: absolute; z-index: 0; bottom: 98%; left: 0; content: "";
+      width: 30px; height: 10px;
+      background: var(--folder-back-color);
+      border-radius: 5px 5px 0 0;
+    }
+    .paper {
+      position: absolute; z-index: 2; bottom: 10%; left: 50%;
+      transform: translate(-50%, 10%);
+      width: 70%; height: 80%;
+      background: #d7d7d7; border-radius: 10px;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    .paper:nth-child(2) { width: 80%; height: 70%; }
+    .paper:nth-child(3) { width: 90%; height: 60%; }
+    .folder__front {
+      position: absolute; z-index: 3; width: 100%; height: 100%;
+      background: var(--folder-color);
+      border-radius: 5px 10px 10px 10px;
+      transform-origin: bottom;
+      transition: all 0.3s ease-in-out;
+    }
+    .folder:focus-visible { outline: 2px solid #ffffff; outline-offset: 4px; }
+
+    /* ---- Drift Wall (디자인 출처: reactbits.dev/components/drift-wall) ---- */
+    .drift-wall {
+      position: relative; width: 100%; height: 100%; overflow: hidden;
+      perspective: var(--dw-perspective, 1200px);
+      perspective-origin: 50% 50%;
+      --dw-tile-w: 200px; --dw-tile-h: 132px; --dw-gap: 18px; --dw-radius: 14px;
+      --dw-lift: 64px; --dw-dim: 0.55; --dw-overlay: #060010; --dw-edge: 40%;
+      -webkit-mask-image:
+        radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+        linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        radial-gradient(ellipse 78% 82% at 50% 46%, #000 var(--dw-edge), transparent 100%),
+        linear-gradient(to top, #000 var(--dw-edge), transparent 100%);
+      mask-composite: intersect;
+    }
+    .drift-wall__plane {
+      position: absolute; top: 50%; left: 50%;
+      display: flex; flex-direction: row;
+      transform-style: preserve-3d; cursor: pointer;
+      transform-origin: 50% 50%; will-change: transform;
+    }
+    .drift-wall__col {
+      position: relative;
+      width: calc(var(--dw-tile-w) + var(--dw-gap));
+      transform-style: preserve-3d;
+    }
+    .drift-wall__track {
+      display: flex; flex-direction: column;
+      will-change: transform; transform-style: preserve-3d;
+    }
+    .drift-wall__tile {
+      position: relative; display: block; width: 100%;
+      height: calc(var(--dw-tile-h) + var(--dw-gap));
+      flex: 0 0 auto; outline: none; transform-style: preserve-3d;
+    }
+    .drift-wall__inner {
+      position: absolute; inset: calc(var(--dw-gap) / 2);
+      display: block; border-radius: var(--dw-radius); overflow: hidden;
+      background: #0b0b12; opacity: var(--dw-dim);
+      transform: translateZ(0); pointer-events: none;
+      transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .drift-wall__overlay {
+      position: absolute; inset: 0;
+      background: var(--dw-overlay); opacity: 0.42;
+      pointer-events: none;
+      transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .drift-wall__tile.is-active .drift-wall__inner,
+    .drift-wall__tile:focus-visible .drift-wall__inner {
+      opacity: 1;
+      transform: translateZ(var(--dw-lift));
+      box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+    }
+    .drift-wall__tile.is-active .drift-wall__overlay,
+    .drift-wall__tile:focus-visible .drift-wall__overlay { opacity: 0; }
+    .drift-wall__tile:focus-visible .drift-wall__inner {
+      box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.7), 0 0 0 2px rgba(255, 255, 255, 0.9);
+    }
 
     @media (prefers-reduced-motion: reduce) {
-      .globe-label::after { animation: none; }
-      .globe { transition: none; }
+      .folder, .folder__front, .paper { transition: none; }
+      .drift-wall__plane, .drift-wall__track { will-change: auto; }
     }
 
     #clickSpark { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
@@ -646,11 +772,12 @@
 
   <section id="fuckindex" class="text-white page" data-page="index">
     <div class="relative h-screen w-full overflow-hidden">
-      <h2 id="indexTitle" class="absolute">Index.</h2>
-      <!-- Globe 버튼과 라벨은 아래 모듈이 주제 목록을 보고 만들어 넣는다 -->
-      <div id="globeField" class="absolute inset-0">
-        <canvas id="globeCanvas"></canvas>
+      <h2 id="indexTitle" class="absolute"><span id="indexBox"><span>Index.</span><span id="folderDock" aria-hidden="true"></span></span></h2>
+      <!-- Folder와 Drift Wall의 카드는 아래 모듈이 주제 목록을 보고 만들어 넣는다 -->
+      <div id="indexScene">
+        <div id="indexWall"><div class="drift-wall"><div class="drift-wall__plane" id="driftPlane"></div></div></div>
       </div>
+      <div id="indexFolderLayer"><div id="indexFolder"></div></div>
     </div>
   </section>
 
@@ -1840,7 +1967,7 @@
 //   pos 2  목차(Index.)               2 → 3  'Index.'가 빠지고 첫 주제가 떠오른다
 //   pos 3~8  각 주제 페이지            그 뒤로는 예전처럼 세로로 넘어간다
 //   pos 9  Footer
-// 목차의 Globe는 해당 주제로 바로 건너뛰는 지름길이고, 도착한 뒤에는 같은 흐름을 탄다.
+// 목차의 카드는 해당 주제로 바로 건너뛰는 지름길이고, 도착한 뒤에는 같은 흐름을 탄다.
 (() => {
   const stage = document.getElementById('stage');
   const PAGE_IDS = ['fuckintro', 'fuckindex', 'fuckhover', 'fuckscrollanimation',
@@ -1894,7 +2021,7 @@
     index.style.setProperty('--live', '1');
   }
 
-  // 목차 → 첫 주제: 같은 결로 'Index.'와 Globe가 갈라져 빠진다
+  // 목차 → 첫 주제: 같은 결로 'Index.'와 카드 벽이 갈라져 빠진다
   function paintIndexToNext(u, next) {
     index.style.setProperty('--in', '1');
     index.style.setProperty('--exit', ease(u).toFixed(4));
@@ -1958,12 +2085,12 @@
     glide(next);
   }
 
-  // ---- 웜홀: 목차에서 Globe를 눌러 그 주제로 바로 건너뛴다 ----
+  // ---- 웜홀: 목차에서 카드를 눌러 그 주제로 바로 건너뛴다 ----
   const reflow = el => void el.offsetHeight;
 
   function enterSpecial(el, target, ox, oy) {
     mode = 'busy';
-    if (window.globeField) window.globeField.freeze(true);
+    if (window.indexScene) window.indexScene.freeze(true);
 
     const land = () => {
       index.style.transition = ''; index.style.transform = ''; index.style.opacity = '';
@@ -1971,7 +2098,7 @@
       el.style.transition = ''; el.style.transform = ''; el.style.opacity = '';
       el.style.zIndex = '';
       pages.forEach((p, i) => { p.style.zIndex = String(30 - i); });
-      if (window.globeField) window.globeField.freeze(false);
+      if (window.indexScene) window.indexScene.freeze(false);
       live.clear(); live.add(target);
       pages.forEach((p, i) => { if (i !== target) retire(p); });
       el.classList.add('is-on');
@@ -2096,7 +2223,7 @@
   // ---- 키보드 ----
   window.addEventListener('keydown', e => {
     const act = document.activeElement;
-    if (act && act.classList && act.classList.contains('globe') && (e.key === ' ' || e.key === 'Enter')) return;
+    if (act && act.closest && act.closest('#indexFolderLayer, .drift-wall__tile') && (e.key === ' ' || e.key === 'Enter')) return;
     const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar';
     const up   = e.key === 'ArrowUp'   || e.key === 'PageUp';
     if (!down && !up) return;
@@ -2111,446 +2238,347 @@
 })();
 </script>
 
-<script type="module">
-import * as THREE from 'three';
-
-// ---- Globe (디자인 출처: pro.reactbits.dev/docs/components/globe) ----
-// 원본의 점 구체 · 대기권 발광 · 무작위 아크 · 드래그 회전을 그대로 가져오되,
-// 대륙 마스크 대신 구 전체에 고르게 점을 뿌린 추상 행성으로 만들고
-// 아크 색만 주제 박스 색을 따라가게 했다.
+<script>
+// ---- 목차 : Folder → Drift Wall (디자인 출처: reactbits.dev/components/folder · /components/drift-wall) ----
+// 두 컴포넌트를 바닐라로 옮기고, Folder의 서류 자리와 Drift Wall의 타일 자리에 같은 '카드'를 끼웠다.
+// Folder를 누르면 서류가 펼쳐지고, 1초 뒤 카드가 화면 전체로 흩뿌려지며 벽이 된다.
+// 제목 옆으로 접힌 Folder를 다시 누르면 카드가 되돌아 모이며 같은 길을 거꾸로 되짚는다.
 (() => {
-  const field  = document.getElementById('globeField');
-  const canvas = document.getElementById('globeCanvas');
-  const page   = document.getElementById('fuckindex');
-  const title  = document.getElementById('indexTitle');
-  if (!field || !canvas || !page) return;
+  const page  = document.getElementById('fuckindex');
+  const scene = document.getElementById('indexScene');
+  const wall  = document.getElementById('indexWall');
+  const plane = document.getElementById('driftPlane');
+  const host  = document.getElementById('indexFolder');
+  const layer = document.getElementById('indexFolderLayer');
+  const box   = document.getElementById('indexBox');
+  const dock  = document.getElementById('folderDock');
+  if (!page || !scene || !wall || !plane || !host || !layer || !box || !dock) return;
 
-  const TOPICS = [
-    { page: 'fuckhover',           label: 'About ME.',                 tone: '#c084fc', ink: '#000000' },
-    { page: 'fuckscrollanimation', label: 'I think, therefore, I am.', tone: '#22d3ee', ink: '#000000' },
-    { page: 'fuckhyperlink',       label: 'Be creative, Be better.',   tone: '#861616', ink: '#ffffff' },
-    { page: 'fuckinteraction',     label: 'Practice makes perfect.',   tone: '#0F5132', ink: '#ffffff' },
-    { page: 'fuckBentoBox',        label: 'Efforts never betray.',     tone: '#E0A800', ink: '#000000' },
-    { page: 'fuckmailto',          label: 'Feel free to contact.',     tone: '#3b82f6', ink: '#000000' }
+  // 주제 텍스트와 주제 박스 색은 각 주제 페이지의 제목에서 그대로 가져왔다
+  const CARDS = [
+    { page: 'fuckhover',           title: 'About ME.',                 sub: '저는 누구인가요?',         hl: '#c084fc', ink: '#000000' },
+    { page: 'fuckscrollanimation', title: 'I think, therefore, I am.', sub: '저는 무엇에 관심이 있나요?', hl: '#22d3ee', ink: '#000000' },
+    { page: 'fuckhyperlink',       title: 'Be creative, Be better.',   sub: '저는 무엇을 하나요?',      hl: '#861616', ink: '#ffffff' },
+    { page: 'fuckinteraction',     title: 'Practice makes perfect.',   sub: '저는 무엇을 다루나요?',     hl: '#0F5132', ink: '#ffffff' },
+    { page: 'fuckBentoBox',        title: 'Efforts never betray.',     sub: '저는 무엇을 했나요?',      hl: '#E0A800', ink: '#000000' },
+    { page: 'fuckmailto',          title: 'Feel free to contact.',     sub: '저에게 어떻게 연락하나요?',  hl: '#3b82f6', ink: '#000000' }
   ];
 
-  // 한 번 정해 고정한 배치. x·y는 화면 비율(%), s는 지름(vmin)
-  const WIDE = [
-    { x: 36, y: 27, s: 30 }, { x: 63, y: 19, s: 13 }, { x: 85, y: 29, s: 26 },
-    { x: 15, y: 66, s: 34 }, { x: 45, y: 74, s: 15 }, { x: 69, y: 72, s: 25 }
-  ];
-  const TALL = [
-    { x: 30, y: 24, s: 30 }, { x: 74, y: 16, s: 17 }, { x: 73, y: 36, s: 26 },
-    { x: 26, y: 52, s: 34 }, { x: 70, y: 68, s: 20 }, { x: 33, y: 84, s: 28 }
-  ];
+  // Drift Wall 원본 설정값. 열 수만 6으로 두어 열마다 다른 주제가 흐르게 했다
+  const COLUMNS = 6;
+  const GAP = 18, TILT = 16, TURN = -14, ROLL = 0, DEPTH = 120;
+  const SPEED = 42, VARIANCE = 0.45, PARALLAX = 0.6, DIM = 0.55;
+  const PAUSE_ON_HOVER = false;
+  const TILE_RATIO = 132 / 200;
 
-  const NEUTRAL   = 0x9ca3af;    // 점과 대기권 색 (원본 neutralColor)
-  const DOTS      = 2600;        // 구 표면 점 개수
-  const ARC_COUNT = 10;          // 한 행성에 동시에 떠 있는 아크 수 (원본 arcCount 기본값)
-  const FOV       = 27;          // 대기권까지 딱 들어차는 화각
-  const TAN_HALF  = Math.tan(FOV * Math.PI / 360);
-  const ARC_SEG   = 110;         // 아크 하나를 이루는 알갱이 수
-  const ARC_DUR   = [2.4, 4.0];  // 아크가 한 번 지나가는 시간(초)
-  const AUTO_SPIN = 0.85;        // 원본 autoRotateSpeed
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const columnFactor = (i, v) => 1 + v * (((i * 0.6180339887 + 0.35) % 1) * 2 - 1);
+  const dw = wall.querySelector('.drift-wall');
 
-  const DOT_VERT = [
-    'attribute float aA;',
-    // uWorld는 알갱이의 월드 반지름, uScale은 뷰포트 높이 / (2*tan(fov/2)).
-    // 둘을 거리로 나누면 원근이 반영된 실제 화면 픽셀 크기가 나온다.
-    'uniform float uWorld; uniform float uScale;',
-    'varying float vA;',
-    'void main(){',
-    '  vA = aA;',
-    '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
-    '  gl_Position = projectionMatrix * mv;',
-    '  gl_PointSize = max(1.0, uWorld * uScale / max(0.001, -mv.z));',
-    '}'
-  ].join('\n');
-
-  const DOT_FRAG = [
-    'uniform vec3 uColor; uniform float uHot;',
-    'varying float vA;',
-    'void main(){',
-    '  float m = 1.0 - smoothstep(0.32, 0.5, length(gl_PointCoord - 0.5));',
-    '  if (m * vA <= 0.004) discard;',
-    // uHot을 켜면 밝은 부분(아크의 머리)이 더 타오른다
-    '  gl_FragColor = vec4(uColor * (1.0 + uHot * vA * 0.9), m * vA);',
-    '}'
-  ].join('\n');
-
-  const ATMO_VERT = [
-    'varying vec3 vN; varying vec3 vP;',
-    'void main(){',
-    '  vN = normalize(normalMatrix * normal);',
-    '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
-    '  vP = mv.xyz;',
-    '  gl_Position = projectionMatrix * mv;',
-    '}'
-  ].join('\n');
-
-  const ATMO_FRAG = [
-    'uniform vec3 uColor; uniform float uStrength;',
-    'varying vec3 vN; varying vec3 vP;',
-    'void main(){',
-    // 실루엣 가장자리에서만 밝아지도록 프레넬을 쓴다
-    '  float f = pow(1.0 - abs(dot(normalize(vN), normalize(-vP))), 4.5);',
-    '  gl_FragColor = vec4(uColor, f * uStrength);',
-    '}'
-  ].join('\n');
-
-  function arcColor(hex) {
-    const c = new THREE.Color(hex);
-    const m = Math.max(c.r, c.g, c.b);
-    if (m > 0.001 && m < 0.78) c.multiplyScalar(0.78 / m);
-    return c;
+  // ---- 카드 ----
+  function cardMarkup(c) {
+    return '<span class="idx-card">' +
+             '<span class="idx-card__title" style="--hl:' + c.hl + ';--ink:' + c.ink + '">' + c.title + '</span>' +
+             '<span class="idx-card__sub">' + c.sub + '</span>' +
+           '</span>';
   }
 
-  function randUnit() {
-    const z = Math.random() * 2 - 1;
-    const a = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.max(0, 1 - z * z));
-    return new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, z);
+  // 주제·부주제는 줄바꿈 없이 한 줄로 들어가야 한다. 가장 긴 글이 카드 폭의 84%에
+  // 맞는 크기를 한 번 재서 모든 카드가 그 크기를 함께 쓴다 (카드끼리 글씨가 들쭉날쭉하지 않게)
+  function fitCardText() {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;' +
+                          'display:inline-block;white-space:nowrap;font-size:100px;line-height:1.15;';
+    document.body.appendChild(probe);
+    let tw = 1, sw = 1;
+    probe.style.fontWeight = '700';
+    probe.style.padding = '0.28em 0.5em';
+    CARDS.forEach(c => { probe.textContent = c.title; tw = Math.max(tw, probe.getBoundingClientRect().width); });
+    probe.style.fontWeight = '400';
+    probe.style.padding = '0';
+    CARDS.forEach(c => { probe.textContent = c.sub; sw = Math.max(sw, probe.getBoundingClientRect().width); });
+    probe.remove();
+    const room = 84;                                  // 양옆 8%씩은 여백으로 남긴다
+    const title = room / tw;                          // 카드 폭에 곱할 비율
+    const sub = Math.min(room / sw, title * 0.72);
+    const root = document.documentElement.style;
+    root.setProperty('--idx-title-k', title.toFixed(5));
+    root.setProperty('--idx-sub-k', sub.toFixed(5));
   }
 
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  } catch (err) {
-    console.warn('[Globe] WebGL 사용 불가', err);
-    return;
+  // ---- Folder ----
+  const folder = document.createElement('div');
+  folder.className = 'folder';
+  folder.tabIndex = 0;
+  folder.setAttribute('role', 'button');
+  folder.setAttribute('aria-label', '주제 목록 열기');
+  const back = document.createElement('div');
+  back.className = 'folder__back';
+  // 원본 Folder는 서류를 세 장까지만 물리므로 앞의 세 주제가 들어간다
+  back.innerHTML = CARDS.slice(0, 3)
+    .map((c, i) => '<div class="paper paper-' + (i + 1) + '">' + cardMarkup(c) + '</div>').join('') +
+    '<div class="folder__front"></div><div class="folder__front right"></div>';
+  folder.appendChild(back);
+  host.appendChild(folder);
+
+  const FOLDER_W = 100, FOLDER_H = 80;                // .folder__back의 고정 크기
+
+  function centerTarget() {
+    const w = scene.clientWidth, h = scene.clientHeight;
+    const s = Math.max(2, Math.min(5.5, Math.min(w * 0.18, h * 0.34) / FOLDER_H));
+    return { x: (w - FOLDER_W * s) / 2, y: (h - FOLDER_H * s) / 2, s };
   }
-  renderer.setClearColor(0x000000, 0);
-  renderer.autoClear = false;
-
-  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
-  camera.position.z = 5;
-
-  function buildGlobe(tone) {
-    const scene = new THREE.Scene();
-    const group = new THREE.Group();
-    scene.add(group);
-
-    // 안쪽 불투명 구 — 뒤편의 점과 아크를 가려 행성처럼 보이게 한다
-    group.add(new THREE.Mesh(
-      new THREE.SphereGeometry(0.985, 48, 32),
-      new THREE.MeshBasicMaterial({ color: 0x0b0b0d })
-    ));
-
-    // 표면 점 — 피보나치 나선으로 고르게 뿌린다
-    const dp = new Float32Array(DOTS * 3);
-    const da = new Float32Array(DOTS);
-    for (let i = 0; i < DOTS; i++) {
-      const y = 1 - (i / (DOTS - 1)) * 2;
-      const rr = Math.sqrt(Math.max(0, 1 - y * y));
-      const th = i * 2.399963229728653;
-      // 피보나치 나선 그대로면 격자 무늬가 도드라져 기계처럼 보인다. 살짝 흔들어 준다
-      const jx = (Math.random() - 0.5) * 0.05, jy = (Math.random() - 0.5) * 0.05, jz = (Math.random() - 0.5) * 0.05;
-      const px = Math.cos(th) * rr + jx, py = y + jy, pz = Math.sin(th) * rr + jz;
-      const inv = 1 / Math.hypot(px, py, pz);
-      dp[i * 3] = px * inv; dp[i * 3 + 1] = py * inv; dp[i * 3 + 2] = pz * inv;
-      da[i] = 0.5 + Math.random() * 0.5;
-    }
-    const dg = new THREE.BufferGeometry();
-    dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
-    dg.setAttribute('aA', new THREE.BufferAttribute(da, 1));
-    const dotMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: new THREE.Color(NEUTRAL) }, uWorld: { value: 0.0135 }, uScale: { value: 300 }, uHot: { value: 0 } },
-      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
-      transparent: true, depthWrite: false
-    });
-    group.add(new THREE.Points(dg, dotMat));
-
-    // 대기권 발광
-    group.add(new THREE.Mesh(
-      new THREE.SphereGeometry(1.14, 48, 32),
-      new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: new THREE.Color(NEUTRAL) }, uStrength: { value: 0.62 } },
-        vertexShader: ATMO_VERT, fragmentShader: ATMO_FRAG,
-        side: THREE.BackSide, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-      })
-    ));
-
-    // 아크 — 무작위 두 지점을 잇는 곡선을 머리부터 그려 나간다.
-    // 알갱이를 촘촘히 이어 선처럼 보이게 한다. WebGL 기본 선은 1px에 묶여 굵기를 못 준다.
-    const color = arcColor(tone);
-    const arcs = [];
-    const ap = new Float32Array(ARC_COUNT * ARC_SEG * 3);
-    const aa = new Float32Array(ARC_COUNT * ARC_SEG);
-    const ag = new THREE.BufferGeometry();
-    ag.setAttribute('position', new THREE.BufferAttribute(ap, 3));
-    ag.setAttribute('aA', new THREE.BufferAttribute(aa, 1));
-    const arcMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: color }, uWorld: { value: 0.024 }, uScale: { value: 300 }, uHot: { value: 1 } },
-      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-    });
-    const arcPts = new THREE.Points(ag, arcMat);
-    arcPts.frustumCulled = false;
-    group.add(arcPts);
-    for (let i = 0; i < ARC_COUNT; i++) arcs.push({ head: -1, dur: 3, wait: Math.random() * 1.8 });
-
-    // 아크의 양 끝을 표시하는 점
-    const mp = new Float32Array(ARC_COUNT * 2 * 3);
-    const ma = new Float32Array(ARC_COUNT * 2);
-    const mg = new THREE.BufferGeometry();
-    mg.setAttribute('position', new THREE.BufferAttribute(mp, 3));
-    mg.setAttribute('aA', new THREE.BufferAttribute(ma, 1));
-    const markMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: color }, uWorld: { value: 0.058 }, uScale: { value: 300 }, uHot: { value: 0.8 } },
-      vertexShader: DOT_VERT, fragmentShader: DOT_FRAG,
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-    });
-    const marks = new THREE.Points(mg, markMat);
-    marks.frustumCulled = false;
-    group.add(marks);
-
-    return { scene, group, arcs, ag, mg, dotMat, markMat, arcMat };
+  function offsetIn(el) {
+    let x = 0, y = 0, stop = scene.parentElement;
+    while (el && el !== stop) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+    return { x, y };
+  }
+  function dockTarget() {
+    const p = offsetIn(dock);
+    const s = dock.offsetHeight / FOLDER_H;           // 제목 글자 높이에 맞춘다
+    return { x: p.x + (dock.offsetWidth - FOLDER_W * s) / 2, y: p.y, s };
+  }
+  function applyFolder(t, animate) {
+    host.style.transition = animate && !reduce ? 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
+    host.style.transform = 'translate(' + t.x.toFixed(1) + 'px, ' + t.y.toFixed(1) + 'px) scale(' + t.s.toFixed(4) + ')';
   }
 
-  function respawn(g, i) {
-    const arc = g.arcs[i];
-    const a = randUnit();
-    let b = randUnit();
-    // 두 점이 너무 붙어 있으면 곡선이 뭉개진다
-    for (let n = 0; n < 8 && a.dot(b) > 0.55; n++) b = randUnit();
-    const omega = Math.acos(Math.max(-1, Math.min(1, a.dot(b))));
-    const sinO = Math.sin(omega) || 1e-4;
-    const lift = 0.16 + Math.random() * 0.26;
+  // ---- Drift Wall ----
+  let tileW = 0, tileH = 0;
+  const cols = [];
 
-    const pos = g.ag.attributes.position.array;
-    const base = i * ARC_SEG * 3;
-    for (let k = 0; k < ARC_SEG; k++) {
-      const t = k / (ARC_SEG - 1);
-      const w1 = Math.sin((1 - t) * omega) / sinO;
-      const w2 = Math.sin(t * omega) / sinO;
-      const h = 1 + Math.sin(Math.PI * t) * lift;
-      pos[base + k * 3]     = (a.x * w1 + b.x * w2) * h;
-      pos[base + k * 3 + 1] = (a.y * w1 + b.y * w2) * h;
-      pos[base + k * 3 + 2] = (a.z * w1 + b.z * w2) * h;
-    }
-    g.ag.attributes.position.needsUpdate = true;
-
-    const mp = g.mg.attributes.position.array;
-    mp[i * 6] = a.x; mp[i * 6 + 1] = a.y; mp[i * 6 + 2] = a.z;
-    mp[i * 6 + 3] = b.x; mp[i * 6 + 4] = b.y; mp[i * 6 + 5] = b.z;
-    g.mg.attributes.position.needsUpdate = true;
-
-    arc.head = 0;
-    arc.dur = ARC_DUR[0] + Math.random() * (ARC_DUR[1] - ARC_DUR[0]);
-  }
-
-  // ---- DOM: Globe 버튼과 라벨 ----
-  const items = TOPICS.map(t => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'globe';
-    btn.dataset.page = t.page;
-    btn.setAttribute('aria-label', t.label);
-    field.appendChild(btn);
-
-    const label = document.createElement('span');
-    label.className = 'globe-label';
-    label.textContent = t.label;
-    label.style.setProperty('--tone', t.tone);
-    label.style.setProperty('--ink', t.ink);
-    field.appendChild(label);
-
-    const it = { topic: t, btn, label, cx: 0, cy: 0, r: 1, rx: 0, ry: Math.random() * 6.28, vx: 0, vy: 0, drag: null, moved: 0 };
-    it.globe = buildGlobe(t.tone);
-    for (let i = 0; i < ARC_COUNT; i++) { respawn(it.globe, i); it.globe.arcs[i].head = -1; }
-    return it;
-  });
-
-  const ready = () => window.pageNav && window.pageNav.indexReady();
-
-  function setHot(it, v) {
-    if (v && !ready()) return;
-    it.btn.classList.toggle('is-hot', v);
-    it.label.classList.toggle('is-on', v);
-  }
-
-  items.forEach(it => {
-    it.btn.addEventListener('pointerenter', () => setHot(it, true));
-    it.btn.addEventListener('pointerleave', () => { if (!it.drag) setHot(it, false); });
-    it.btn.addEventListener('focus', () => setHot(it, true));
-    it.btn.addEventListener('blur',  () => setHot(it, false));
-
-    it.btn.addEventListener('pointerdown', e => {
-      if (!ready()) return;
-      it.drag = { x: e.clientX, y: e.clientY, held: false };
-      it.moved = 0;
-    });
-    it.btn.addEventListener('pointermove', e => {
-      if (!it.drag) return;
-      const dx = e.clientX - it.drag.x, dy = e.clientY - it.drag.y;
-      it.drag.x = e.clientX; it.drag.y = e.clientY;
-      it.moved += Math.abs(dx) + Math.abs(dy);
-      it.vy += dx * 0.0009;
-      it.vx += dy * 0.0009;
-      // 진짜 끌기 시작했을 때만 포인터를 붙잡는다. 누르자마자 잡으면 클릭이 흐트러진다
-      if (!it.drag.held && it.moved > 4) {
-        it.drag.held = true;
-        try { it.btn.setPointerCapture(e.pointerId); } catch (_) {}
-      }
-    });
-    const end = e => {
-      if (!it.drag) return;
-      if (it.drag.held) { try { it.btn.releasePointerCapture(e.pointerId); } catch (_) {} }
-      it.drag = null;
-    };
-    it.btn.addEventListener('pointerup', end);
-    it.btn.addEventListener('pointercancel', end);
-
-    it.btn.addEventListener('click', () => {
-      // 돌리려고 끌었을 뿐이면 페이지를 열지 않는다
-      if (it.moved > 6) { it.moved = 0; return; }
-      if (!ready()) return;
-      const r = it.btn.getBoundingClientRect();
-      window.pageNav.enter(it.topic.page, r.left + r.width / 2, r.top + r.height / 2);
-    });
-  });
-
-  // ---- 배치 ----
-  function layout() {
-    const w = field.clientWidth, h = field.clientHeight;
+  function buildWall() {
+    const w = scene.clientWidth, h = scene.clientHeight;
     if (!w || !h) return;
-    const vmin = Math.min(w, h) / 100;
-    const preset = w / h < 1.05 ? TALL : WIDE;
-    items.forEach((it, i) => {
-      const p = preset[i];
-      const size = p.s * vmin;
-      it.cx = (p.x / 100) * w;
-      it.cy = (p.y / 100) * h;
-      it.r = size / 2;
-      it.btn.style.setProperty('--gx', it.cx.toFixed(1) + 'px');
-      it.btn.style.setProperty('--gy', it.cy.toFixed(1) + 'px');
-      it.btn.style.setProperty('--gs', size.toFixed(1) + 'px');
-      it.btn.style.setProperty('--gdir', it.cy < h / 2 ? '-1' : '1');
-    });
-    placeLabels(w, h);
-  }
+    tileW = Math.max(150, Math.min(420, (w * 1.06) / COLUMNS - GAP));
+    tileH = Math.round(tileW * TILE_RATIO);
+    const unit = tileH + GAP;
+    const copies = Math.max(2, Math.ceil((h * 1.6) / unit) + 1);
 
-  function placeLabels(w, h) {
-    const fr = field.getBoundingClientRect();
-    let tr = null;
-    if (title) {
-      const t = title.getBoundingClientRect();
-      tr = { l: t.left - fr.left, t: t.top - fr.top, r: t.right - fr.left, b: t.bottom - fr.top };
+    dw.style.setProperty('--dw-tile-w', tileW.toFixed(1) + 'px');
+    dw.style.setProperty('--dw-tile-h', tileH + 'px');
+    dw.style.setProperty('--dw-gap', GAP + 'px');
+    dw.style.setProperty('--dw-dim', String(DIM));
+
+    plane.innerHTML = '';
+    cols.length = 0;
+    for (let c = 0; c < COLUMNS; c++) {
+      const card = CARDS[c % CARDS.length];
+      const col = document.createElement('div');
+      col.className = 'drift-wall__col';
+      const track = document.createElement('div');
+      track.className = 'drift-wall__track';
+      let html = '';
+      for (let k = 0; k < copies; k++) {
+        // 같은 카드가 여러 벌 도는 것이므로 키보드와 낭독기에는 첫 벌만 내보낸다
+        const a11y = k === 0
+          ? 'tabindex="0" role="button" aria-label="' + card.title + '"'
+          : 'aria-hidden="true"';
+        html += '<div class="drift-wall__tile" data-tile-id="' + c + '-' + k + '" data-col="' + c +
+                '" data-page="' + card.page + '" ' + a11y + '>' +
+                  '<span class="drift-wall__inner">' + cardMarkup(card) +
+                    '<span class="drift-wall__overlay" aria-hidden="true"></span>' +
+                  '</span>' +
+                '</div>';
+      }
+      track.innerHTML = html;
+      col.appendChild(track);
+      plane.appendChild(col);
+      cols.push({
+        track,
+        copyHeight: unit,
+        offset: unit * ((c * 0.37) % 1),
+        velocity: 0,
+        base: SPEED * columnFactor(c, VARIANCE) * (c % 2 === 0 ? 1 : -1)
+      });
     }
-    items.forEach(it => {
-      const lw = it.label.offsetWidth || 170;
-      const lh = it.label.offsetHeight || 34;
-      const gap = 16;
-      const cands = [
-        [it.cx, it.cy + it.r + gap + lh / 2],
-        [it.cx, it.cy - it.r - gap - lh / 2],
-        [it.cx + it.r + gap + lw / 2, it.cy],
-        [it.cx - it.r - gap - lw / 2, it.cy]
-      ];
-      let best = cands[0], bestCost = Infinity;
-      for (const c of cands) {
-        const l = c[0] - lw / 2, r = c[0] + lw / 2, t = c[1] - lh / 2, b = c[1] + lh / 2;
-        let cost = 0;
-        cost += (Math.max(0, 10 - l) + Math.max(0, r - (w - 10))) * 60;
-        cost += (Math.max(0, 10 - t) + Math.max(0, b - (h - 10))) * 60;
-        // 다른 Globe를 최대한 가리지 않는 자리를 고른다
-        items.forEach(o => {
-          if (o === it) return;
-          const nx = Math.max(l, Math.min(o.cx, r));
-          const ny = Math.max(t, Math.min(o.cy, b));
-          const d = Math.hypot(o.cx - nx, o.cy - ny);
-          if (d < o.r + 6) cost += (o.r + 6 - d) * 4;
-        });
-        // 'Index.' 글자도 피한다
-        if (tr && l < tr.r + 12 && r > tr.l - 12 && t < tr.b + 12 && b > tr.t - 12) cost += 900;
-        if (cost < bestCost) { bestCost = cost; best = c; }
-      }
-      it.label.style.setProperty('--lx', best[0].toFixed(1) + 'px');
-      it.label.style.setProperty('--ly', best[1].toFixed(1) + 'px');
-    });
   }
 
-  let cw = 0, ch = 0;
-  function resizeTo(w, h) {
-    if (w === cw && h === ch) return;
-    cw = w; ch = h;
-    const pr = Math.min(window.devicePixelRatio || 1, 2);
-    renderer.setPixelRatio(pr);
-    renderer.setSize(w, h, false);
+  const pointer = { x: 0, y: 0 };
+  const damped = { x: 0, y: 0 };
+  let hoveredCol = -1, wallHovered = false, activeTile = null;
+  let frozen = false, lastTs = null;
+
+  function applyPlane(px, py) {
+    plane.style.transform =
+      'translate(-50%, -50%) scale(1.18) rotateX(' + (TILT + py).toFixed(2) + 'deg) rotateY(' +
+      (TURN + px).toFixed(2) + 'deg) rotateZ(' + ROLL + 'deg) translateZ(' + -DEPTH + 'px)';
   }
 
-  function step(it, dt) {
-    const g = it.globe;
-    if (!it.drag) it.ry += AUTO_SPIN * dt * 0.22;
-    it.ry += it.vy; it.rx += it.vx;
-    it.vy *= 0.90; it.vx *= 0.90;
-    it.rx = Math.max(-0.65, Math.min(0.65, it.rx));
-    g.group.rotation.set(it.rx, it.ry, 0);
-
-    const ma = g.mg.attributes.aA.array;
-    const aa = g.ag.attributes.aA.array;
-    for (let i = 0; i < g.arcs.length; i++) {
-      const arc = g.arcs[i];
-      const base = i * ARC_SEG;
-      if (arc.head < 0) {
-        arc.wait -= dt;
-        if (arc.wait <= 0) respawn(g, i);
-        ma[i * 2] = ma[i * 2 + 1] = 0;
-        for (let k = 0; k < ARC_SEG; k++) aa[base + k] = 0;
-        continue;
-      }
-      arc.head += dt / arc.dur * 1.45;
-      // 머리 앞은 아직 그려지지 않고, 뒤로는 꼬리가 옅어지며 남는다
-      for (let k = 0; k < ARC_SEG; k++) {
-        const d = arc.head - k / (ARC_SEG - 1);
-        aa[base + k] = d < 0 ? 0 : Math.max(0, 1 - d / 0.55);
-      }
-      // 출발점은 머리가 떠나면 옅어지고, 도착점은 머리가 닿을 때 켜진다
-      ma[i * 2]     = Math.max(0, 1 - Math.abs(arc.head) * 1.4);
-      ma[i * 2 + 1] = Math.max(0, 1 - Math.abs(arc.head - 1) * 3.0);
-      if (arc.head > 1.6) { arc.head = -1; arc.wait = 0.2 + Math.random() * 1.5; }
-    }
-    g.mg.attributes.aA.needsUpdate = true;
-    g.ag.attributes.aA.needsUpdate = true;
-  }
-
-  let frozen = false, last = 0;
-  window.globeField = { freeze(v) { frozen = !!v; }, relayout: layout };
-
-  function frame(now) {
+  function frame(ts) {
     requestAnimationFrame(frame);
-    const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
-    last = now;
+    if (lastTs === null) lastTs = ts;
+    const dt = Math.min(0.05, Math.max(0, ts - lastTs) / 1000);
+    lastTs = ts;
     if (frozen || document.hidden || !page.classList.contains('is-on')) return;
 
-    const fr = field.getBoundingClientRect();
-    if (fr.width < 2 || fr.height < 2) return;
-    resizeTo(Math.round(fr.width), Math.round(fr.height));
+    const maxTilt = PARALLAX * 8;
+    const damp = 1 - Math.exp(-dt / 0.12);
+    damped.x += (pointer.x * maxTilt - damped.x) * damp;
+    damped.y += (-pointer.y * maxTilt - damped.y) * damp;
+    applyPlane(damped.x, damped.y);
 
-    renderer.setScissorTest(false);
-    renderer.clear(true, true, false);
-    renderer.setScissorTest(true);
-
-    for (const it of items) {
-      if (!reduce) step(it, dt);
-      const r = it.btn.getBoundingClientRect();
-      const x = r.left - fr.left;
-      const y = fr.height - (r.top - fr.top + r.height);
-      if (r.width < 2 || x + r.width < 0 || x > fr.width || y + r.height < 0 || y > fr.height) continue;
-      // 알갱이 크기는 이 행성이 차지한 뷰포트 높이에 맞춰 다시 잡는다
-      const scale = (r.height * renderer.getPixelRatio()) / (2 * TAN_HALF);
-      it.globe.dotMat.uniforms.uScale.value = scale;
-      it.globe.markMat.uniforms.uScale.value = scale;
-      it.globe.arcMat.uniforms.uScale.value = scale;
-      renderer.setViewport(x, y, r.width, r.height);
-      renderer.setScissor(x, y, r.width, r.height);
-      renderer.render(it.globe.scene, camera);
+    for (let c = 0; c < cols.length; c++) {
+      const col = cols[c];
+      if (reduce) { col.track.style.transform = 'translate3d(0, ' + -col.offset.toFixed(2) + 'px, 0)'; continue; }
+      const paused = wallHovered && PAUSE_ON_HOVER;
+      const target = (paused || hoveredCol === c) ? 0 : col.base;
+      const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
+      col.velocity += (target - col.velocity) * ease;
+      let next = col.offset + col.velocity * dt;
+      next = ((next % col.copyHeight) + col.copyHeight) % col.copyHeight;
+      col.offset = next;
+      col.track.style.transform = 'translate3d(0, ' + (-next).toFixed(2) + 'px, 0)';
     }
   }
 
-  layout();
+  function release() {
+    if (activeTile) activeTile.classList.remove('is-active');
+    activeTile = null;
+    hoveredCol = -1;
+  }
+
+  dw.addEventListener('pointerenter', () => { wallHovered = true; });
+  dw.addEventListener('pointerleave', () => {
+    wallHovered = false;
+    pointer.x = 0; pointer.y = 0;
+    release();
+  });
+  dw.addEventListener('pointermove', e => {
+    const r = dw.getBoundingClientRect();
+    if (PARALLAX > 0 && !reduce) {
+      pointer.x = (e.clientX - r.left) / r.width - 0.5;
+      pointer.y = (e.clientY - r.top) / r.height - 0.5;
+    }
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    const tile = hit && hit.closest ? hit.closest('[data-tile-id]') : null;
+    if (!tile || tile === activeTile) return;
+    if (activeTile) activeTile.classList.remove('is-active');
+    activeTile = tile;
+    tile.classList.add('is-active');
+    hoveredCol = Number(tile.dataset.col);
+  });
+
+  function openTile(tile) {
+    if (mode !== 'wall' || !tile || !window.pageNav) return;
+    const r = tile.getBoundingClientRect();
+    window.pageNav.enter(tile.dataset.page, r.left + r.width / 2, r.top + r.height / 2);
+  }
+  dw.addEventListener('click', e => {
+    openTile(e.target && e.target.closest ? e.target.closest('[data-tile-id]') : null);
+  });
+  dw.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tile = e.target && e.target.closest ? e.target.closest('[data-tile-id]') : null;
+    if (!tile) return;
+    e.preventDefault();
+    openTile(tile);
+  });
+
+  // 제목 상자가 앉을 자리만큼 벽을 도려낸다
+  function updateHole() {
+    const p = offsetIn(box);
+    wall.style.setProperty('--hole-x', p.x + 'px');
+    wall.style.setProperty('--hole-y', p.y + 'px');
+    wall.style.setProperty('--hole-w', box.offsetWidth + 'px');
+    wall.style.setProperty('--hole-h', box.offsetHeight + 'px');
+  }
+
+  // ---- 흩뿌리기 : 화면 한가운데(= Folder가 있던 자리)에서 제자리로, 되돌릴 땐 그 역순 ----
+  let scatterAnims = [];
+  function scatter(dir) {
+    scatterAnims.forEach(a => a.cancel());
+    scatterAnims = [];
+    if (reduce) return;
+    const sr = scene.getBoundingClientRect();
+    const ox = sr.width / 2, oy = sr.height / 2;
+    const info = [];
+    let maxD = 1;
+    plane.querySelectorAll('.drift-wall__inner').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const dx = ox - (r.left - sr.left + r.width / 2);
+      const dy = oy - (r.top - sr.top + r.height / 2);
+      const d = Math.hypot(dx, dy);
+      if (d > maxD) maxD = d;
+      info.push({ el, dx, dy, d });
+    });
+    info.forEach(it => {
+      const k = it.d / maxD;
+      const gathered = { transform: 'translate3d(' + it.dx.toFixed(1) + 'px, ' + it.dy.toFixed(1) + 'px, 0) scale(0.08)', opacity: 0 };
+      const placed = { transform: 'translate3d(0, 0, 0) scale(1)', opacity: DIM };
+      scatterAnims.push(it.el.animate(dir === 'in' ? [gathered, placed] : [placed, gathered], {
+        duration: 820,
+        delay: (dir === 'in' ? k : 1 - k) * 260,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        fill: dir === 'in' ? 'backwards' : 'forwards'
+      }));
+    });
+  }
+
+  // ---- 여닫기 ----
+  let mode = 'folder';                    // folder | wall | busy
+  const timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const clearLater = () => { timers.forEach(clearTimeout); timers.length = 0; };
+
+  function openWall() {
+    if (mode !== 'folder') return;
+    mode = 'busy';
+    clearLater();
+    folder.classList.add('open');
+    later(() => {
+      folder.classList.add('is-emptied');
+      layer.style.setProperty('--fdir', '-46');       // 접힌 Folder는 제목을 따라 위로 빠진다
+      applyFolder(dockTarget(), true);
+      box.classList.add('is-boxed');
+      wall.classList.add('is-open');
+      requestAnimationFrame(() => { updateHole(); scatter('in'); });
+      folder.setAttribute('aria-label', '주제 목록 닫기');
+      later(() => { mode = 'wall'; }, reduce ? 0 : 1120);
+    }, reduce ? 0 : 1000);
+  }
+
+  function closeWall() {
+    if (mode !== 'wall') return;
+    mode = 'busy';
+    clearLater();
+    release();
+    scatter('out');
+    folder.classList.remove('is-emptied');
+    layer.style.setProperty('--fdir', '42');
+    applyFolder(centerTarget(), true);
+    folder.setAttribute('aria-label', '주제 목록 열기');
+    later(() => {
+      wall.classList.remove('is-open');
+      box.classList.remove('is-boxed');
+      folder.classList.remove('open');
+      mode = 'folder';
+    }, reduce ? 0 : 1120);
+  }
+
+  folder.addEventListener('click', () => { if (mode === 'wall') closeWall(); else openWall(); });
+  folder.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    if (mode === 'wall') closeWall(); else openWall();
+  });
+
+  function layout() {
+    const w = scene.clientWidth;
+    if (!w) return;
+    const want = Math.max(150, Math.min(420, (w * 1.06) / COLUMNS - GAP));
+    if (!cols.length || Math.abs(want - tileW) > 0.5) buildWall();
+    if (mode !== 'busy') applyFolder(mode === 'wall' ? dockTarget() : centerTarget(), false);
+    updateHole();
+  }
+
+  fitCardText();
+  buildWall();
+  applyPlane(0, 0);
+  requestAnimationFrame(() => { applyFolder(centerTarget(), false); updateHole(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCardText);
   window.addEventListener('resize', layout);
+  window.indexScene = { freeze(v) { frozen = !!v; }, relayout: layout };
   requestAnimationFrame(frame);
 })();
 </script>
