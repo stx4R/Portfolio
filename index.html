@@ -126,12 +126,12 @@
     #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
     /* 커버 위 인용구 — 라틴어 원문이 가장 크고, 그 아래 우리말 뜻, 오른쪽에 출처.
        인용구 덩어리와 스크롤 화살표는 서로 밀지 않도록 각자 화면 높이 비율(중심선)에 앉힌다 */
-    #introQuote { position: absolute; left: 0; right: 0; top: 37.5%; transform: translateY(-50%); }
+    #introQuote { position: absolute; left: 0; right: 0; top: 38.5%; transform: translateY(-50%); }
     #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5.6vw, 6.2rem); color: #fafafa; }
     #introQuote .q2row { position: relative; margin-top: 0.7rem; }
     #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.8vw, 3.1rem); color: #d4d4d4; }
     /* 출처는 가로 자리(오른쪽 9vw)를 그대로 두고, 세로로는 2번 줄 아래에 떨어뜨린다 */
-    #introQuoteBy { position: absolute; top: calc(100% + 1rem); right: 9vw; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.65rem, 1vw, 1rem); color: #a3a3a3; }
+    #introQuoteBy { position: absolute; top: calc(100% + 1rem); right: 9vw; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.7rem, 1.1vw, 1.1rem); color: #a3a3a3; }
     #introScrollHint { position: absolute; left: 50%; top: 61.9%; transform: translate(-50%, -50%); }
 
     /* 2번 줄 옆에 출처가 들어갈 폭이 안 나오는 화면부터는 아래로 내려 오른쪽에 붙인다 */
