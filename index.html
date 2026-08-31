@@ -501,7 +501,6 @@
   // 길이 단위는 CSS 픽셀, 시간 단위는 60fps 기준 프레임 — 원본 컴포넌트의 prop 단위 그대로다.
   (() => {
     const stage = document.getElementById('particleImageStage');
-    const host  = document.getElementById('introStage');
     const introPage = document.getElementById('fuckintro');
     if (!stage) return;
 
@@ -514,9 +513,8 @@
     const NOISE_STRENGTH   = 0.05;    // 한 프레임에 실리는 가속도(px/frame²)
     const DAMPING          = 0.95;    // 한 프레임마다 남는 속도의 비율
     const LIFESPAN         = 200;     // 이 프레임 수만큼 살고 제자리로 리스폰한다
-    const CURSOR_STRENGTH  = 0.1;     // 포인터의 운동량이 알갱이에 실리는 비율
-    const CURSOR_RADIUS    = 100;     // 포인터가 미치는 반경(CSS px)
     const DPR              = 2;       // 픽셀 비 상한
+    // 원본의 cursorInteraction에 해당하는 커서 반응은 쓰지 않는다 — 알갱이는 흐름만 따른다
 
     // ---- 포트폴리오 쪽 톤 (인트로 텍스트가 얹히므로 원본보다 어둡게 간다) ----
     const PARTICLE_OPACITY = 0.9;    // 최대 불투명도 (원본 기본값 0.85)
@@ -643,8 +641,6 @@
 
       const VEL_SHADER = NOISE_GLSL + '\n' + [
         'uniform float uTime, uNoiseScale, uNoiseStrength, uDamping;',
-        'uniform vec2 uMouse, uMouseVel;',
-        'uniform float uCursorRadius, uCursorStrength, uCursorOn;',
         'void main(){',
         '  vec2 uv = gl_FragCoord.xy / resolution.xy;',
         '  vec4 pos = texture2D(texturePosition, uv);',
@@ -653,14 +649,6 @@
         '  // 노이즈 값이 곧 흐름의 각도가 된다 — 이웃한 알갱이는 같은 방향으로 함께 밀린다',
         '  float a = snoise(vec3(pos.xy * uNoiseScale, uTime)) * 6.2831853;',
         '  vec2 v = vel.xy * pow(uDamping, uDt) + vec2(cos(a), sin(a)) * (uNoiseStrength * uDt);',
-        '  // 커서는 밀어내는 게 아니라 자기 운동량을 나눠 주어 알갱이를 데리고 간다.',
-        '  // 이동량 자체가 이미 이번 프레임에 일어난 일이므로 여기서는 uDt를 곱하지 않는다',
-        '  if (uCursorOn > 0.5) {',
-        '    float d = distance(pos.xy, uMouse);',
-        '    if (d < uCursorRadius) {',
-        '      v += uMouseVel * (uCursorStrength * (1.0 - d / uCursorRadius));',
-        '    }',
-        '  }',
         '  gl_FragColor = vec4(v, 0.0, 1.0);',
         '}'
       ].join('\n');
@@ -699,12 +687,7 @@
         uTime:           { value: 0 },
         uNoiseScale:     { value: NOISE_SCALE },
         uNoiseStrength:  { value: reduce ? 0 : NOISE_STRENGTH },
-        uDamping:        { value: DAMPING },
-        uMouse:          { value: new THREE.Vector2(-1e5, -1e5) },
-        uMouseVel:       { value: new THREE.Vector2(0, 0) },
-        uCursorRadius:   { value: CURSOR_RADIUS },
-        uCursorStrength: { value: CURSOR_STRENGTH },
-        uCursorOn:       { value: 0 }
+        uDamping:        { value: DAMPING }
       });
 
       const initError = gpu.init();
@@ -817,25 +800,6 @@
       resize();
       window.addEventListener('resize', resize);
 
-      // 5) 커서 — ReactBits와 같이 포인터의 운동량을 반경 안의 알갱이에 실어 준다.
-      // 한 프레임 사이에 포인터가 움직인 거리를 그대로 넘기므로, 이벤트가 몇 번 오든 힘은 같다
-      const ptr = { x: 0, y: 0, dx: 0, dy: 0, on: false };
-      if (host) {
-        host.addEventListener('pointermove', e => {
-          // 인트로가 끝날 때까지 배경 레이어는 확대돼 있으므로, 화면 좌표를 캔버스 좌표로 되돌린다
-          const r = stage.getBoundingClientRect();
-          const sx = r.width  / (stage.clientWidth  || 1);
-          const sy = r.height / (stage.clientHeight || 1);
-          const x = (e.clientX - r.left) / (sx || 1);
-          const y = (e.clientY - r.top)  / (sy || 1);
-          if (ptr.on) { ptr.dx += x - ptr.x; ptr.dy += y - ptr.y; }
-          ptr.x = x; ptr.y = y; ptr.on = true;
-        }, { passive: true });
-        const leave = () => { ptr.on = false; ptr.dx = 0; ptr.dy = 0; };
-        host.addEventListener('pointerleave', leave, { passive: true });
-        host.addEventListener('pointercancel', leave, { passive: true });
-      }
-
       let noiseTime = 0, last = 0;
       function frame(now) {
         requestAnimationFrame(frame);
@@ -850,17 +814,6 @@
         shared.uDt.value = step;
         noiseTime += step * 0.0025 * SPEED;
         velVar.material.uniforms.uTime.value = noiseTime;
-
-        const mv = velVar.material.uniforms.uMouseVel.value;
-        if (ptr.on) {
-          velVar.material.uniforms.uCursorOn.value = 1;
-          velVar.material.uniforms.uMouse.value.set(ptr.x, ptr.y);
-          mv.set(ptr.dx, ptr.dy);
-          ptr.dx = 0; ptr.dy = 0;   // 한 번 실어 준 이동량은 비운다 — 포인터가 멈추면 힘도 멎는다
-        } else {
-          velVar.material.uniforms.uCursorOn.value = 0;
-          mv.set(0, 0);
-        }
 
         gpu.compute();
         shared.uRespawn.value = 0;
