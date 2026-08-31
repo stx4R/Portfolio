@@ -124,7 +124,10 @@
     }
 
     #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
-    #introHello { font-weight: 700; letter-spacing: -0.035em; font-size: clamp(2.4rem, 6.6vw, 5.5rem); line-height: 1.05; }
+    /* 커버 위 인용구 — 라틴어 원문이 가장 크고, 그 아래 우리말 뜻, 오른쪽에 출처 */
+    #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5vw, 4.4rem); color: #fafafa; }
+    #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.5vw, 2.2rem); color: #d4d4d4; margin-top: 0.7rem; }
+    #introQuoteBy { position: absolute; right: 9vw; top: 58%; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.85rem, 1.7vw, 1.55rem); color: #a3a3a3; }
 
     /* 1번 박스 — 가장 강조되는 헤드라인 */
     #introHead, #introSign {
@@ -148,6 +151,8 @@
     #introScrim { display: none; }
 
     @media (max-width: 767px) {
+      #introQuote { padding: 0 6vw; }
+      #introQuoteBy { position: static; margin-top: 1.5rem; }
       #introHead { right: 6vw; left: 6vw; top: 7vh; max-width: none; }
       #introSign { left: 6vw; bottom: 7vh; }
       #introScrim {
@@ -408,9 +413,13 @@
       <!-- 커버 판. 스크롤을 누적할수록 가운데 뚫린 원이 커지며 위 화면이 드러난다 -->
       <div id="introCover" class="absolute inset-0 pointer-events-none"></div>
 
-      <!-- 커버 위에 얹는 첫 인사 -->
+      <!-- 커버 위에 얹는 인용구 -->
       <div id="introHelloLayer" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <p id="introHello">Hello World!</p>
+        <div id="introQuote" class="text-center">
+          <p class="q1">Faber est suae quisque fortunae.</p>
+          <p class="q2">운명을 만드는 사람은 바로 자신이다.</p>
+        </div>
+        <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
         <svg class="w-8 h-8 mt-8 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
           <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
         </svg>
@@ -1920,7 +1929,7 @@
 <script>
 // ---- 페이지 내비게이션 ----
 // 스크롤 한 번에 한 걸음씩 옮긴다.
-//   pos 0  첫 인사(Hello World!)      0 → 1  Scroll Mask가 열린다
+//   pos 0  인용구(Faber est...)       0 → 1  Scroll Mask가 열린다
 //   pos 1  메인(Particle Image)       1 → 2  텍스트가 위아래로 빠지고 목차가 내려온다
 //   pos 2  목차(Index.)               2 → 3  'Index.'가 빠지고 첫 주제가 떠오른다
 //   pos 3~8  각 주제 페이지            그 뒤로는 예전처럼 세로로 넘어간다
