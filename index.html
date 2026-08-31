@@ -123,11 +123,11 @@
       will-change: -webkit-mask-image, mask-image;
     }
 
-    #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
+    #introHelloLayer { padding-bottom: 12vh; opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
     /* 커버 위 인용구 — 라틴어 원문이 가장 크고, 그 아래 우리말 뜻, 오른쪽에 출처 */
     #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5vw, 4.4rem); color: #fafafa; }
     #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.5vw, 2.2rem); color: #d4d4d4; margin-top: 0.7rem; }
-    #introQuoteBy { position: absolute; right: 9vw; top: 58%; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.85rem, 1.7vw, 1.55rem); color: #a3a3a3; }
+    #introQuoteBy { position: absolute; right: 9vw; top: 49%; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.75rem, 1.4vw, 1.3rem); color: #a3a3a3; }
 
     /* 1번 박스 — 가장 강조되는 헤드라인 */
     #introHead, #introSign {
@@ -420,7 +420,7 @@
           <p class="q2">운명을 만드는 사람은 바로 자신이다.</p>
         </div>
         <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
-        <svg class="w-8 h-8 mt-8 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-8 h-8 mt-14 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
           <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
         </svg>
       </div>
