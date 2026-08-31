@@ -491,9 +491,14 @@
 
   <script type="module">
   import * as THREE from 'three';
+  import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
 
-  // ---- Particle Image (디자인 출처: pro.reactbits.dev/docs/components/particle-image) ----
-  // 사진의 픽셀을 GPU 파티클로 옮겨 담고, 플로우 필드를 따라 흩어졌다 제자리로 다시 모이게 한다.
+  // ---- Particle Image (pro.reactbits.dev/docs/components/particle-image) ----
+  // ReactBits와 같은 방식: 파티클의 위치와 속도를 부동소수 텍스처 두 장에 담아 두고 매 프레임 GPU에서 갱신한다.
+  //   속도  = 속도 × damping + 플로우 필드 방향 × noiseStrength   (감쇠가 있는 가속도 적분)
+  //   위치  = 위치 + 속도
+  // 그래서 알갱이가 관성을 갖고 길게 흘러가며, lifespan 프레임마다 제자리로 되돌아온다.
+  // 길이 단위는 CSS 픽셀, 시간 단위는 60fps 기준 프레임 — 원본 컴포넌트의 prop 단위 그대로다.
   (() => {
     const stage = document.getElementById('particleImageStage');
     const host  = document.getElementById('introStage');
@@ -502,17 +507,21 @@
 
     const SRC = 'https://images.unsplash.com/photo-1574359587026-daf1bfd26baa?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
-    const PARTICLE_OPACITY = 0.9;    // 최대 불투명도
-    const SPEED            = 0.11;   // 플로우 필드가 변해가는 속도
-    const NOISE_SCALE      = 2.4;    // 낮을수록 흐름이 길고 완만해진다
-    const NOISE_STRENGTH   = 0.035;  // 한 생애 동안 밀려나는 거리(사진 높이 기준 비율)
-    const LIFESPAN         = 4.6;    // 초. 이 주기로 제자리에 다시 모인다
-    const CURSOR_RADIUS    = 0.14;
-    const CURSOR_STRENGTH  = 0.055;
-    const LUMA_CUTOFF      = 0.045;  // 이보다 어두운 픽셀은 파티클로 만들지 않는다
-    const SPACING_PX       = 2.4;    // 파티클 간격(대략). 작을수록 촘촘하고 무겁다
-    const IMAGE_OPACITY    = 0.5;    // 파티클 뒤에 깔리는 원본 사진의 농도 (원본 imageOpacity)
-    const POINT_SCALE      = 1.15;   // 간격 대비 알갱이 지름. 1보다 크면 서로 겹친다
+    // ---- ReactBits 기본값 (움직임에 관한 값은 손대지 않는다) ----
+    const PARTICLE_COUNT   = 500000;  // 데스크톱 기준. 좁은 화면·저사양에서는 아래 pickCount()가 줄인다
+    const SPEED            = 1;       // 플로우 필드가 변해가는 속도
+    const NOISE_SCALE      = 0.0005;  // 플로우 필드의 주파수. 낮을수록 길고 완만한 흐름
+    const NOISE_STRENGTH   = 0.05;    // 한 프레임에 실리는 가속도(px/frame²)
+    const DAMPING          = 0.95;    // 한 프레임마다 남는 속도의 비율
+    const LIFESPAN         = 200;     // 이 프레임 수만큼 살고 제자리로 리스폰한다
+    const CURSOR_STRENGTH  = 0.1;     // 포인터의 운동량이 알갱이에 실리는 비율
+    const CURSOR_RADIUS    = 100;     // 포인터가 미치는 반경(CSS px)
+    const DPR              = 2;       // 픽셀 비 상한
+
+    // ---- 포트폴리오 쪽 톤 (인트로 텍스트가 얹히므로 원본보다 어둡게 간다) ----
+    const PARTICLE_OPACITY = 0.9;    // 최대 불투명도 (원본 기본값 0.85)
+    const IMAGE_OPACITY    = 0.5;    // 파티클 뒤에 깔리는 원본 사진의 농도 (원본 기본값 1)
+    const POINT_SCALE      = 1.15;   // 격자 간격 대비 알갱이 지름. 1보다 크면 서로 겹친다
     const GAMMA            = 1.25;   // 1보다 크면 어두운 곳이 더 눌려 대비가 살아난다
     const GAIN             = 1.3;    // 밝기 배수
     // 화면이 좁아 사진이 잘릴 때 화면 중앙에 붙잡아 둘 지점(사진 왼쪽 위 기준 비율) — 조각상의 얼굴
@@ -535,133 +544,217 @@
     img.onload = () => { try { build(img); } catch (err) { console.warn('[ParticleImage]', err); fallback(); } };
     img.src = SRC;
 
+    // 기기 사정에 맞춰 알갱이 수를 정한다. 원본의 particleCount 의미는 그대로 두고 넘기는 값만 조절한다
+    function pickCount() {
+      const w = window.innerWidth;
+      let n = w < 768 ? 130000 : w < 1280 ? 260000 : PARTICLE_COUNT;
+      const cores = navigator.hardwareConcurrency || 4;
+      const mem   = navigator.deviceMemory || 8;
+      if (cores <= 4) n = Math.min(n, 200000);
+      if (mem <= 4)   n = Math.min(n, 160000);
+      return n;
+    }
+
+    // 두 계산 셰이더가 함께 쓰는 조각들
+    const NOISE_GLSL = [
+      '// Simplex noise 3D - Ashima Arts / Stefan Gustavson (MIT)',
+      'vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}',
+      'vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}',
+      'vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}',
+      'vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}',
+      'float snoise(vec3 v){',
+      '  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);',
+      '  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);',
+      '  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g;',
+      '  vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);',
+      '  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;',
+      '  i=mod289(i);',
+      '  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));',
+      '  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;',
+      '  vec4 j=p-49.0*floor(p*ns.z*ns.z);',
+      '  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);',
+      '  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);',
+      '  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);',
+      '  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));',
+      '  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;',
+      '  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);',
+      '  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));',
+      '  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;',
+      '  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;',
+      '  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));',
+      '}',
+      'float hash12(vec2 p){',
+      '  vec3 p3=fract(vec3(p.xyx)*0.1031); p3+=dot(p3,p3.yzx+33.33);',
+      '  return fract((p3.x+p3.y)*p3.z);',
+      '}',
+      // 알갱이의 제자리(home) — 격자 좌표를 화면에 그려질 사진 사각형 위에 그대로 편다
+      'uniform vec2 uOrigin, uSpan;',
+      'vec2 homeOf(vec2 uv){ return uOrigin + uv * uSpan; }',
+      // 위치·속도 셰이더가 같은 판단을 내려야 하므로 리스폰 여부는 한곳에서 정한다
+      'uniform float uDt, uLifespan, uRespawn;',
+      'bool reborn(float prevAge){ return uRespawn > 0.5 || prevAge + uDt >= uLifespan; }'
+    ].join('\n');
+
     function build(image) {
       const imgAspect = image.naturalWidth / image.naturalHeight;
 
-      // 1) 사진을 격자로 훑어 밝은 픽셀만 파티클로 뽑아낸다
-      const viewH = stage.clientHeight || window.innerHeight;
-      // 좁은 화면에서는 간격을 벌려 알갱이 수를 줄인다
-      const spacing = SPACING_PX * (window.innerWidth < 768 ? 1.2 : 1);
-      const rows = Math.round(Math.min(Math.max(viewH / spacing, 200), 480));
-      const cols = Math.max(2, Math.round(rows * imgAspect));
+      // 1) 시뮬레이션 격자. 화면에 그려질 때 가로세로 간격이 같아지도록 사진 비율에 맞춰 나눈다
+      const want = pickCount();
+      const rows = Math.max(4, Math.round(Math.sqrt(want / imgAspect)));
+      const cols = Math.max(4, Math.round(rows * imgAspect));
+      const count = cols * rows;
 
+      // 2) 알갱이 색은 사진을 격자 크기로 줄여 만든 텍스처에서 한 칸에 한 텍셀씩 정확히 가져온다
       const sheet = document.createElement('canvas');
       sheet.width = cols; sheet.height = rows;
-      const ctx = sheet.getContext('2d', { willReadFrequently: true });
+      const ctx = sheet.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(image, 0, 0, cols, rows);
-      const px = ctx.getImageData(0, 0, cols, rows).data;
 
-      // 커스텀 셰이더는 three의 색공간 변환 청크를 거치지 않고 프레임버퍼에 그대로 쓰인다.
-      // 그러니 색은 sRGB 값 그대로 두고, 대비만 살짝 눌러 흑백 대비를 살린다.
-      const tone = new Float32Array(256);
-      for (let i = 0; i < 256; i++) {
-        tone[i] = Math.min(1, Math.pow(i / 255, GAMMA) * GAIN);
+      const colorTex = new THREE.Texture(sheet);
+      colorTex.flipY = false;                      // 격자 첫 줄이 사진 첫 줄이 되도록
+      colorTex.colorSpace = THREE.NoColorSpace;    // 커스텀 셰이더라 색공간 변환을 거치지 않는다
+      colorTex.minFilter = THREE.NearestFilter;
+      colorTex.magFilter = THREE.NearestFilter;
+      colorTex.generateMipmaps = false;
+      colorTex.needsUpdate = true;
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
+      } catch (err) {
+        console.warn('[ParticleImage] WebGL 사용 불가', err);
+        fallback();
+        return;
       }
-
-      const totalCells = cols * rows;
-      const pos  = new Float32Array(totalCells * 3);
-      const col  = new Float32Array(totalCells * 3);
-      const seed = new Float32Array(totalCells);
-      let n = 0;
-
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const i = (y * cols + x) * 4;
-          const r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
-          if (a < 8) continue;
-          const luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-          if (luma < LUMA_CUTOFF) continue;
-          // 사진 높이를 1로 정규화 — x는 ±aspect/2, y는 ±0.5 범위
-          pos[n * 3]     = ((x + 0.5) / cols - 0.5) * imgAspect;
-          pos[n * 3 + 1] = 0.5 - (y + 0.5) / rows;
-          pos[n * 3 + 2] = 0;
-          col[n * 3]     = tone[r];
-          col[n * 3 + 1] = tone[g];
-          col[n * 3 + 2] = tone[b];
-          seed[n] = Math.random();
-          n++;
-        }
+      if (renderer.capabilities.maxVertexTextures < 2) {
+        console.warn('[ParticleImage] 정점 셰이더 텍스처 지원 부족');
+        renderer.dispose(); fallback(); return;
       }
-      if (n === 0) { fallback(); return; }
+      // 뒤에 깔린 사진이 비쳐야 하므로 캔버스는 비워 둔다
+      renderer.setClearColor(0x000000, 0);
+      stage.appendChild(renderer.domElement);
 
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(pos.subarray(0, n * 3), 3));
-      geo.setAttribute('aColor',   new THREE.BufferAttribute(col.subarray(0, n * 3), 3));
-      geo.setAttribute('aSeed',    new THREE.BufferAttribute(seed.subarray(0, n), 1));
-      geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8);
+      // 3) 위치·속도를 담을 계산용 텍스처. 픽셀 좌표를 담으므로 32비트 부동소수가 필요하다
+      const gpu = new GPUComputationRenderer(cols, rows, renderer);
+      const gl = renderer.getContext();
+      if (!gl.getExtension('EXT_color_buffer_float')) gpu.setDataType(THREE.HalfFloatType);
 
-      // 2) 파티클을 움직이는 일은 전부 정점 셰이더에서 — CPU는 손대지 않는다
-      const uniforms = {
+      const VEL_SHADER = NOISE_GLSL + '\n' + [
+        'uniform float uTime, uNoiseScale, uNoiseStrength, uDamping;',
+        'uniform vec2 uMouse, uMouseVel;',
+        'uniform float uCursorRadius, uCursorStrength, uCursorOn;',
+        'void main(){',
+        '  vec2 uv = gl_FragCoord.xy / resolution.xy;',
+        '  vec4 pos = texture2D(texturePosition, uv);',
+        '  vec4 vel = texture2D(textureVelocity, uv);',
+        '  if (reborn(pos.z)) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }',
+        '  // 노이즈 값이 곧 흐름의 각도가 된다 — 이웃한 알갱이는 같은 방향으로 함께 밀린다',
+        '  float a = snoise(vec3(pos.xy * uNoiseScale, uTime)) * 6.2831853;',
+        '  vec2 v = vel.xy * pow(uDamping, uDt) + vec2(cos(a), sin(a)) * (uNoiseStrength * uDt);',
+        '  // 커서는 밀어내는 게 아니라 자기 운동량을 나눠 주어 알갱이를 데리고 간다.',
+        '  // 이동량 자체가 이미 이번 프레임에 일어난 일이므로 여기서는 uDt를 곱하지 않는다',
+        '  if (uCursorOn > 0.5) {',
+        '    float d = distance(pos.xy, uMouse);',
+        '    if (d < uCursorRadius) {',
+        '      v += uMouseVel * (uCursorStrength * (1.0 - d / uCursorRadius));',
+        '    }',
+        '  }',
+        '  gl_FragColor = vec4(v, 0.0, 1.0);',
+        '}'
+      ].join('\n');
+
+      const POS_SHADER = NOISE_GLSL + '\n' + [
+        'void main(){',
+        '  vec2 uv = gl_FragCoord.xy / resolution.xy;',
+        '  vec4 pos = texture2D(texturePosition, uv);',
+        '  vec4 vel = texture2D(textureVelocity, uv);',
+        '  vec2 home = homeOf(uv);',
+        '  if (uRespawn > 0.5) {',
+        '    // 첫 프레임과 크게 리사이즈된 뒤 — 나이를 흩어 두어야 한꺼번에 사라졌다 나타나지 않는다',
+        '    gl_FragColor = vec4(home, hash12(uv * 1024.0) * uLifespan, 1.0);',
+        '    return;',
+        '  }',
+        '  float age = pos.z + uDt;',
+        '  if (age >= uLifespan) { gl_FragColor = vec4(home, age - uLifespan, 1.0); return; }',
+        '  gl_FragColor = vec4(pos.xy + vel.xy * uDt, age, 1.0);',
+        '}'
+      ].join('\n');
+
+      const posVar = gpu.addVariable('texturePosition', POS_SHADER, gpu.createTexture());
+      const velVar = gpu.addVariable('textureVelocity', VEL_SHADER, gpu.createTexture());
+      gpu.setVariableDependencies(posVar, [posVar, velVar]);
+      gpu.setVariableDependencies(velVar, [posVar, velVar]);
+
+      const shared = {
+        uDt:       { value: 1 },
+        uLifespan: { value: LIFESPAN },
+        uRespawn:  { value: 1 },
+        uOrigin:   { value: new THREE.Vector2(0, 0) },
+        uSpan:     { value: new THREE.Vector2(1, 1) }
+      };
+      Object.assign(posVar.material.uniforms, shared);
+      Object.assign(velVar.material.uniforms, shared, {
         uTime:           { value: 0 },
-        uSpeed:          { value: SPEED },
         uNoiseScale:     { value: NOISE_SCALE },
         uNoiseStrength:  { value: reduce ? 0 : NOISE_STRENGTH },
-        uLifespan:       { value: LIFESPAN },
-        uSize:           { value: 2 },
-        uOpacity:        { value: PARTICLE_OPACITY },
-        uPixelRatio:     { value: 1 },
-        uFit:            { value: 1 },
-        uOffset:         { value: new THREE.Vector2(0, 0) },
-        uMotion:         { value: reduce ? 0 : 1 },
-        uMouse:          { value: new THREE.Vector2(1e3, 1e3) },
+        uDamping:        { value: DAMPING },
+        uMouse:          { value: new THREE.Vector2(-1e5, -1e5) },
+        uMouseVel:       { value: new THREE.Vector2(0, 0) },
         uCursorRadius:   { value: CURSOR_RADIUS },
-        uCursorStrength: { value: CURSOR_STRENGTH }
+        uCursorStrength: { value: CURSOR_STRENGTH },
+        uCursorOn:       { value: 0 }
+      });
+
+      const initError = gpu.init();
+      if (initError) {
+        console.warn('[ParticleImage]', initError);
+        renderer.dispose(); stage.replaceChildren(); fallback(); return;
+      }
+
+      // 4) 그리기 — 정점 하나가 알갱이 하나. position에는 계산 텍스처를 읽을 좌표만 담는다
+      const ref = new Float32Array(count * 3);
+      for (let y = 0, i = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++, i++) {
+          ref[i * 3]     = (x + 0.5) / cols;
+          ref[i * 3 + 1] = (y + 0.5) / rows;
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(ref, 3));
+      geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8);
+
+      const draw = {
+        uPosition:   { value: null },
+        uColor:      { value: colorTex },
+        uViewport:   { value: new THREE.Vector2(1, 1) },
+        uSize:       { value: 2 },
+        uPixelRatio: { value: 1 },
+        uOpacity:    { value: PARTICLE_OPACITY },
+        uLifespan:   { value: LIFESPAN },
+        uMotion:     { value: reduce ? 0 : 1 },
+        uGamma:      { value: GAMMA },
+        uGain:       { value: GAIN }
       };
 
       const VERT = [
-        'attribute vec3 aColor;',
-        'attribute float aSeed;',
-        'uniform float uTime, uSpeed, uNoiseScale, uNoiseStrength, uLifespan;',
-        'uniform float uSize, uOpacity, uPixelRatio, uFit, uMotion;',
-        'uniform float uCursorRadius, uCursorStrength;',
-        'uniform vec2 uMouse, uOffset;',
+        'uniform sampler2D uPosition, uColor;',
+        'uniform vec2 uViewport;',
+        'uniform float uSize, uPixelRatio, uOpacity, uLifespan, uMotion, uGamma, uGain;',
         'varying vec3 vColor;',
         'varying float vAlpha;',
-        '// Simplex noise 3D - Ashima Arts / Stefan Gustavson (MIT)',
-        'vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}',
-        'vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}',
-        'vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}',
-        'vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}',
-        'float snoise(vec3 v){',
-        '  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);',
-        '  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);',
-        '  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g;',
-        '  vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);',
-        '  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;',
-        '  i=mod289(i);',
-        '  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));',
-        '  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;',
-        '  vec4 j=p-49.0*floor(p*ns.z*ns.z);',
-        '  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);',
-        '  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);',
-        '  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);',
-        '  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));',
-        '  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;',
-        '  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);',
-        '  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));',
-        '  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;',
-        '  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;',
-        '  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));',
-        '}',
         'void main(){',
-        '  float life = fract(uTime / uLifespan + aSeed);',
-        '  vec2 home = position.xy * uFit + uOffset;',
-        '  vec2 p = home;',
-        '  float t = uTime * uSpeed;',
-        '  // 플로우 필드를 세 걸음 따라간다 - 노이즈 값이 곧 진행 방향의 각도가 된다',
-        '  for (int i = 0; i < 3; i++) {',
-        '    float a = snoise(vec3(p * uNoiseScale, t)) * 6.2831853;',
-        '    p += vec2(cos(a), sin(a)) * (uNoiseStrength * life / 3.0);',
-        '  }',
-        '  vec2 d = p - uMouse;',
-        '  float dist = length(d);',
-        '  if (dist < uCursorRadius) {',
-        '    p += normalize(d + vec2(1e-5)) * (1.0 - dist / uCursorRadius) * uCursorStrength;',
-        '  }',
-        '  float fade = smoothstep(0.0, 0.10, life) * (1.0 - smoothstep(0.55, 1.0, life));',
-        '  vColor = aColor;',
-        '  vAlpha = uOpacity * mix(1.0, fade, uMotion);',
-        '  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);',
+        '  vec2 ref = position.xy;',
+        '  vec4 pt = texture2D(uPosition, ref);',
+        '  // 위치는 CSS 픽셀(왼쪽 위가 원점)이라 클립 좌표로 직접 옮긴다',
+        '  vec2 ndc = vec2(pt.x / uViewport.x * 2.0 - 1.0, 1.0 - pt.y / uViewport.y * 2.0);',
+        '  vec3 c = texture2D(uColor, ref).rgb;',
+        '  vColor = min(vec3(1.0), pow(c, vec3(uGamma)) * uGain);',
+        '  float life = clamp(pt.z / uLifespan, 0.0, 1.0);',
+        '  float env = smoothstep(0.0, 0.10, life) * (1.0 - smoothstep(0.72, 1.0, life));',
+        '  vAlpha = uOpacity * mix(1.0, env, uMotion);',
+        '  gl_Position = vec4(ndc, 0.0, 1.0);',
         '  gl_PointSize = uSize * uPixelRatio;',
         '}'
       ].join('\n');
@@ -677,7 +770,7 @@
       ].join('\n');
 
       const material = new THREE.ShaderMaterial({
-        uniforms,
+        uniforms: draw,
         vertexShader: VERT,
         fragmentShader: FRAG,
         transparent: true,
@@ -686,83 +779,94 @@
         blending: THREE.AdditiveBlending
       });
 
-      let renderer;
-      try {
-        renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
-      } catch (err) {
-        console.warn('[ParticleImage] WebGL 사용 불가', err);
-        fallback();
-        return;
-      }
-      // 뒤에 깔린 사진이 비쳐야 하므로 캔버스는 비워 둔다
-      renderer.setClearColor(0x000000, 0);
-      stage.appendChild(renderer.domElement);
-
       const scene = new THREE.Scene();
       scene.add(new THREE.Points(geo, material));
       const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 10);
       camera.position.z = 1;
 
+      let lastW = 0, lastH = 0;
       function resize() {
         const w = stage.clientWidth  || window.innerWidth;
         const h = stage.clientHeight || window.innerHeight;
-        const aspect = w / h;
-        camera.left = -aspect / 2; camera.right = aspect / 2;
-        camera.top = 0.5; camera.bottom = -0.5;
-        camera.updateProjectionMatrix();
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, DPR));
         renderer.setSize(w, h, false);
-        // 사진이 화면을 꽉 채우도록(cover) 확대 배율을 잡는다
-        const fit = Math.max(1, aspect / imgAspect);
-        uniforms.uFit.value = fit;
-        uniforms.uPixelRatio.value = renderer.getPixelRatio();
+
+        // 사진이 화면을 꽉 채우도록(cover) 그려질 사각형을 잡는다
+        const scale = Math.max(w / image.naturalWidth, h / image.naturalHeight);
+        const dw = image.naturalWidth * scale, dh = image.naturalHeight * scale;
         // 잘려나가는 쪽으로 여유가 있으면 초점(얼굴)이 화면 중앙에 오도록 밀어준다
-        const slackX = Math.max(0, (imgAspect * fit - aspect) / 2);
-        const slackY = Math.max(0, (fit - 1) / 2);
-        const wantX = -(FOCUS_X - 0.5) * imgAspect * fit;
-        const wantY = -(0.5 - FOCUS_Y) * fit;
-        const offX = Math.max(-slackX, Math.min(slackX, wantX));
-        const offY = Math.max(-slackY, Math.min(slackY, wantY));
-        uniforms.uOffset.value.set(offX, offY);
+        const ox = Math.min(0, Math.max(w - dw, w / 2 - FOCUS_X * dw));
+        const oy = Math.min(0, Math.max(h - dh, h / 2 - FOCUS_Y * dh));
+
+        shared.uOrigin.value.set(ox, oy);
+        shared.uSpan.value.set(dw, dh);
+        draw.uViewport.value.set(w, h);
+        draw.uPixelRatio.value = renderer.getPixelRatio();
+        // 알갱이 지름은 격자 간격을 따라간다 — 화면이 커져 성겨지면 알갱이도 같이 굵어진다
+        draw.uSize.value = Math.max(1, (dh / rows) * POINT_SCALE);
 
         // 같은 계산으로 사진도 자리를 잡아, 알갱이와 한 치도 어긋나지 않게 한다
-        if (photo) {
-          const drawH = fit * h, drawW = imgAspect * fit * h;
-          photo.style.objectPosition =
-            (w / 2 - drawW / 2 + offX * h).toFixed(1) + 'px ' +
-            (h / 2 - drawH / 2 - offY * h).toFixed(1) + 'px';
+        if (photo) photo.style.objectPosition = ox.toFixed(1) + 'px ' + oy.toFixed(1) + 'px';
+
+        // 좌표계가 크게 바뀌었으면 제자리부터 다시 잡는다. 모바일 주소창 높이 변화 정도는 넘긴다
+        if (Math.abs(w - lastW) > lastW * 0.04 || Math.abs(h - lastH) > lastH * 0.04) {
+          shared.uRespawn.value = 1;
         }
-        // 알갱이 지름은 격자 간격을 따라간다 — 화면이 커져 성겨지면 알갱이도 같이 굵어진다
-        uniforms.uSize.value = Math.max(1, (h / rows) * fit * POINT_SCALE);
+        lastW = w; lastH = h;
       }
       resize();
       window.addEventListener('resize', resize);
 
-      // 3) 커서 상호작용 - 화면 좌표를 카메라 좌표로 옮겨 넘긴다
-      const mouse = { x: 1e3, y: 1e3 };
-      const aim   = { x: 1e3, y: 1e3 };
+      // 5) 커서 — ReactBits와 같이 포인터의 운동량을 반경 안의 알갱이에 실어 준다.
+      // 한 프레임 사이에 포인터가 움직인 거리를 그대로 넘기므로, 이벤트가 몇 번 오든 힘은 같다
+      const ptr = { x: 0, y: 0, dx: 0, dy: 0, on: false };
       if (host) {
         host.addEventListener('pointermove', e => {
-          const r = host.getBoundingClientRect();
-          aim.x = ((e.clientX - r.left) / r.width - 0.5) * (r.width / r.height);
-          aim.y = 0.5 - (e.clientY - r.top) / r.height;
-          if (mouse.x > 999) { mouse.x = aim.x; mouse.y = aim.y; }
+          // 인트로가 끝날 때까지 배경 레이어는 확대돼 있으므로, 화면 좌표를 캔버스 좌표로 되돌린다
+          const r = stage.getBoundingClientRect();
+          const sx = r.width  / (stage.clientWidth  || 1);
+          const sy = r.height / (stage.clientHeight || 1);
+          const x = (e.clientX - r.left) / (sx || 1);
+          const y = (e.clientY - r.top)  / (sy || 1);
+          if (ptr.on) { ptr.dx += x - ptr.x; ptr.dy += y - ptr.y; }
+          ptr.x = x; ptr.y = y; ptr.on = true;
         }, { passive: true });
-        host.addEventListener('pointerleave', () => { aim.x = 1e3; aim.y = 1e3; mouse.x = 1e3; mouse.y = 1e3; }, { passive: true });
+        const leave = () => { ptr.on = false; ptr.dx = 0; ptr.dy = 0; };
+        host.addEventListener('pointerleave', leave, { passive: true });
+        host.addEventListener('pointercancel', leave, { passive: true });
       }
 
-      let clock = 0, last = 0;
+      let noiseTime = 0, last = 0;
       function frame(now) {
         requestAnimationFrame(frame);
-        const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
-        last = now;
         // 메인 페이지를 벗어났거나 탭이 숨겨졌으면 GPU를 쉬게 둔다
-        if (document.hidden || !introPage || !introPage.classList.contains('is-on')) return;
-        if (!reduce) clock += dt;
-        uniforms.uTime.value = clock;
-        mouse.x += (aim.x - mouse.x) * 0.12;
-        mouse.y += (aim.y - mouse.y) * 0.12;
-        uniforms.uMouse.value.set(mouse.x, mouse.y);
+        if (document.hidden || !introPage || !introPage.classList.contains('is-on')) { last = 0; return; }
+
+        // 60fps 한 프레임을 1로 삼아, 화면 주사율이 달라도 같은 속도로 흐르게 한다
+        const dt = last ? Math.min(Math.max((now - last) / 16.6667, 0.25), 3) : 1;
+        last = now;
+        const step = reduce ? 0 : dt;
+
+        shared.uDt.value = step;
+        noiseTime += step * 0.0025 * SPEED;
+        velVar.material.uniforms.uTime.value = noiseTime;
+
+        const mv = velVar.material.uniforms.uMouseVel.value;
+        if (ptr.on) {
+          velVar.material.uniforms.uCursorOn.value = 1;
+          velVar.material.uniforms.uMouse.value.set(ptr.x, ptr.y);
+          mv.set(ptr.dx, ptr.dy);
+          ptr.dx = 0; ptr.dy = 0;   // 한 번 실어 준 이동량은 비운다 — 포인터가 멈추면 힘도 멎는다
+        } else {
+          velVar.material.uniforms.uCursorOn.value = 0;
+          mv.set(0, 0);
+        }
+
+        gpu.compute();
+        shared.uRespawn.value = 0;
+        draw.uPosition.value = gpu.getCurrentRenderTarget(posVar).texture;
+
+        renderer.setRenderTarget(null);
         renderer.render(scene, camera);
       }
       requestAnimationFrame(frame);
