@@ -125,12 +125,19 @@
 
     #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
     /* 커버 위 인용구 — 라틴어 원문이 가장 크고, 그 아래 우리말 뜻, 오른쪽에 출처.
-       세 덩어리와 스크롤 화살표는 서로 밀지 않도록 각자 화면 높이 비율(중심선)에 앉힌다 */
-    #introQuote { position: absolute; left: 0; right: 0; top: 34.7%; transform: translateY(-50%); }
-    #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5vw, 4.4rem); color: #fafafa; }
-    #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.5vw, 2.2rem); color: #d4d4d4; margin-top: 0.7rem; }
-    #introQuoteBy { position: absolute; right: 9vw; top: 54%; transform: translateY(-50%); text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.7rem, 1.15vw, 1.15rem); color: #a3a3a3; }
+       인용구 덩어리와 스크롤 화살표는 서로 밀지 않도록 각자 화면 높이 비율(중심선)에 앉힌다 */
+    #introQuote { position: absolute; left: 0; right: 0; top: 37.5%; transform: translateY(-50%); }
+    #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5.6vw, 6.2rem); color: #fafafa; }
+    #introQuote .q2row { position: relative; margin-top: 0.7rem; }
+    #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.8vw, 3.1rem); color: #d4d4d4; }
+    /* 출처는 가로 자리(오른쪽 9vw)를 그대로 두고, 세로로는 2번 줄 아래에 떨어뜨린다 */
+    #introQuoteBy { position: absolute; top: calc(100% + 1rem); right: 9vw; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.65rem, 1vw, 1rem); color: #a3a3a3; }
     #introScrollHint { position: absolute; left: 50%; top: 61.9%; transform: translate(-50%, -50%); }
+
+    /* 2번 줄 옆에 출처가 들어갈 폭이 안 나오는 화면부터는 아래로 내려 오른쪽에 붙인다 */
+    @media (max-width: 900px) {
+      #introQuoteBy { position: static; margin-top: 1.1rem; }
+    }
 
     /* 1번 박스 — 가장 강조되는 헤드라인 */
     #introHead, #introSign {
@@ -154,10 +161,9 @@
     #introScrim { display: none; }
 
     @media (max-width: 767px) {
-      /* 세로로 긴 화면에서는 높이 비율 그대로 두면 사이가 벌어져, 아래 두 덩어리를 끌어올린다 */
+      /* 세로로 긴 화면에서는 높이 비율 그대로 두면 사이가 벌어져, 화살표를 끌어올린다 */
       #introQuote { padding: 0 6vw; }
-      #introQuoteBy { top: 46%; }
-      #introScrollHint { top: 56%; }
+      #introScrollHint { top: 53%; }
       #introHead { right: 6vw; left: 6vw; top: 7vh; max-width: none; }
       #introSign { left: 6vw; bottom: 7vh; }
       #introScrim {
@@ -422,12 +428,15 @@
       <div id="introHelloLayer" class="absolute inset-0 pointer-events-none">
         <div id="introQuote" class="text-center">
           <p class="q1">Faber est suae quisque fortunae.</p>
-          <p class="q2">운명을 만드는 사람은 바로 자신이다.</p>
+          <!-- 출처는 2번 줄과 윗변을 맞춰야 하므로 같은 줄 안에 넣는다 -->
+          <div class="q2row">
+            <p class="q2">운명을 만드는 사람은 바로 자신이다.</p>
+            <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
+          </div>
         </div>
-        <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
         <!-- 튀어오르는 애니메이션이 transform을 쓰므로, 자리잡기는 감싸는 div가 맡는다 -->
         <div id="introScrollHint">
-          <svg class="w-8 h-8 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-12 h-12 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
             <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </div>
