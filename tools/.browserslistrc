@@ -1,0 +1,4 @@
+# Play CDN 산출물과 프리픽스 맞추려고 safari 11 포함
+# ㄴ 빼면 .transition-colors 에서 -webkit-text-decoration-color 빠짐
+defaults
+safari >= 11

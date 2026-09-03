@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>stx4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <script type="importmap">
   {
@@ -18,19 +17,33 @@
   </script>
 
   <style>
-    /* Pretendard -> static/fonts */
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/Pretendard-Regular.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/Pretendard-Medium.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/Pretendard-SemiBold.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/Pretendard-Bold.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/Pretendard-ExtraBold.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/Pretendard-Black.woff2") format("woff2"); }
+    /* Pretendard 서브셋 -> static/fonts/subset */
+    /* ㄴ index.html에 실제로 쓰인 글자만 담김. 본문 고치면 python tools/subset-fonts.py 재실행 */
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/subset/Pretendard-Thin.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/subset/Pretendard-ExtraLight.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/subset/Pretendard-Light.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/subset/Pretendard-Regular.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/subset/Pretendard-Medium.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/subset/Pretendard-SemiBold.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/subset/Pretendard-Bold.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/subset/Pretendard-ExtraBold.subset.woff2") format("woff2"); }
+    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/subset/Pretendard-Black.subset.woff2") format("woff2"); }
+
+    /* 폴백용 원본 */
+    /* ㄴ 서브셋에 없는 글자 튀어나올 때만 받아감. 평소엔 요청 안 감 */
+    /* ㄴ unicode-range는 Pretendard 실제 커버리지. 한자처럼 원본에도 없는 글자로 헛다운로드 도는 것 차단 */
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/Pretendard-Regular.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/Pretendard-Medium.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/Pretendard-SemiBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/Pretendard-Bold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/Pretendard-ExtraBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
+    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/Pretendard-Black.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
 
     body, html {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-family: "Pretendard", "PretendardFull", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     }
 
     html, body { height: 100%; overflow: hidden; }
@@ -362,6 +375,12 @@
     }
   </style>
   <script>document.documentElement.classList.add('js-reveal');</script>
+
+  <!-- Tailwind 빌드 결과 -->
+  <!-- ㄴ Play CDN(400KB + 브라우저에서 CSS 컴파일) 걷어내고 미리 뽑아둔 것으로 대체 -->
+  <!-- ㄴ 클래스 추가/삭제하면 node tools/build-tailwind.mjs 재실행 -->
+  <!-- ㄴ 위치는 head 맨 끝 고정. CDN이 여기에 꽂던 자리라 캐스케이드 순서 걸림 -->
+  <link rel="stylesheet" href="static/tailwind.css">
 </head>
 <body class="bg-neutral-900 text-white">
 <main id="stage" class="w-full h-screen">
@@ -499,7 +518,13 @@
       if (photo) photo.style.setProperty('--photo', '1');
     }
 
-    if (photo) { photo.src = SRC; photo.style.setProperty('--photo', String(IMAGE_OPACITY)); }
+    // crossOrigin 맞춰둠
+    // ㄴ 아래 파티클용 Image는 anonymous라 안 맞추면 CORS 모드 갈려서 같은 사진을 두 번 받음
+    if (photo) {
+      photo.crossOrigin = 'anonymous';
+      photo.src = SRC;
+      photo.style.setProperty('--photo', String(IMAGE_OPACITY));
+    }
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -730,6 +755,10 @@
         mouse.x += (aim.x - mouse.x) * 0.12;
         mouse.y += (aim.y - mouse.y) * 0.12;
         uniforms.uMouse.value.set(mouse.x, mouse.y);
+        // 인트로 커버가 화면 다 막고 있는 동안은 그릴 이유 없음
+        // ㄴ 접속 직후가 딱 이 구간. 안 보이는 파티클 30만 개를 매 프레임 갈고 있었음
+        // ㄴ uTime은 위에서 계속 돌리니까 커버 열렸을 때 위상은 그대로임
+        if (window.introProgress === 0) return;
         renderer.render(scene, camera);
       }
       requestAnimationFrame(frame);
@@ -802,12 +831,38 @@
     </section>
 
     <script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import * as RapierModule from 'rapier';
-
+    // 랜야드 씬 지연 로드
+    // ㄴ three + rapier wasm + card.glb 합쳐 2MB 가까움. 첫 화면이랑 같이 받으면 초반에 걸림
+    // ㄴ 첫 페인트 끝난 뒤 idle에 시작. 카드 페이지가 먼저 열리면 그 즉시 시작
     const stage = document.getElementById('lanyardStage');
-    if (stage) {
+    if (stage) schedule(bootLanyard);
+
+    function schedule(run) {
+      let done = false;
+      const go = () => { if (done) return; done = true; run(); };
+      const page = stage.closest('.page');
+      if (page && page.classList.contains('is-on')) return go();
+      if (page) {
+        const mo = new MutationObserver(() => {
+          if (!page.classList.contains('is-on')) return;
+          mo.disconnect();
+          go();
+        });
+        mo.observe(page, { attributes: true, attributeFilter: ['class'] });
+      }
+      const idle = () => window.requestIdleCallback
+        ? requestIdleCallback(go, { timeout: 1500 })
+        : setTimeout(go, 200);
+      if (document.readyState === 'complete') idle();
+      else addEventListener('load', idle, { once: true });
+    }
+
+    async function bootLanyard() {
+      const [THREE, { GLTFLoader }, RapierModule] = await Promise.all([
+        import('three'),
+        import('three/addons/loaders/GLTFLoader.js'),
+        import('rapier')
+      ]);
       const RAPIER = RapierModule.default ?? RapierModule;
 
       const CARD_GLB = 'static/card.glb';
@@ -2261,7 +2316,10 @@
     let cap = fs * 0.72;
     const ctx = document.createElement('canvas').getContext('2d');
     if (ctx) {
-      ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+      // 캔버스는 unicode-range 무시하고 패밀리에 적힌 웹폰트를 죄다 받아버림
+      // ㄴ 폴백용 원본까지 끌려오니 여기선 빼고 잼. 'I' 측정값은 그대로임
+      const fam = cs.fontFamily.replace(/(^|,\s*)"?PretendardFull"?/, '');
+      ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + fam;
       const m = ctx.measureText('I');
       const h = (m.actualBoundingBoxAscent || 0) + (m.actualBoundingBoxDescent || 0);
       if (h > 1) cap = h;
