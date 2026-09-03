@@ -18,8 +18,7 @@
   </script>
 
   <style>
-    /* Pretendard, static/fonts에 직접 넣음 */
-    /* ㄴ 9종 다 박아놔도 실제 쓰는 굵기만 받아감 */
+    /* Pretendard -> static/fonts */
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); }
@@ -40,7 +39,7 @@
     #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; will-change: transform, opacity, filter; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
     #projectWheel .wheel-item--selected { font-weight: 600; }
 
-    /* CardSwap 카드 스택 (reactbits.dev/components/card-swap) */
+    /* CardSwap */
     #projectCardStage .cs-stack { position: absolute; inset: 0 0 40px 0; }
     #projectCardStage .cs-card {
       position: absolute; inset: 0;
@@ -76,11 +75,10 @@
     #stackStage .stack-item:hover .stack-card { filter: brightness(1.3); }
     .lanyard-wrapper { position: relative; z-index: 0; width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; transform: scale(1); transform-origin: center; }
     .lanyard-wrapper canvas { width: 100%; height: 100%; display: block; touch-action: none; }
-    /* 이모지 OS마다 다르게 생겨서 Fluent Emoji 이미지로 고정 */
+    /* OS별 이모지가 다르기에, Fluent Emoji로 고정 */
     img.emoji { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; }
 
-    /* Blur Highlight (pro.reactbits.dev/docs/components/blur-highlight) */
-    /* ㄴ 흐리게 들어와서 선명해지고 그다음 형광펜이 쓸고 지나감 */
+    /* Blur Highlight */
     .js-reveal [data-reveal] {
       opacity: 0.3; filter: blur(8px); transform: translateY(6px);
       transition: opacity 520ms ease var(--d, 0ms),
@@ -109,8 +107,6 @@
     [data-hl-dir="right"] { --hl-pos: right center; }
 
     /* Intro : Scroll Mask + Particle Image */
-    /* ㄴ pro.reactbits.dev/docs/components/scroll-mask, .../particle-image */
-    /* ㄴ 커버에 원형 구멍 뚫고 스크롤 쌓일수록 구멍 키움 */
     #introStage { --iris-in: 0px; --iris-out: 0px; }
 
     #introReveal { transform: scale(var(--zoom, 1.12)); transform-origin: 50% 50%; background: #000; opacity: var(--live, 1); will-change: transform, opacity; }
@@ -124,34 +120,28 @@
     }
 
     #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
-    /* 커버 위 인용구. 라틴어 원문 / 우리말 뜻 / 오른쪽에 출처 */
-    /* ㄴ 인용구랑 화살표 서로 밀면 안 돼서 각자 높이 비율에 앉힘 */
     #introQuote { position: absolute; left: 0; right: 0; top: 43.5%; transform: translateY(-50%); }
     #introQuote .q1 { font-weight: 900; font-style: italic; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(1.8rem, 5.6vw, 6.2rem); color: #fafafa; }
     #introQuote .q2row { position: relative; margin-top: 0.7rem; }
     #introQuote .q2 { font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; font-size: clamp(1.05rem, 2.8vw, 3.1rem); color: #d4d4d4; }
-    /* 출처는 오른쪽 9vw 고정, 세로로만 2번 줄 밑에 떨굼 */
     #introQuoteBy { position: absolute; top: calc(100% + 1.6rem); right: 9vw; text-align: right; font-weight: 600; letter-spacing: -0.01em; line-height: 1.45; font-size: clamp(0.85rem, 1.5vw, 1.55rem); color: #a3a3a3; }
     #introScrollHint { position: absolute; left: 50%; top: 71%; transform: translate(-50%, -50%); }
-
-    /* 폭 안 나오면 출처 밑으로 내려서 오른쪽에 붙임 */
     @media (max-width: 900px) {
       #introQuoteBy { position: static; margin-top: 1.1rem; }
     }
 
-    /* 1번 박스, 제일 강조 */
+    /* 1번 박스, Heavy. */
     #introHead, #introSign {
       opacity: calc(var(--in, 0) * var(--live, 1));
       filter: blur(calc((1 - var(--in, 0)) * 7px));
       will-change: opacity, transform, filter;
     }
-    /* 목차로 넘어갈 때 위는 위로, 아래는 아래로 빠짐 */
     #introHead { transform: translateY(calc((1 - var(--in, 0)) * 20px - var(--exit, 0) * 46vh)); }
     #introSign { transform: translateY(calc((1 - var(--in, 0)) * 20px + var(--exit, 0) * 46vh)); }
     #introHead .t1 { font-weight: 900; letter-spacing: -0.035em; line-height: 1.14; font-size: clamp(1.9rem, 4.3vw, 4rem); }
     #introHead .t2 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.5; font-size: clamp(0.95rem, 1.6vw, 1.5rem); color: #d4d4d4; margin-top: 0.85rem; }
 
-    /* 2번 박스, 그 다음 */
+    /* 2번 박스, Extra Bold. */
     #introSign .s1 { font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; font-size: clamp(0.7rem, 1vw, 0.95rem); color: #a3a3a3; }
     #introSign .s2 { font-weight: 600; letter-spacing: -0.01em; font-size: clamp(1rem, 1.5vw, 1.45rem); color: #fafafa; margin-top: 0.3rem; }
 
@@ -161,7 +151,6 @@
     #introScrim { display: none; }
 
     @media (max-width: 767px) {
-      /* 세로 긴 화면은 사이가 벌어져서 화살표 끌어올림 */
       #introQuote { padding: 0 6vw; }
       #introScrollHint { top: 60%; }
       #introHead { right: 6vw; left: 6vw; top: 7vh; max-width: none; }
@@ -175,8 +164,6 @@
     }
 
     /* 페이지 스택 */
-    /* ㄴ 전부 한자리에 겹쳐두고 보일 것만 켬. 전환 중엔 두 장이 같이 켜짐 */
-    /* 넘어갈 때 살짝 눕게 원근 줌 */
     #stage { position: fixed; inset: 0; overflow: hidden; perspective: 1500px; }
     .page {
       position: absolute; inset: 0;
@@ -184,13 +171,11 @@
       will-change: opacity, transform;
     }
     .page.is-on { visibility: visible; opacity: 1; }
-    /* 뒤에 깔린 페이지가 클릭 훔쳐가서 맨 앞 한 장만 입력 받음 */
     .page { pointer-events: none; }
     .page.is-front { pointer-events: auto; }
-    /* z-index는 내비가 순서대로 붙임. 앞 페이지가 위에 얹혀야 자연스러움 */
     .page { transform-origin: 50% 50%; backface-visibility: hidden; }
 
-    /* 목차 페이지 */
+    /* Index. 페이지 */
     #indexTitle {
       position: absolute; left: 7vw; top: 26vh; z-index: 2; pointer-events: none;
       font-weight: 900; letter-spacing: -0.035em; line-height: 1;
@@ -200,9 +185,7 @@
       transform: translateY(calc((1 - var(--in, 1)) * -62vh - var(--exit, 0) * 46vh));
       will-change: opacity, transform;
     }
-    /* 목차 : 제목이랑 접힌 Folder 나란히 놓는 줄 */
-    /* ㄴ Drift Wall이 화면 다 덮어서 카드가 이 뒤로 지나감 */
-    /* ㄴ 흰 글자가 밝은 카드 위에서 안 보여서 그림자만 깔아둠 */
+    /* Index. : Drift Wall, Folder */
     #indexBox {
       display: inline-flex; align-items: baseline; gap: 0.34em;
     }
@@ -213,8 +196,6 @@
       opacity: calc(var(--in, 1) * var(--live, 1));
       will-change: opacity;
     }
-    /* 목차 뜰 때 제목은 위로, 벽은 아래로 갈라짐 */
-    /* ㄴ 접힌 Folder는 제목 따라가야 해서 --fdir로 방향 뒤집음 */
     #indexFolderLayer {
       position: absolute; inset: 0; z-index: 3; pointer-events: none;
       opacity: calc(var(--in, 1) * var(--live, 1));
@@ -233,9 +214,7 @@
     }
     #indexWall.is-open { opacity: 1; pointer-events: auto; }
 
-    /* 카드 : Folder 서류랑 Drift Wall 타일이 같은 물건임 */
-    /* ㄴ 주제는 stx4R이랑 같은 굵기(700)에 주제 박스 색 그대로 */
-    /* ㄴ 여백이랑 글씨 전부 카드 폭(--cw) 비례라 서류든 타일이든 똑같이 앉음 */
+    /* 카드 : Folder(서류), Drift Wall(타일) 같은 type으로 처리 */
     .idx-card {
       --cw: 100px;
       position: absolute; inset: 0;
@@ -257,13 +236,12 @@
       font-weight: 700; line-height: 1.2; color: #3d3d3d;
       font-size: calc(var(--cw) * var(--idx-sub-k, 0.045));
     }
-    /* 서류 세 장은 .folder__back(100px)의 70/80/90% 폭 */
     .paper:nth-child(1) .idx-card { --cw: 70px; }
     .paper:nth-child(2) .idx-card { --cw: 80px; }
     .paper:nth-child(3) .idx-card { --cw: 90px; }
     .drift-wall__inner .idx-card { --cw: var(--dw-tile-w); }
 
-    /* Folder (reactbits.dev/components/folder) */
+    /* Folder */
     .folder {
       --folder-color: #FFCC7B;
       --folder-back-color: #EABB71;
@@ -275,7 +253,6 @@
     .folder:hover .folder__front { transform: skew(15deg) scaleY(0.6); }
     .folder:hover .right { transform: skew(-15deg) scaleY(0.6); }
 
-    /* 카드가 벽으로 나가 있는 동안엔 서류 비워둬야 앞뒤 맞음 */
     .folder.is-emptied .paper { opacity: 0; }
 
     .folder__back {
@@ -307,7 +284,7 @@
     }
     .folder:focus-visible { outline: 2px solid #ffffff; outline-offset: 4px; }
 
-    /* Drift Wall (reactbits.dev/components/drift-wall) */
+    /* Drift Wall */
     .drift-wall {
       position: relative; width: 100%; height: 100%; overflow: hidden;
       perspective: var(--dw-perspective, 1200px);
@@ -398,10 +375,9 @@
 
       <!-- 스크롤 다 하면 나오는 최종 화면 -->
       <div id="introReveal" class="absolute inset-0">
-        <!-- 파티클 뒤에 깔리는 원본 사진. 자리는 파티클이랑 똑같이 -->
+        <!-- 파티클 뒤에 깔리는 원본 사진, 자리는 파티클이랑 똑같이 -->
         <img id="introPhoto" class="absolute inset-0 h-full w-full" alt="" />
         <div id="particleImageStage" class="absolute inset-0"></div>
-        <!-- 좁은 화면은 밝은 면에 글자가 얹혀서 위아래 살짝 눌러줌 -->
         <div id="introScrim" class="absolute inset-0 pointer-events-none"></div>
       </div>
 
@@ -420,7 +396,7 @@
         </div>
       </div>
 
-      <!-- 커버판. 스크롤 쌓일수록 가운데 구멍 커짐 -->
+      <!-- 커버판 -->
       <div id="introCover" class="absolute inset-0 pointer-events-none"></div>
 
       <!-- 커버 위 인용구 -->
@@ -433,7 +409,6 @@
             <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
           </div>
         </div>
-        <!-- animate-bounce가 transform 먹어서 자리잡기는 바깥 div가 함 -->
         <div id="introScrollHint">
           <svg class="w-12 h-12 text-neutral-400 animate-bounce" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
             <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
@@ -444,9 +419,8 @@
   </section>
 
   <script>
-  // Scroll Mask (pro.reactbits.dev/docs/components/scroll-mask)
-  // ㄴ 원본 iris 변형. 화면 가운데 구멍 커지면서 뒤가 드러남
-  // ㄴ 진행도는 내가 안 쌓고 페이지 내비가 주는 값 받아서 그리기만 함
+  // Scroll Mask
+  // ㄴ 원본 iris 변형
   (() => {
     const stage = document.getElementById('introStage');
     if (!stage) return;
@@ -455,10 +429,9 @@
     const head   = document.getElementById('introHead');
     const sign   = document.getElementById('introSign');
 
-    const SETTLE = 0.84;   // 여기서 마스크 다 열림. 나머지는 여운
+    const SETTLE = 0.84;
 
     const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
-    // 개방률은 smoothstep. ease-out 쓰면 초반에 다 열려서 뒤가 빔
     const ease  = t => t * t * (3 - 2 * t);
     const range = (v, a, b) => clamp01((v - a) / (b - a));
 
@@ -491,7 +464,7 @@
   <script type="module">
   import * as THREE from 'three';
 
-  // Particle Image (pro.reactbits.dev/docs/components/particle-image)
+  // Particle Image
   // ㄴ 사진 픽셀을 GPU 파티클로 옮겨서 플로우 필드 따라 흩어졌다 다시 모임
   (() => {
     const stage = document.getElementById('particleImageStage');
@@ -503,18 +476,18 @@
 
     const PARTICLE_OPACITY = 0.9;    // 최대 불투명도
     const SPEED            = 0.11;   // 플로우 필드 변하는 속도
-    const NOISE_SCALE      = 2.4;    // 낮을수록 흐름 길고 완만함
-    const NOISE_STRENGTH   = 0.035;  // 한 생애 동안 밀려나는 거리 (사진 높이 기준)
-    const LIFESPAN         = 4.6;    // 초, 이 주기로 다시 모임
+    const NOISE_SCALE      = 2.4;    // 낮을수록 flow, long
+    const NOISE_STRENGTH   = 0.035;  // 밀려나는 거리 (사진 높이 기준)
+    const LIFESPAN         = 4.6;    // 주기(s)로 다시 모임
     const CURSOR_RADIUS    = 0.14;
     const CURSOR_STRENGTH  = 0.055;
-    const LUMA_CUTOFF      = 0.045;  // 이거보다 어두우면 파티클 안 만듦
-    const SPACING_PX       = 2.4;    // 파티클 간격, 작을수록 촘촘하고 무거움
-    const IMAGE_OPACITY    = 0.5;    // 뒤에 깔리는 원본 사진 농도 (원본 imageOpacity)
-    const POINT_SCALE      = 1.15;   // 간격 대비 알갱이 지름. 1 넘으면 서로 겹침
+    const LUMA_CUTOFF      = 0.045;  // 이거보다 어두우면 X
+    const SPACING_PX       = 2.4;    // 파티클 간격
+    const IMAGE_OPACITY    = 0.5;    // 원본 사진 투명도
+    const POINT_SCALE      = 1.15;   // 간격 대비 particle 지름.(단, 1 이상이면 좆됌)
     const GAMMA            = 1.25;   // 1 넘으면 어두운 데가 더 눌려서 대비 살아남
     const GAIN             = 1.3;    // 밝기 배수
-    // 사진 잘릴 때 화면 가운데 붙잡아 둘 지점 (사진 왼쪽 위 기준). 조각상 얼굴
+    // 사진 잘릴 때 화면 가운데 정렬할 무게중심
     const FOCUS_X          = 0.37;
     const FOCUS_Y          = 0.44;
 
@@ -537,9 +510,7 @@
     function build(image) {
       const imgAspect = image.naturalWidth / image.naturalHeight;
 
-      // 1) 사진 격자로 훑어서 밝은 픽셀만 뽑음
       const viewH = stage.clientHeight || window.innerHeight;
-      // 좁은 화면은 간격 벌려서 알갱이 수 줄임
       const spacing = SPACING_PX * (window.innerWidth < 768 ? 1.2 : 1);
       const rows = Math.round(Math.min(Math.max(viewH / spacing, 200), 480));
       const cols = Math.max(2, Math.round(rows * imgAspect));
@@ -550,8 +521,8 @@
       ctx.drawImage(image, 0, 0, cols, rows);
       const px = ctx.getImageData(0, 0, cols, rows).data;
 
-      // 커스텀 셰이더는 three 색공간 변환 안 거치고 프레임버퍼에 바로 박힘
-      // ㄴ 그래서 색은 sRGB 그대로 두고 대비만 살짝 눌러줌
+      // 커스텀 shader three 색공간 변환 안 거치고 프레임버퍼에 바로
+      // ㄴ 색 sRGB 그대로 두고 대비만 살짝
       const tone = new Float32Array(256);
       for (let i = 0; i < 256; i++) {
         tone[i] = Math.min(1, Math.pow(i / 255, GAMMA) * GAIN);
@@ -570,7 +541,7 @@
           if (a < 8) continue;
           const luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
           if (luma < LUMA_CUTOFF) continue;
-          // 사진 높이를 1로 정규화. x는 ±aspect/2, y는 ±0.5
+          // 사진 높이 1로 정규화, x는 ±aspect/2, y는 ±0.5
           pos[n * 3]     = ((x + 0.5) / cols - 0.5) * imgAspect;
           pos[n * 3 + 1] = 0.5 - (y + 0.5) / rows;
           pos[n * 3 + 2] = 0;
@@ -589,7 +560,7 @@
       geo.setAttribute('aSeed',    new THREE.BufferAttribute(seed.subarray(0, n), 1));
       geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8);
 
-      // 2) 파티클 움직이는 건 전부 정점 셰이더. CPU 안 씀
+      // 2) 파티클 움직이는 건 전부 정점 shader. CPU 안 씀
       const uniforms = {
         uTime:           { value: 0 },
         uSpeed:          { value: SPEED },
@@ -711,11 +682,11 @@
         camera.updateProjectionMatrix();
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(w, h, false);
-        // 사진이 화면 꽉 차게(cover) 확대 배율 잡음
+        // 사진이 화면 꽉 차게(cover) 확대 배율
         const fit = Math.max(1, aspect / imgAspect);
         uniforms.uFit.value = fit;
         uniforms.uPixelRatio.value = renderer.getPixelRatio();
-        // 잘리는 쪽에 여유 있으면 얼굴이 가운데 오게 밀어줌
+        // 잘리는 쪽에 여유 있으면 얼굴이 가운데 오게
         const slackX = Math.max(0, (imgAspect * fit - aspect) / 2);
         const slackY = Math.max(0, (fit - 1) / 2);
         const wantX = -(FOCUS_X - 0.5) * imgAspect * fit;
@@ -724,20 +695,18 @@
         const offY = Math.max(-slackY, Math.min(slackY, wantY));
         uniforms.uOffset.value.set(offX, offY);
 
-        // 사진도 같은 계산으로 앉혀야 알갱이랑 안 어긋남
         if (photo) {
           const drawH = fit * h, drawW = imgAspect * fit * h;
           photo.style.objectPosition =
             (w / 2 - drawW / 2 + offX * h).toFixed(1) + 'px ' +
             (h / 2 - drawH / 2 - offY * h).toFixed(1) + 'px';
         }
-        // 알갱이 지름은 격자 간격 따라감. 화면 커져서 성겨지면 같이 굵어짐
         uniforms.uSize.value = Math.max(1, (h / rows) * fit * POINT_SCALE);
       }
       resize();
       window.addEventListener('resize', resize);
 
-      // 3) 커서 상호작용. 화면 좌표를 카메라 좌표로 바꿔서 넘김
+      // 3) Cursor interaction. 화면 좌표를 카메라 좌표로 바꿔서 넘김
       const mouse = { x: 1e3, y: 1e3 };
       const aim   = { x: 1e3, y: 1e3 };
       if (host) {
@@ -755,7 +724,6 @@
         requestAnimationFrame(frame);
         const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
         last = now;
-        // 메인 벗어났거나 탭 숨겨졌으면 GPU 쉬게 둠
         if (document.hidden || !introPage || !introPage.classList.contains('is-on')) return;
         if (!reduce) clock += dt;
         uniforms.uTime.value = clock;
@@ -775,7 +743,6 @@
   <section id="fuckindex" class="text-white page" data-page="index">
     <div class="relative h-screen w-full overflow-hidden">
       <h2 id="indexTitle" class="absolute"><span id="indexBox"><span>Index.</span><span id="folderDock" aria-hidden="true"></span></span></h2>
-      <!-- Folder랑 Drift Wall 카드는 밑에 모듈이 주제 목록 보고 만들어 넣음 -->
       <div id="indexScene">
         <div id="indexWall"><div class="drift-wall"><div class="drift-wall__plane" id="driftPlane"></div></div></div>
       </div>
@@ -1054,10 +1021,6 @@
         }
       }
 
-      // 띠가 repeat 횟수만큼 접혀 붙어서 텍스처가 그만큼 가로로 눌림
-      // ㄴ ReactBits 로고는 가로로 길어서 티 안 나는데 DSHS 배지는 정원형이라 티 존나 남
-      // ㄴ 눌리는 배수만큼 텍스처 안에서 미리 늘려놔야 줄 위에서 제 비율 나옴
-      // ㄴ 세로는 원본 로고 자리(159px) 그대로 둬서 보이는 크기는 원본이랑 같음
       function buildBandTexture(logo) {
         if (!logo) return null;
         const canvas = document.createElement('canvas');
@@ -1236,8 +1199,6 @@
       window.addEventListener('resize', resize);
       resize();
 
-      // 페이지가 전부 같은 자리에 겹쳐 있어서 IntersectionObserver로는 가려진 걸 모름
-      // ㄴ 내비가 켜둔 페이지인지로 봐야 물리 연산이 뒤에서 계속 안 돎
       const ownPage = stage.closest('.page');
       const isVisible = () => !document.hidden && (!ownPage || ownPage.classList.contains('is-on'));
 
@@ -1914,12 +1875,10 @@
 
 <script>
 // Blur Highlight 재생기
-// ㄴ 페이지 들어올 때마다 [data-reveal] 순서대로 선명해짐
-// ㄴ [data-hl]은 그 뒤에 형광펜이 쓸고 지나감
+// ㄴ 페이지 들어올 때마다 [data-reveal] 순서대로
 (() => {
-  const STEP = 90;   // 그룹 안 형제끼리 지연(ms)
+  const STEP = 90;   // 그룹 안끼리 지연(ms)
 
-  // 컨테이너에 data-reveal-group 달면 직계 자식들이 차례로 나옴
   document.querySelectorAll('[data-reveal-group]').forEach(group => {
     const base = parseInt(group.dataset.revealGroup, 10) || 0;
     [...group.children].forEach((el, i) => {
@@ -1943,14 +1902,13 @@
 </script>
 
 <script>
-// 페이지 내비게이션
-// 스크롤 한 번에 한 걸음
-//   pos 0  인용구(Faber est...)       0 → 1  Scroll Mask 열림
-//   pos 1  메인(Particle Image)       1 → 2  텍스트 위아래로 빠지고 목차 내려옴
-//   pos 2  목차(Index.)               2 → 3  'Index.' 빠지고 첫 주제 뜸
-//   pos 3~8  각 주제 페이지            그 뒤로는 그냥 세로로 넘김
+// 페이지 nav.
+// 스크롤 한 번, 한 페이지
+//   pos 0  인용구(Faber est...)
+//   pos 1  메인(Particle Image)
+//   pos 2  목차(Index.)
+//   pos 3~8  각 주제 페이지
 //   pos 9  Footer
-// ㄴ 목차 카드는 그 주제로 바로 가는 지름길. 도착하면 똑같은 흐름 탐
 (() => {
   const stage = document.getElementById('stage');
   const PAGE_IDS = ['fuckintro', 'fuckindex', 'fuckhover', 'fuckscrollanimation',
@@ -1961,10 +1919,10 @@
   const introStage = document.getElementById('introStage');
   if (!stage || !intro || !index || !introStage) return;
 
-  const LAST     = pages.length;   // pos 최댓값. 마스크 한 걸음이 앞에 더 있음
-  const DUR      = 620;            // 한 걸음 걸리는 시간(ms)
-  const COOLDOWN = 660;            // 휠 한 번에 여러 장 안 넘어가게
-  const WORM_IN  = 950;            // 웜홀 빨려드는 시간(ms)
+  const LAST     = pages.length;
+  const DUR      = 620;
+  const COOLDOWN = 660;
+  const WORM_IN  = 950;
 
   const reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -1975,7 +1933,7 @@
 
   let pos = 0, from = 0, to = 0, t0 = 0, raf = null;
   let moving = false, mode = 'base', locked = false, settled = null;
-  const live = new Set();          // 지금 화면에 껴 있는 페이지 번호
+  const live = new Set();
 
   pages.forEach((el, i) => { el.style.zIndex = String(30 - i); });
 
@@ -1986,7 +1944,6 @@
     if (el) { window.playReveals(el); el.classList.add('is-front'); }
   }
 
-  // 물러나는 페이지는 인라인 스타일 걷어내고 끔
   function retire(el) {
     el.classList.remove('is-on');
     el.style.transform = '';
@@ -1994,8 +1951,6 @@
     el.style.transition = '';
   }
 
-  // 메인 → 목차 : 위 텍스트는 위로, 아래 텍스트는 아래로 빠지고 배경은 옅어짐
-  // ㄴ 목차 'Index.'는 반대로 위에서 내려옴
   function paintIntroToIndex(u) {
     introStage.style.setProperty('--exit', ease(u).toFixed(4));
     introStage.style.setProperty('--live', (1 - clamp01(u / 0.82)).toFixed(4));
@@ -2004,7 +1959,6 @@
     index.style.setProperty('--live', '1');
   }
 
-  // 목차 → 첫 주제 : 같은 식으로 'Index.'랑 카드 벽이 갈라져서 빠짐
   function paintIndexToNext(u, next) {
     index.style.setProperty('--in', '1');
     index.style.setProperty('--exit', ease(u).toFixed(4));
@@ -2012,7 +1966,6 @@
     if (next) next.style.opacity = range(u, 0.3, 1).toFixed(3);
   }
 
-  // 나머지 페이지는 예전처럼 세로로 넘김 (Swiper coverflow 느낌)
   function paintSlide(a, b, u) {
     const e = ease(u), f = 1 - e;
     a.style.transform = 'translateY(' + (-e * 100).toFixed(2) + '%) rotateX(' + (e * 44).toFixed(2) +
@@ -2037,8 +1990,6 @@
     live.forEach(i => { if (!want.has(i)) retire(pages[i]); });
     want.forEach(i => { pages[i].classList.add('is-on'); });
     live.clear(); want.forEach(i => live.add(i));
-
-    // 두 장 다 매 프레임 다시 칠하니까 남은 값 안 섞이게 먼저 비움
     want.forEach(i => { pages[i].style.transform = ''; pages[i].style.opacity = ''; });
 
     if (a === 0)      paintIntroToIndex(u);
@@ -2122,7 +2073,6 @@
     setTimeout(land, WORM_IN + 60);
   }
 
-  // 바깥에서 쓰는 창구
   window.pageNav = {
     enter(pageId, ox, oy) {
       if (mode !== 'base' || moving || Math.abs(to - 2) > 0.01) return;
@@ -2141,18 +2091,17 @@
   const busy = () => locked || moving || mode !== 'base';
 
   // 휠
-  // ㄴ 관성 스크롤 한 번에 여러 장 안 넘어가게 감속 감지해서 거름
+  // ㄴ 스크롤 한 번에 여러 장 안 넘어가게 감속 감지해서 빠꾸
   const scrollings = [];
   let prevWheelTime = 0, canScroll = true;
   const average = arr => arr.reduce((x, y) => x + y, 0) / arr.length;
 
   stage.addEventListener('wheel', e => {
-    // 카드 위에서 휠 굴리면 카드 안만 스크롤. 페이지는 안 넘김
+    // 카드 위에서 휠 하면 카드 안만 스크롤, 페이지는 안 넘김
     const cardStage = e.target instanceof Element ? e.target.closest('#projectCardStage') : null;
     if (cardStage) {
       const sc = cardStage.querySelector('[data-scroll-lock]');
       if (sc && !sc.contains(e.target)) {
-        // 헤더/푸터 같은 바깥쪽 굴려도 본문 움직이게 위임
         e.preventDefault();
         let d = e.deltaY;
         if (e.deltaMode === 1) d *= 40;
@@ -2223,10 +2172,7 @@
 
 <script>
 // 목차 : Folder → Drift Wall
-// ㄴ reactbits.dev/components/folder, /components/drift-wall
 // ㄴ 둘 다 바닐라로 옮기고 Folder 서류 자리랑 Drift Wall 타일 자리에 같은 카드 끼움
-// ㄴ Folder 누르면 서류 펼쳐지고 1초 뒤에 카드가 화면 전체로 흩뿌려져서 벽 됨
-// ㄴ 제목 옆에 접힌 Folder 다시 누르면 카드가 거꾸로 되돌아옴
 (() => {
   const page  = document.getElementById('fuckindex');
   const scene = document.getElementById('indexScene');
@@ -2238,7 +2184,7 @@
   const title = document.getElementById('indexTitle');
   if (!page || !scene || !wall || !plane || !host || !layer || !dock || !title) return;
 
-  // 주제 텍스트랑 박스 색은 각 주제 페이지 제목에서 그대로 가져옴
+  // 주제 텍스트랑 박스 색은 각 주제 페이지에서 그대로
   const CARDS = [
     { page: 'fuckhover',           title: 'About ME.',                 sub: '저는 누구인가요?',         hl: '#c084fc', ink: '#000000' },
     { page: 'fuckscrollanimation', title: 'I think, therefore, I am.', sub: '저는 무엇에 관심이 있나요?', hl: '#22d3ee', ink: '#000000' },
@@ -2248,9 +2194,9 @@
     { page: 'fuckmailto',          title: 'Feel free to contact.',     sub: '저에게 어떻게 연락하나요?',  hl: '#3b82f6', ink: '#000000' }
   ];
 
-  // Drift Wall 원본 설정값. 열 수만 6으로 바꿔서 열마다 다른 주제 흐르게 함
+  // Drift Wall 설정값
   const COLUMNS = 7;
-  const OVERSCAN = 1.24;                  // 판이 화면보다 넓어야 좌우 끝이 안 빔
+  const OVERSCAN = 1.24;
   const GAP = 18, TILT = 16, TURN = -14, ROLL = 0, DEPTH = 120;
   const SPEED = 42, VARIANCE = 0.45, PARALLAX = 0.6, DIM = 0.55;
   const PAUSE_ON_HOVER = false;
@@ -2268,8 +2214,8 @@
            '</span>';
   }
 
-  // 주제/부주제는 무조건 한 줄. 제일 긴 글이 카드 폭 84%에 맞는 크기를 한 번 재서
-  // ㄴ 모든 카드가 그 크기 같이 씀. 안 그러면 카드마다 글씨 들쭉날쭉함
+  // 주제/부주제는 무조건 한 줄롱
+  // ㄴ 모든 카드가 크기 공유임
   function fitCardText() {
     const probe = document.createElement('span');
     probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;' +
@@ -2282,8 +2228,8 @@
     probe.style.padding = '0';
     CARDS.forEach(c => { probe.textContent = c.sub; sw = Math.max(sw, probe.getBoundingClientRect().width); });
     probe.remove();
-    const room = 84;                                  // 양옆 8%씩 여백
-    const title = room / tw;                          // 카드 폭에 곱할 비율
+    const room = 84;
+    const title = room / tw;
     const sub = Math.min(room / sw, title * 0.72);
     const root = document.documentElement.style;
     root.setProperty('--idx-title-k', title.toFixed(5));
@@ -2298,18 +2244,16 @@
   folder.setAttribute('aria-label', '주제 목록 열기');
   const back = document.createElement('div');
   back.className = 'folder__back';
-  // 원본 Folder는 서류 세 장까지만 됨. 그래서 앞 세 개만 들어감
   back.innerHTML = CARDS.slice(0, 3)
     .map((c, i) => '<div class="paper paper-' + (i + 1) + '">' + cardMarkup(c) + '</div>').join('') +
     '<div class="folder__front"></div><div class="folder__front right"></div>';
   folder.appendChild(back);
   host.appendChild(folder);
 
-  const FOLDER_W = 100, FOLDER_H = 80;                // .folder__back 고정 크기
-  const FOLDER_TAB = 10 - FOLDER_H * 0.02;            // ::after 꼭지가 back 위로 삐져나온 만큼
-  const FOLDER_VIS_H = FOLDER_H + FOLDER_TAB;         // 눈에 보이는 Folder 전체 높이
+  const FOLDER_W = 100, FOLDER_H = 80;
+  const FOLDER_TAB = 10 - FOLDER_H * 0.02;
+  const FOLDER_VIS_H = FOLDER_H + FOLDER_TAB;
 
-  // em 상자가 글자보다 커서 'I' 실제 획 높이를 캔버스로 직접 잼
   let dockCap = 0;
   function syncDock() {
     const cs = getComputedStyle(title);
@@ -2330,7 +2274,6 @@
   function centerTarget() {
     const w = scene.clientWidth, h = scene.clientHeight;
     const s = Math.max(1.8, Math.min(4.2, Math.min(w * 0.165, h * 0.30) / FOLDER_VIS_H));
-    // 꼭지까지 포함한 몸통이 가운데 오게 꼭지 높이만큼 내림
     return { x: (w - FOLDER_W * s) / 2, y: (h - FOLDER_VIS_H * s) / 2 + FOLDER_TAB * s, s };
   }
   function offsetIn(el) {
@@ -2340,7 +2283,7 @@
   }
   function dockTarget() {
     const p = offsetIn(dock);
-    const s = dockCap / FOLDER_VIS_H;                 // 'I' 획 높이에 몸통 전체 맞춤
+    const s = dockCap / FOLDER_VIS_H;
     return { x: p.x, y: p.y + FOLDER_TAB * s, s };
   }
   function applyFolder(t, animate) {
@@ -2353,8 +2296,6 @@
   const cols = [];
   const orders = [];
 
-  // 열마다 여섯 장 순서 다르게 물려야 벽 봤을 때 같은 열이 반복 안 됨
-  // ㄴ 한 번 정한 순서는 창 크기 바뀌어도 그대로 감
   function columnOrder(c) {
     if (!orders[c]) {
       const a = CARDS.slice();
@@ -2392,7 +2333,6 @@
       let html = '';
       for (let k = 0; k < copies; k++) {
         order.forEach((card, i) => {
-          // 같은 카드가 벽 여기저기 도는 거라 키보드/스크린리더엔 첫 열 첫 벌만 내보냄
           const a11y = c === 0 && k === 0
             ? 'tabindex="0" role="button" aria-label="' + card.title + '"'
             : 'aria-hidden="true"';
@@ -2498,7 +2438,7 @@
     openTile(tile);
   });
 
-  // 흩뿌리기 : 화면 한가운데(Folder 있던 자리)에서 제자리로. 되돌릴 땐 역순
+  // 흩뿌리기 : 화면 한가운데(Folder 있던 자리)에서 제자리로, 빠꾸하면 reverse
   let scatterAnims = [];
   function scatter(dir) {
     scatterAnims.forEach(a => a.cancel());
@@ -2540,7 +2480,7 @@
     mode = 'busy';
     clearLater();
     folder.classList.add('is-emptied');
-    layer.style.setProperty('--fdir', '-46');         // 접힌 Folder는 제목 따라 위로 빠짐
+    layer.style.setProperty('--fdir', '-46');
     applyFolder(dockTarget(), true);
     wall.classList.add('is-open');
     requestAnimationFrame(() => scatter('in'));
@@ -2593,7 +2533,7 @@
 </script>
 
 <script>
-// ClickSpark (reactbits.dev/animations/click-spark)
+// ClickSpark
 (() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -2727,12 +2667,9 @@
     const H = cw / 2;
     const B = ch * 0.18;
     const R = (H * H + B * B) / (2 * B);
-    // 아치 끝 최대 기울기. 회전한 라벨이 얼마나 더 내려가는지 계산에 씀
     const rotMax = Math.asin(Math.min(H / R, 1));
     const cos = Math.cos(rotMax), sin = Math.sin(rotMax);
     const denom = 0.5 + cos / 2 + (7 * sin) / 18;
-    // 카드 + 라벨이 스테이지 안에 다 들어오는 카드 크기 찾기
-    // ㄴ 카드 좁아서 라벨 두 줄 되면 아래 여백 커짐. 그래서 재보고 다시 계산함
     let below = 14 + 28 + 4;
     let cardH = 0;
     let cardW = 0;
@@ -2750,7 +2687,6 @@
       below = real + 4;
     }
     const step = cardW + ch * 0.12;
-    // 카드만 말고 '카드 + 라벨' 통째로 세로 가운데 둬야 라벨이 안 잘림
     const topExt = cardH / 2 + 4;
     const bottomExt = B + (cardH / 2 + below) * cos + (cardW / 2) * sin;
     const shiftY = (topExt - bottomExt) / 2;
