@@ -18,7 +18,7 @@
 
   <style>
     /* Pretendard 서브셋 -> static/fonts/subset */
-    /* ㄴ index.html에 실제로 쓰인 글자만 담김. 본문 고치면 python tools/subset-fonts.py 재실행 */
+    /* ㄴ index.html에 쓰는것만 load, 본문 수정시 python tools/subset-fonts.py 재실행 */
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/subset/Pretendard-Thin.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/subset/Pretendard-ExtraLight.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/subset/Pretendard-Light.subset.woff2") format("woff2"); }
@@ -30,8 +30,7 @@
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/subset/Pretendard-Black.subset.woff2") format("woff2"); }
 
     /* 폴백용 원본 */
-    /* ㄴ 서브셋에 없는 글자 튀어나올 때만 받아감. 평소엔 요청 안 감 */
-    /* ㄴ unicode-range는 Pretendard 실제 커버리지. 한자처럼 원본에도 없는 글자로 헛다운로드 도는 것 차단 */
+    /* ㄴ if i was you i wanna be me too 서브셋에 없는 글자만!!!! 평소엔 요청 X */
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
@@ -1901,7 +1900,7 @@
             <p class="text-xs text-neutral-500">Visit L-INK-dshs</p>
           </a>
 
-          <a href="mailto:suppuding@gmail.com" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
+          <a href="mailto:contact@stx4r.me" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
             <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 48 48"><path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/></svg>
             <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Gmail</h3>
             <p class="text-xs text-neutral-500">Send Gmail</p>
