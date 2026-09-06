@@ -187,6 +187,13 @@
     .page.is-front { pointer-events: auto; }
     .page { transform-origin: 50% 50%; backface-visibility: hidden; }
 
+    /* Footer : 마우스 따라다니는 별 + 글자 흩뿌리기 */
+    /* ㄴ 캔버스가 글자 위에 깔림. 별이 글자를 쓸고 지나가는 게 보여야 물리적으로 읽힘 */
+    #footerStage { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+    #footerStage canvas { display: block; width: 100%; height: 100%; }
+    /* inline-block 이어야 transform이 먹음. pre는 어절 사이 공백 안 죽게 */
+    #fuckfooter .sc-l { display: inline-block; white-space: pre; will-change: transform; }
+
     /* Index. 페이지 */
     #indexTitle {
       position: absolute; left: 7vw; top: 26vh; z-index: 2; pointer-events: none;
@@ -2251,10 +2258,326 @@
 <!-- 응 끝 -->
 
   <section id="fuckfooter" class="bg-neutral-900 text-white page" data-page="footer">
-    <div class="h-screen w-full flex items-center justify-center">
-      <p class="text-4xl font-light text-center" data-reveal><strong>© 2026 stx4R. All rights reserved.</strong></p>
+    <div class="h-screen w-full flex flex-col items-center justify-center gap-6">
+      <p class="text-5xl md:text-6xl font-bold tracking-tight text-center" data-reveal data-scatter>Creative Developer</p>
+      <p class="text-4xl font-light text-center" data-reveal data-delay="140" data-scatter><strong>© 2026 stx4R. All rights reserved.</strong></p>
     </div>
+    <div id="footerStage"></div>
   </section>
+
+  <script type="module">
+  // Footer : 마우스 따라다니는 별 + 부딪힌 글자 흩뿌리기
+  // ㄴ 참고 🍆.ws — 커서에 오브젝트가 붙고 몸통이 관성으로 늦게 따라붙는 구조
+  // ㄴ 거긴 wiggle 본 5개를 쓰는데 profile.glb엔 뼈대가 없음. 정점 셰이더에서 굽혀 같은 그림 만듦
+  // ㄴ 글자는 ReactBits Text Scatter 재현. 충돌 임펄스 -> 감쇠 -> 스프링 복귀
+  (() => {
+    const section = document.getElementById('fuckfooter');
+    const stage = document.getElementById('footerStage');
+    if (!section || !stage) return;
+
+    // 데스크톱 전용
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const desktop = matchMedia('(hover: hover) and (pointer: fine)').matches && innerWidth >= 1024;
+    if (reduce || !desktop) return;
+
+    const STAR_GLB = 'static/profile.glb';
+    const BODY_HEX = 0xf2cf9b;   // 채도 낮춘 버터 옐로
+    const MARK_HEX = 0x141414;   // 눈/입 유광 블랙
+
+    const STAR_PX = 210;         // 별 화면 높이(px)
+    const GRIP = 0.34;           // 잡는 지점. 모델 y +0.5가 꼭대기라 위쪽을 쥠
+    const HIT_R = 84;            // 충돌 반지름(px)
+    const BEND_GAIN = 0.5;       // 지연 벡터를 얼마나 굽힘으로 옮길지
+    const BEND_MAX = 0.3;        // 이 이상 휘면 별 형태가 안 읽힘
+
+    // ReactBits Text Scatter 기본값 기준
+    const VELOCITY = 180;        // 튕겨나가는 초기 속도(px/s)
+    const ROTATION = 90;         // 최대 회전(deg)
+    const SCATTER_SCALE = 1.12;
+    const RETURN_AFTER = 0.4;    // 마지막 충돌 후 복귀 시작(s)
+    const RETURN_DUR = 1.6;      // 복귀 체감 시간(s)
+    const HELD_DRAG = 3.2;       // 흩어져 떠 있는 동안 감쇠. 이걸로 최대 이탈 거리가 정해짐
+    const RE_HIT = 0.25;         // 같은 글자 재타격 쿨다운(s). 없으면 빠르게 훑을 때 발산함
+
+    const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+
+    // ── 1. 글자 쪼개기 ───────────────────────────────────────
+    // ㄴ <strong> 같은 구조 유지해야 해서 텍스트 노드만 교체
+    const letters = [];
+    section.querySelectorAll('[data-scatter]').forEach(host => {
+      const nodes = [];
+      const walk = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+      while (walk.nextNode()) nodes.push(walk.currentNode);
+      for (const node of nodes) {
+        const frag = document.createDocumentFragment();
+        for (const ch of node.nodeValue) {
+          const span = document.createElement('span');
+          span.className = 'sc-l';
+          span.textContent = ch;
+          frag.appendChild(span);
+          if (ch.trim()) letters.push({ el: span });   // 공백은 안 움직임
+        }
+        node.parentNode.replaceChild(frag, node);
+      }
+    });
+    if (!letters.length) return;
+
+    // ── 2. 글자 물리 ─────────────────────────────────────────
+    // ㄴ 복귀는 ζ=0.45 스프링. 살짝 넘어갔다 돌아와서 'Bounce Back'처럼 보임
+    const W0 = 4 / (0.45 * RETURN_DUR);
+    const K = W0 * W0, C = 2 * 0.45 * W0;
+
+    const reset = L => {
+      L.x = L.y = L.r = L.vx = L.vy = L.vr = 0;
+      L.s = 1; L.hit = L.knock = -1e9; L.inside = false; L.dirty = false;
+      L.el.style.transform = '';
+    };
+    letters.forEach(reset);
+
+    // offsetLeft/Top은 transform 영향을 안 받음. 흩어진 상태에서 재도 원위치가 나옴
+    const measure = () => {
+      for (const L of letters) {
+        let x = 0, y = 0, n = L.el;
+        while (n && n !== section) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+        L.hw = L.el.offsetWidth / 2;
+        L.hh = L.el.offsetHeight / 2;
+        L.cx = x + L.hw;
+        L.cy = y + L.hh;
+      }
+    };
+
+    const stepLetters = (dt, now) => {
+      for (const L of letters) {
+        const held = now - L.hit < RETURN_AFTER;
+        if (held) {
+          const d = Math.exp(-HELD_DRAG * dt);
+          L.vx *= d; L.vy *= d; L.vr *= d;
+        } else {
+          L.vx += (-K * L.x - C * L.vx) * dt;
+          L.vy += (-K * L.y - C * L.vy) * dt;
+          L.vr += (-K * L.r - C * L.vr) * dt;
+        }
+        L.x += L.vx * dt; L.y += L.vy * dt;
+        L.r = clamp(L.r + L.vr * dt, -ROTATION, ROTATION);
+        L.s += ((held ? SCATTER_SCALE : 1) - L.s) * Math.min(1, 8 * dt);
+
+        const moved = Math.abs(L.x) > 0.05 || Math.abs(L.y) > 0.05
+                   || Math.abs(L.r) > 0.05 || Math.abs(L.s - 1) > 0.002;
+        if (!moved && !L.dirty) continue;
+        L.el.style.transform = moved
+          ? `translate3d(${L.x.toFixed(2)}px, ${L.y.toFixed(2)}px, 0) rotate(${L.r.toFixed(2)}deg) scale(${L.s.toFixed(3)})`
+          : '';
+        L.dirty = moved;
+      }
+    };
+
+    // 별이 글자에 처음 닿는 순간에만 임펄스. 겹쳐 있는 동안 계속 때리면 발산함
+    const collide = (sx, sy, svx, svy, now) => {
+      const speed = Math.hypot(svx, svy);
+      for (const L of letters) {
+        const px = L.cx + L.x, py = L.cy + L.y;
+        const nx = clamp(sx, px - L.hw, px + L.hw);
+        const ny = clamp(sy, py - L.hh, py + L.hh);
+        const dx = sx - nx, dy = sy - ny;
+        if (dx * dx + dy * dy > HIT_R * HIT_R) { L.inside = false; continue; }
+        L.hit = now;
+        if (L.inside || now - L.knock < RE_HIT) continue;
+        L.inside = true;
+        L.knock = now;
+
+        // 밀리는 방향 : 별 중심 -> 글자, 거기에 별 진행 방향을 섞어 쓸려나가게
+        let ux = px - sx, uy = py - sy;
+        const ul = Math.hypot(ux, uy) || 1;
+        ux /= ul; uy /= ul;
+        if (speed > 1) { ux += (svx / speed) * 0.7; uy += (svy / speed) * 0.7; }
+        const nl = Math.hypot(ux, uy) || 1;
+        const push = VELOCITY * (0.6 + 0.4 * Math.min(1, speed / 1400));
+        L.vx += (ux / nl) * push;
+        L.vy += (uy / nl) * push;
+        L.vr += (Math.random() - 0.5) * ROTATION * 2.2;
+      }
+    };
+
+    // ── 3. 포인터 ────────────────────────────────────────────
+    let mx = 0, my = 0, hasPointer = false;
+    addEventListener('pointermove', e => {
+      const r = section.getBoundingClientRect();
+      mx = e.clientX - r.left;
+      my = e.clientY - r.top;
+      hasPointer = true;
+    }, { passive: true });
+
+    // ── 4. 씬 지연 로드 ──────────────────────────────────────
+    // ㄴ three + glb 0.5MB. 첫 화면이랑 같이 받을 이유 없음
+    let booted = false;
+    const boot = () => { if (booted) return; booted = true; run(); };
+    if (section.classList.contains('is-on')) boot();
+    else {
+      const mo = new MutationObserver(() => {
+        if (!section.classList.contains('is-on')) return;
+        mo.disconnect(); boot();
+      });
+      mo.observe(section, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    async function run() {
+      const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+        import('three'),
+        import('three/addons/loaders/GLTFLoader.js'),
+        import('three/addons/environments/RoomEnvironment.js')
+      ]);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const FOV = 30, DIST = 10;
+      const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+      camera.position.set(0, 0, DIST);
+
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+      pmrem.dispose();
+      scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+      keyLight.position.set(2, 3, 4); scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      fillLight.position.set(-3, -1, 2); scene.add(fillLight);
+
+      // COLOR_0은 색이 아니라 마스크(흰=몸통 / 검=눈,입). 여기서 실제 색·거칠기로 갈라줌
+      const uBend = { value: new THREE.Vector3() };
+      const material = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff, vertexColors: true,
+        roughness: 0.45, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.45
+      });
+      material.onBeforeCompile = sh => {
+        sh.uniforms.uBody = { value: new THREE.Color(BODY_HEX).convertSRGBToLinear() };
+        sh.uniforms.uMark = { value: new THREE.Color(MARK_HEX).convertSRGBToLinear() };
+        sh.uniforms.uBend = uBend;
+        sh.vertexShader = sh.vertexShader
+          .replace('void main() {', 'uniform vec3 uBend;\nvoid main() {')
+          .replace('#include <begin_vertex>', `
+            #include <begin_vertex>
+            float bw = clamp((${GRIP.toFixed(2)} - position.y) / 0.92, 0.0, 1.0);
+            transformed += uBend * pow(bw, 1.35);
+          `);
+        sh.fragmentShader = sh.fragmentShader
+          .replace('void main() {', 'uniform vec3 uBody;\nuniform vec3 uMark;\nvoid main() {')
+          .replace('#include <color_fragment>', `
+            float mk = smoothstep(0.35, 0.65, vColor.r);
+            diffuseColor.rgb *= mix(uMark, uBody, mk);
+          `)
+          .replace('#include <roughnessmap_fragment>',
+            'float roughnessFactor = mix(0.12, roughness, smoothstep(0.35, 0.65, vColor.r));')
+          .replace('#include <metalnessmap_fragment>',
+            'float metalnessFactor = mix(0.95, metalness, smoothstep(0.35, 0.65, vColor.r));');
+      };
+
+      const gltf = await new GLTFLoader().loadAsync(STAR_GLB);
+      let geometry = null;
+      gltf.scene.traverse(o => { if (o.isMesh) geometry = o.geometry; });
+      if (!geometry) return;
+
+      const holder = new THREE.Group();
+      const star = new THREE.Mesh(geometry, material);
+      holder.add(star);
+      scene.add(holder);
+
+      // ── 크기/좌표 ──
+      let W = 0, H = 0, perPx = 1, scale = 1;
+      const resize = () => {
+        const r = section.getBoundingClientRect();
+        W = Math.max(1, r.width); H = Math.max(1, r.height);
+        renderer.setSize(W, H, false);
+        camera.aspect = W / H;
+        camera.updateProjectionMatrix();
+        perPx = (2 * Math.tan(FOV * Math.PI / 360) * DIST) / H;
+        scale = STAR_PX * perPx;
+        measure();
+      };
+      resize();
+      addEventListener('resize', resize);
+      if (document.fonts) document.fonts.ready.then(measure);
+
+      // ── 별 물리 ──
+      // ㄴ holder가 커서를 빠르게 쫓고, p1/p2가 그 뒤를 스프링으로 늦게 따라옴
+      // ㄴ p2와 커서의 차이가 곧 '얼마나 휘었나'
+      const grip = new THREE.Vector3();
+      const p1 = new THREE.Vector3(), v1 = new THREE.Vector3();
+      const p2 = new THREE.Vector3(), v2 = new THREE.Vector3();
+      const tmp = new THREE.Vector3(), hit = new THREE.Vector3(), invQ = new THREE.Quaternion();
+      const K1 = 700, C1 = 30, K2 = 480, C2 = 26;
+
+      const toWorld = (px, py, out) => out.set((px - W / 2) * perPx, (H / 2 - py) * perPx, 0);
+
+      let prevSx = 0, prevSy = 0, svx = 0, svy = 0, hasPrev = false;
+      let vis = 0, last = 0, raf = 0, started = false;
+
+      const frame = now => {
+        raf = requestAnimationFrame(frame);
+        const t = now / 1000;
+        const dt = Math.min(0.05, last ? t - last : 0.016);
+        last = t;
+        if (dt <= 0) return;
+
+        const active = section.classList.contains('is-on');
+        vis += ((active ? 1 : 0) - vis) * Math.min(1, 6 * dt);
+        if (!active && vis < 0.01) { hasPrev = false; renderer.clear(); return; }
+
+        // 커서(없으면 화면 한가운데)를 월드로
+        const px = hasPointer ? clamp(mx, 0, W) : W / 2;
+        const py = hasPointer ? clamp(my, 0, H) : H / 2;
+        toWorld(px, py, tmp);
+        if (!started) { grip.copy(tmp); p1.copy(tmp); p2.copy(tmp); started = true; }
+        grip.lerp(tmp, Math.min(1, 20 * dt));
+
+        // 2단 스프링
+        v1.addScaledVector(tmp.copy(grip).sub(p1).multiplyScalar(K1), dt).addScaledVector(v1, -C1 * dt);
+        p1.addScaledVector(v1, dt);
+        v2.addScaledVector(tmp.copy(p1).sub(p2).multiplyScalar(K2), dt).addScaledVector(v2, -C2 * dt);
+        p2.addScaledVector(v2, dt);
+
+        const eff = scale * (0.35 + 0.65 * vis);
+        holder.position.copy(grip);
+        star.scale.setScalar(eff);
+        // 잡는 지점이 위쪽이라 몸통이 아래로 처짐. 가만히 있을 땐 살짝 떠 있음
+        star.position.set(0, -GRIP * eff + Math.sin(t * 1.2) * 0.02 * eff, 0);
+
+        // 지연 벡터를 로컬로 옮겨 굽힘값으로
+        tmp.copy(p2).sub(grip).multiplyScalar(BEND_GAIN / Math.max(eff, 1e-4));
+        star.rotation.z = clamp(-tmp.x * 0.7, -0.4, 0.4) + Math.sin(t * 0.9) * 0.03;
+        star.rotation.x = clamp(tmp.y * 0.45, -0.3, 0.3);
+        holder.updateMatrixWorld(true);
+        invQ.copy(star.quaternion).invert();
+        tmp.applyQuaternion(invQ);
+        if (tmp.length() > BEND_MAX) tmp.setLength(BEND_MAX);
+        uBend.value.copy(tmp);
+
+        // 글자 충돌 : 커서가 아니라 실제 별 몸통 위치로 판정
+        star.getWorldPosition(hit);
+        const sx = hit.x / perPx + W / 2;
+        const sy = H / 2 - hit.y / perPx;
+        if (hasPrev) { svx = (sx - prevSx) / dt; svy = (sy - prevSy) / dt; }
+        else { svx = svy = 0; hasPrev = true; }
+        prevSx = sx; prevSy = sy;
+        if (active && vis > 0.5) collide(sx, sy, svx, svy, t);
+        stepLetters(dt, t);
+
+        renderer.render(scene, camera);
+      };
+      raf = requestAnimationFrame(frame);
+
+      // 푸터를 벗어나면 글자 원위치
+      new MutationObserver(() => {
+        if (!section.classList.contains('is-on')) { letters.forEach(reset); measure(); }
+      }).observe(section, { attributes: true, attributeFilter: ['class'] });
+    }
+  })();
+  </script>
 
 </main>
 
