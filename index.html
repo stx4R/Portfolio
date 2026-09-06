@@ -6,6 +6,13 @@
   <title>stx4R</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
 
+  <!-- 연결/사진은 파싱 중에 미리 깔아둠 -->
+  <!-- ㄴ 원래는 모듈 스크립트가 실행돼야 요청이 시작돼서 첫 화면이 그만큼 늦게 떴음 -->
+  <!-- ㄴ URL은 아래 ParticleImage의 SRC와 반드시 같아야 함. 다르면 두 번 받음 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+  <link rel="preload" as="image" crossorigin href="https://images.unsplash.com/photo-1574359587026-daf1bfd26baa?q=80&amp;w=2670&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.1.0&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
+
   <script type="importmap">
   {
     "imports": {
@@ -19,26 +26,20 @@
   <style>
     /* Pretendard 서브셋 -> static/fonts/subset */
     /* ㄴ index.html에 쓰는것만 load, 본문 수정시 python tools/subset-fonts.py 재실행 */
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/subset/Pretendard-Thin.subset.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/subset/Pretendard-ExtraLight.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/subset/Pretendard-Light.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/subset/Pretendard-Regular.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/subset/Pretendard-Medium.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/subset/Pretendard-SemiBold.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/subset/Pretendard-Bold.subset.woff2") format("woff2"); }
-    @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/subset/Pretendard-ExtraBold.subset.woff2") format("woff2"); }
     @font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/subset/Pretendard-Black.subset.woff2") format("woff2"); }
 
     /* 폴백용 원본 */
     /* ㄴ if i was you i wanna be me too 서브셋에 없는 글자만!!!! 평소엔 요청 X */
-    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 100; font-display: swap; src: url("static/fonts/Pretendard-Thin.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
-    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 200; font-display: swap; src: url("static/fonts/Pretendard-ExtraLight.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 300; font-display: swap; src: url("static/fonts/Pretendard-Light.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 400; font-display: swap; src: url("static/fonts/Pretendard-Regular.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 500; font-display: swap; src: url("static/fonts/Pretendard-Medium.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 600; font-display: swap; src: url("static/fonts/Pretendard-SemiBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 700; font-display: swap; src: url("static/fonts/Pretendard-Bold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
-    @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 800; font-display: swap; src: url("static/fonts/Pretendard-ExtraBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
     @font-face { font-family: "PretendardFull"; font-style: normal; font-weight: 900; font-display: swap; src: url("static/fonts/Pretendard-Black.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-04FF, U+052F, U+0E3F, U+1D43-1D65, U+1D9C-1DA0, U+1DBB-20BF, U+20DB-213B, U+214D-21BB, U+21D0-21EA, U+2202-222B, U+2248, U+2260-226B, U+22EF, U+2303-2305, U+2318-232B, U+2380-238B, U+23CE-23CF, U+2423, U+2460-2473, U+24B6-24CF, U+24EA-24FF, U+25A0-25CF, U+25E6-2606, U+263C, U+2661-266A, U+26A0, U+2713-2717, U+2756, U+2776-2789, U+27EF-27FA, U+2985-2986, U+2B06-2B1C, U+2C7C-2C7F, U+2DFF, U+2E18, U+3000-301F, U+3041-30FE, U+3131-3164, U+318D, U+321C, U+3380-33DD, U+A69F, U+A7FF, U+A92E, U+AC00-D7A3, U+E000-E080, U+E093-E164, U+EE01-EE05, U+F000-F057, U+F6C3, U+FE20-FE2D, U+FEFF-FF60, U+FFA1-FFE6, U+1F10B, U+1F12F-1F189, U+1F850-1F852, U+F0000-F0002; }
 
     body, html {
@@ -48,8 +49,9 @@
     html, body { height: 100%; overflow: hidden; }
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
-    #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; will-change: transform, opacity, filter; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
+    #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
     #projectWheel .wheel-item--selected { font-weight: 600; }
+    #fuckBentoBox.is-on #projectWheel .wheel-item { will-change: transform, opacity, filter; }
 
     /* CardSwap */
     #projectCardStage .cs-stack { position: absolute; inset: 0 0 40px 0; }
@@ -82,10 +84,11 @@
       #projectCardStage .cs-readme { font-size: 12px; }
       #projectCardStage .cs-lead { font-size: 11px; margin-bottom: 10px; padding-bottom: 10px; }
     }
-    #stackStage .stack-item { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); will-change: transform; }
+    #stackStage .stack-item { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+    #fuckinteraction.is-on #stackStage .stack-item { will-change: transform; }
     #stackStage .stack-item .stack-card { background: linear-gradient(#2b2b2b, #191919); border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: filter 200ms; }
     #stackStage .stack-item:hover .stack-card { filter: brightness(1.3); }
-    .lanyard-wrapper { position: relative; z-index: 0; width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; transform: scale(1); transform-origin: center; }
+    .lanyard-wrapper { position: relative; z-index: 0; width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; }
     .lanyard-wrapper canvas { width: 100%; height: 100%; display: block; touch-action: none; }
     /* OS별 이모지가 다르기에, Fluent Emoji로 고정 */
     img.emoji { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; }
@@ -128,7 +131,6 @@
       -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris-in), #000 var(--iris-out));
               mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris-in), #000 var(--iris-out));
       -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-      will-change: -webkit-mask-image, mask-image;
     }
 
     #introHelloLayer { opacity: var(--hello, 1); transform: translateY(calc((1 - var(--hello, 1)) * -28px)); will-change: opacity, transform; }
@@ -180,9 +182,9 @@
     .page {
       position: absolute; inset: 0;
       opacity: 0; visibility: hidden;
-      will-change: opacity, transform;
     }
-    .page.is-on { visibility: visible; opacity: 1; }
+    /* 레이어 승격은 화면에 올라온 장만. 9장 전부 걸면 안 보이는 것까지 GPU에 물고 있음 */
+    .page.is-on { visibility: visible; opacity: 1; will-change: opacity, transform; }
     .page { pointer-events: none; }
     .page.is-front { pointer-events: auto; }
     .page { transform-origin: 50% 50%; backface-visibility: hidden; }
@@ -192,7 +194,8 @@
     #footerStage { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
     #footerStage canvas { display: block; width: 100%; height: 100%; }
     /* inline-block 이어야 transform이 먹음. pre는 어절 사이 공백 안 죽게 */
-    #fuckfooter .sc-l { display: inline-block; white-space: pre; will-change: transform; }
+    #fuckfooter .sc-l { display: inline-block; white-space: pre; }
+    #fuckfooter.is-on .sc-l { will-change: transform; }
 
     /* Index. 페이지 */
     #indexTitle {
@@ -264,7 +267,7 @@
     .folder {
       --folder-color: #FFCC7B;
       --folder-back-color: #EABB71;
-      transition: all 0.2s ease-in;
+      transition: transform 0.2s ease-in;
       cursor: pointer;
     }
     .folder:hover { transform: translateY(-8px); }
@@ -299,7 +302,7 @@
       background: var(--folder-color);
       border-radius: 5px 10px 10px 10px;
       transform-origin: bottom;
-      transition: all 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out;
     }
     .folder:focus-visible { outline: 2px solid #ffffff; outline-offset: 4px; }
 
@@ -343,7 +346,7 @@
       position: absolute; inset: calc(var(--dw-gap) / 2);
       display: block; border-radius: var(--dw-radius); overflow: hidden;
       background: #0b0b12; opacity: var(--dw-dim);
-      transform: translateZ(0); pointer-events: none;
+      pointer-events: none;
       transition:
         transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1355,16 +1358,12 @@
         if (window.pageNav) window.pageNav.lockInput(true);
       });
 
+      // 포인터 이벤트마다 카드 삼각형을 훑을 이유 없음. 프레임 루프에서 한 번만
+      let hoverDirty = false;
       canvas.addEventListener('pointermove', event => {
         readPointer(event);
-        if (!dragged) {
-          const next = !!hitsCard();
-          if (next !== hovered) {
-            hovered = next;
-            applyCursor();
-          }
-        }
-      });
+        if (!dragged) hoverDirty = true;
+      }, { passive: true });
 
       function endDrag(event) {
         if (!dragged) return;
@@ -1418,6 +1417,14 @@
       renderer.setAnimationLoop(() => {
         const delta = Math.min(clock.getDelta(), 0.1);
         if (!isVisible() || !stage.clientWidth) return;
+
+        if (hoverDirty) {
+          hoverDirty = false;
+          if (!dragged) {
+            const next = !!hitsCard();
+            if (next !== hovered) { hovered = next; applyCursor(); }
+          }
+        }
 
         if (dragged) {
           vec.set(pointer.x, pointer.y, 0.5).unproject(camera);
@@ -2543,7 +2550,7 @@
 
       let prevSx = 0, prevSy = 0, svx = 0, svy = 0, hasPrev = false;
       let prevPx = 0, prevPy = 0;
-      let vis = 0, last = 0, raf = 0, started = false;
+      let vis = 0, last = 0, raf = 0, started = false, cleared = false;
 
       const frame = now => {
         raf = requestAnimationFrame(frame);
@@ -2554,7 +2561,12 @@
 
         const active = section.classList.contains('is-on');
         vis += ((active ? 1 : 0) - vis) * Math.min(1, 6 * dt);
-        if (!active && vis < 0.01) { hasPrev = false; renderer.clear(); return; }
+        if (!active && vis < 0.01) {
+          hasPrev = false;
+          if (!cleared) { renderer.clear(); cleared = true; }   // 지우는 건 한 번이면 됨
+          return;
+        }
+        cleared = false;
 
         // 커서(없으면 화면 한가운데)를 월드로
         const px = hasPointer ? clamp(mx, 0, W) : W / 2;
@@ -2844,17 +2856,14 @@
       if (i < 0 || !el) return;
       enterSpecial(el, i, ox, oy);
     },
-    lockInput(v) { locked = !!v; },
-    indexReady() { return mode === 'base' && !moving && Math.abs(pos - 2) < 0.01; },
-    where() { return mode !== 'base' ? 'busy' : (pos < 1.5 ? 'intro' : pos < 2.5 ? 'index' : pos > 8.5 ? 'footer' : 'special'); },
-    at() { return pos; },
-    go(dir) { step(dir); }
+    lockInput(v) { locked = !!v; }
   };
 
   const busy = () => locked || moving || mode !== 'base';
 
   // 모바일에서 페이지 안에 세로로 넘치는 영역([data-mscroll])이 생김
   // ㄴ 그 안이 남았으면 먼저 굴리고, 끝에 닿아야 페이지를 넘김
+  let scrollableCache = new WeakMap();
   function scrollableAt(target, delta) {
     if (!(target instanceof Element)) return null;
     const el = target.closest('[data-mscroll]');
@@ -2862,8 +2871,13 @@
     const room = el.scrollHeight - el.clientHeight;
     if (room < 2) return null;
     // 데스크톱에선 overflow가 visible이라 넘쳐도 못 굴림. 여기서 잡아주면 페이지가 안 넘어가고 갇힘
-    const ov = getComputedStyle(el).overflowY;
-    if (ov !== 'auto' && ov !== 'scroll') return null;
+    let ok = scrollableCache.get(el);
+    if (ok === undefined) {
+      const ov = getComputedStyle(el).overflowY;
+      ok = ov === 'auto' || ov === 'scroll';
+      scrollableCache.set(el, ok);
+    }
+    if (!ok) return null;
     const atTop = el.scrollTop <= 0;
     const atEnd = el.scrollTop >= room - 1;
     if (delta > 0 && !atEnd) return el;
@@ -2951,7 +2965,10 @@
     step(down ? 1 : -1);
   });
 
-  window.addEventListener('resize', () => { if (mode === 'base') paint(pos); });
+  window.addEventListener('resize', () => {
+    scrollableCache = new WeakMap();   // 브레이크포인트 넘어가면 overflow가 바뀜
+    if (mode === 'base') paint(pos);
+  });
 
   paint(0);
 })();
@@ -2993,7 +3010,6 @@
   const OVERSCAN = 1.24;
   const GAP = 18, TILT = 16, TURN = -14, ROLL = 0, DEPTH = 120;
   const SPEED = 42, VARIANCE = 0.45, PARALLAX = 0.6;
-  const PAUSE_ON_HOVER = false;
   const TILE_RATIO = 132 / 200;
   const tileWidthFor = (w, n) => Math.max(minTile(), Math.min(420, (w * OVERSCAN) / n - GAP));
 
@@ -3040,7 +3056,7 @@
   const back = document.createElement('div');
   back.className = 'folder__back';
   back.innerHTML = CARDS.slice(0, 3)
-    .map((c, i) => '<div class="paper paper-' + (i + 1) + '">' + cardMarkup(c) + '</div>').join('') +
+    .map(c => '<div class="paper">' + cardMarkup(c) + '</div>').join('') +
     '<div class="folder__front"></div><div class="folder__front right"></div>';
   folder.appendChild(back);
   host.appendChild(folder);
@@ -3050,11 +3066,13 @@
   const FOLDER_VIS_H = FOLDER_H + FOLDER_TAB;
 
   let dockCap = 0;
+  let capCtx = null;
   function syncDock() {
     const cs = getComputedStyle(title);
     const fs = parseFloat(cs.fontSize) || 16;
     let cap = fs * 0.72;
-    const ctx = document.createElement('canvas').getContext('2d');
+    if (capCtx === null) capCtx = document.createElement('canvas').getContext('2d') || false;
+    const ctx = capCtx;
     if (ctx) {
       // 캔버스는 unicode-range 무시하고 패밀리에 적힌 웹폰트를 죄다 받아버림
       // ㄴ 폴백용 원본까지 끌려오니 여기선 빼고 잼. 'I' 측정값은 그대로임
@@ -3158,7 +3176,7 @@
 
   const pointer = { x: 0, y: 0 };
   const damped = { x: 0, y: 0 };
-  let hoveredCol = -1, wallHovered = false, activeTile = null;
+  let hoveredCol = -1, activeTile = null;
   let frozen = false, lastTs = null;
 
   function applyPlane(px, py) {
@@ -3183,8 +3201,7 @@
     for (let c = 0; c < cols.length; c++) {
       const col = cols[c];
       if (reduce) { col.track.style.transform = 'translate3d(0, ' + -col.offset.toFixed(2) + 'px, 0)'; continue; }
-      const paused = wallHovered && PAUSE_ON_HOVER;
-      const target = (paused || hoveredCol === c) ? 0 : col.base;
+      const target = hoveredCol === c ? 0 : col.base;
       const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
       col.velocity += (target - col.velocity) * ease;
       let next = col.offset + col.velocity * dt;
@@ -3200,9 +3217,7 @@
     hoveredCol = -1;
   }
 
-  dw.addEventListener('pointerenter', () => { wallHovered = true; });
   dw.addEventListener('pointerleave', () => {
-    wallHovered = false;
     pointer.x = 0; pointer.y = 0;
     release();
   });
@@ -3212,8 +3227,7 @@
       pointer.x = (e.clientX - r.left) / r.width - 0.5;
       pointer.y = (e.clientY - r.top) / r.height - 0.5;
     }
-    const hit = document.elementFromPoint(e.clientX, e.clientY);
-    const tile = hit && hit.closest ? hit.closest('[data-tile-id]') : null;
+    const tile = e.target instanceof Element ? e.target.closest('[data-tile-id]') : null;
     if (!tile || tile === activeTile) return;
     if (activeTile) activeTile.classList.remove('is-active');
     activeTile = tile;
@@ -3327,7 +3341,7 @@
   requestAnimationFrame(() => applyFolder(centerTarget(), false));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitCardText(); layout(); });
   window.addEventListener('resize', layout);
-  window.indexScene = { freeze(v) { frozen = !!v; }, relayout: layout };
+  window.indexScene = { freeze(v) { frozen = !!v; } };
   requestAnimationFrame(frame);
 })();
 </script>
@@ -3337,12 +3351,10 @@
 (() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const cv = document.createElement('canvas');
-  cv.id = 'clickSpark';
-  document.body.appendChild(cv);
-  const ctx = cv.getContext('2d');
+  let cv = null, ctx = null;
 
   function size() {
+    if (!cv) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = innerWidth * dpr;
     cv.height = innerHeight * dpr;
@@ -3350,7 +3362,14 @@
     cv.style.height = innerHeight + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  size();
+  function ensureCanvas() {
+    if (cv) return;
+    cv = document.createElement('canvas');
+    cv.id = 'clickSpark';
+    document.body.appendChild(cv);
+    ctx = cv.getContext('2d');
+    size();
+  }
   addEventListener('resize', size);
 
   const COUNT = 8, DUR = 420, R0 = 10, R1 = 28, LEN = 10;
@@ -3380,6 +3399,7 @@
   }
 
   addEventListener('pointerdown', e => {
+    ensureCanvas();
     sparks.push({ x: e.clientX, y: e.clientY, t: performance.now(), a: Math.random() * Math.PI });
     if (!raf) raf = requestAnimationFrame(frame);
   });
@@ -3460,19 +3480,19 @@
     cards.push(card);
   });
 
-  function layout() {
+  let H = 0, R = 1, step = 1, cardW = 0, cardH = 0, shiftY = 0, sized = false;
+
+  function measure() {
     const cw = stage.clientWidth;
     const ch = stage.clientHeight;
-    if (!cw || !ch) return;
-    const H = cw / 2;
+    if (!cw || !ch) return false;
+    H = cw / 2;
     const B = ch * 0.18;
-    const R = (H * H + B * B) / (2 * B);
+    R = (H * H + B * B) / (2 * B);
     const rotMax = Math.asin(Math.min(H / R, 1));
     const cos = Math.cos(rotMax), sin = Math.sin(rotMax);
     const denom = 0.5 + cos / 2 + (7 * sin) / 18;
     let below = 14 + 28 + 4;
-    let cardH = 0;
-    let cardW = 0;
     for (let pass = 0; pass < 3; pass++) {
       cardH = Math.max(Math.min(ch * 0.62, (ch - 4 - B - below * cos) / denom), 72);
       cardW = (cardH * 7) / 9;
@@ -3486,10 +3506,16 @@
       if (real + 4 <= below + 0.5) break;
       below = real + 4;
     }
-    const step = cardW + ch * 0.12;
+    step = cardW + ch * 0.12;
     const topExt = cardH / 2 + 4;
     const bottomExt = B + (cardH / 2 + below) * cos + (cardW / 2) * sin;
-    const shiftY = (topExt - bottomExt) / 2;
+    shiftY = (topExt - bottomExt) / 2;
+    sized = true;
+    return true;
+  }
+
+  function place() {
+    if (!sized) return;
     const n = items.length;
     items.forEach((el, i) => {
       let d = i - index;
@@ -3507,10 +3533,12 @@
     });
   }
 
+  function layout() { if (measure()) place(); }
+
   function move(direction) {
     const n = items.length;
     index = (((index + direction) % n) + n) % n;
-    layout();
+    place();
   }
 
   prevBtn.addEventListener('click', () => move(-1));
@@ -3533,6 +3561,7 @@
   stage.addEventListener('touchend', () => { sx = null; }, { passive: true });
 
   window.addEventListener('resize', layout);
+  if (document.fonts) document.fonts.ready.then(layout);
 
   layout();
 })();

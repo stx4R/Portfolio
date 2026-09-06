@@ -11,8 +11,9 @@ HTML   = ROOT / "index.html"
 SRCDIR = ROOT / "static" / "fonts"
 OUTDIR = SRCDIR / "subset"
 
-WEIGHTS = ["Thin", "ExtraLight", "Light", "Regular",
-           "Medium", "SemiBold", "Bold", "ExtraBold", "Black"]
+# index.html이 실제로 부르는 굵기만. Thin/ExtraLight/ExtraBold는 쓰는 규칙이 없어서 뺌
+# ㄴ 새로 쓰게 되면 여기 추가하고 index.html @font-face도 같이 넣을 것
+WEIGHTS = ["Light", "Regular", "Medium", "SemiBold", "Bold", "Black"]
 
 # 본문에 없어도 넣어두는 안전 마진. 나중에 글 조금 고쳐도 폴백 안 타게
 MARGIN = [
