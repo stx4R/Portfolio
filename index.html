@@ -2259,7 +2259,7 @@
 
   <section id="fuckfooter" class="bg-neutral-900 text-white page" data-page="footer">
     <div class="h-screen w-full flex flex-col items-center justify-center gap-6">
-      <p class="text-5xl md:text-6xl font-bold tracking-tight text-center" data-reveal data-scatter>Creative Developer</p>
+      <p class="text-5xl md:text-6xl font-bold tracking-tight text-center" data-reveal data-scatter>Imagination 2 Reality!</p>
       <p class="text-4xl font-light text-center" data-reveal data-delay="140" data-scatter><strong>© 2026 stx4R. All rights reserved.</strong></p>
     </div>
     <div id="footerStage"></div>
@@ -2281,14 +2281,20 @@
     if (reduce || !desktop) return;
 
     const STAR_GLB = 'static/profile.glb';
-    const BODY_HEX = 0xf2cf9b;   // 채도 낮춘 버터 옐로
-    const MARK_HEX = 0x141414;   // 눈/입 유광 블랙
+    // 원본 아트웍에서 뽑은 색. 톤매핑 끄고 이 값이 화면에 거의 그대로 찍히게 조명을 맞춤
+    const BODY_HEX = 0xffce85;   // 몸통
+    const MARK_HEX = 0x5c534b;   // 눈/입
 
     const STAR_PX = 210;         // 별 화면 높이(px)
     const GRIP = 0.34;           // 잡는 지점. 모델 y +0.5가 꼭대기라 위쪽을 쥠
     const HIT_R = 84;            // 충돌 반지름(px)
     const BEND_GAIN = 0.5;       // 지연 벡터를 얼마나 굽힘으로 옮길지
     const BEND_MAX = 0.3;        // 이 이상 휘면 별 형태가 안 읽힘
+    // 감아차기 먹은 공처럼. 움직이면 회전이 걸리고 멈춰도 관성으로 더 돌다 잦아듦
+    const SPIN_ROLL = 0.045;     // 포인터 속도(px/s)가 각속도로 쌓이는 비율. 한 번 튕기면 한 바퀴 넘게
+    const SPIN_DAMP = 1.9;       // 회전 감쇠. 클수록 빨리 멈춤
+    const SPIN_SETTLE = 0.35;    // 각속도가 이보다 느려지면 얼굴을 정면으로 되돌림
+    const TAU = Math.PI * 2;
 
     // ReactBits Text Scatter 기본값 기준
     const VELOCITY = 180;        // 튕겨나가는 초기 속도(px/s)
@@ -2430,7 +2436,8 @@
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      // ACES를 물리면 원본 아트웍 색이 어둡고 탁하게 눌림. 색을 그대로 살리려고 톤매핑 뺌
+      renderer.toneMapping = THREE.NoToneMapping;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       stage.appendChild(renderer.domElement);
 
@@ -2442,10 +2449,15 @@
       const pmrem = new THREE.PMREMGenerator(renderer);
       scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
       pmrem.dispose();
-      scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+      // scene.environment는 material.envMapIntensity가 아니라 이걸로 조절됨(three r163~)
+      // ㄴ 재질 쪽만 만지면 아무리 낮춰도 안 어두워짐
+      scene.environmentIntensity = 0.25;
+      // 정면이 BODY_HEX 그대로 찍히게 맞춘 값. 렌더 픽셀 찍어서 역산했으니 함부로 만지지 말 것
+      // ㄴ 물리 조명이라 확산광 계수는 intensity/π. 환경광까지 합쳐 총량이 1이어야 albedo 1:1
+      scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.27);
       keyLight.position.set(2, 3, 4); scene.add(keyLight);
-      const fillLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.47);
       fillLight.position.set(-3, -1, 2); scene.add(fillLight);
 
       // COLOR_0은 색이 아니라 마스크(흰=몸통 / 검=눈,입). 여기서 실제 색·거칠기로 갈라줌
@@ -2455,8 +2467,10 @@
         roughness: 0.45, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.45
       });
       material.onBeforeCompile = sh => {
-        sh.uniforms.uBody = { value: new THREE.Color(BODY_HEX).convertSRGBToLinear() };
-        sh.uniforms.uMark = { value: new THREE.Color(MARK_HEX).convertSRGBToLinear() };
+        // convertSRGBToLinear 부르면 안 됨. Color(hex)가 이미 sRGB로 읽어 작업공간으로 옮겨놓음
+        // ㄴ 한 번 더 돌리면 이중 변환이라 채도만 확 올라가고 원본 색이랑 달라짐
+        sh.uniforms.uBody = { value: new THREE.Color(BODY_HEX) };
+        sh.uniforms.uMark = { value: new THREE.Color(MARK_HEX) };
         sh.uniforms.uBend = uBend;
         sh.vertexShader = sh.vertexShader
           .replace('void main() {', 'uniform vec3 uBend;\nvoid main() {')
@@ -2471,10 +2485,11 @@
             float mk = smoothstep(0.35, 0.65, vColor.r);
             diffuseColor.rgb *= mix(uMark, uBody, mk);
           `)
+          // 눈/입은 광택만 남기고 금속기를 뺌. 메탈이 세면 환경만 비춰서 원본 색이 안 나옴
           .replace('#include <roughnessmap_fragment>',
-            'float roughnessFactor = mix(0.12, roughness, smoothstep(0.35, 0.65, vColor.r));')
+            'float roughnessFactor = mix(0.22, roughness, smoothstep(0.35, 0.65, vColor.r));')
           .replace('#include <metalnessmap_fragment>',
-            'float metalnessFactor = mix(0.95, metalness, smoothstep(0.35, 0.65, vColor.r));');
+            'float metalnessFactor = mix(0.25, metalness, smoothstep(0.35, 0.65, vColor.r));');
       };
 
       const gltf = await new GLTFLoader().loadAsync(STAR_GLB);
@@ -2510,11 +2525,14 @@
       const p1 = new THREE.Vector3(), v1 = new THREE.Vector3();
       const p2 = new THREE.Vector3(), v2 = new THREE.Vector3();
       const tmp = new THREE.Vector3(), hit = new THREE.Vector3(), invQ = new THREE.Quaternion();
+      const spin = new THREE.Vector3(), spinV = new THREE.Vector3();
+      const eul = new THREE.Euler(), qTilt = new THREE.Quaternion(), qSpin = new THREE.Quaternion();
       const K1 = 700, C1 = 30, K2 = 480, C2 = 26;
 
       const toWorld = (px, py, out) => out.set((px - W / 2) * perPx, (H / 2 - py) * perPx, 0);
 
       let prevSx = 0, prevSy = 0, svx = 0, svy = 0, hasPrev = false;
+      let prevPx = 0, prevPy = 0;
       let vis = 0, last = 0, raf = 0, started = false;
 
       const frame = now => {
@@ -2532,8 +2550,28 @@
         const px = hasPointer ? clamp(mx, 0, W) : W / 2;
         const py = hasPointer ? clamp(my, 0, H) : H / 2;
         toWorld(px, py, tmp);
-        if (!started) { grip.copy(tmp); p1.copy(tmp); p2.copy(tmp); started = true; }
+        if (!started) { grip.copy(tmp); p1.copy(tmp); p2.copy(tmp); prevPx = px; prevPy = py; started = true; }
         grip.lerp(tmp, Math.min(1, 20 * dt));
+
+        // 회전 : 이동 속도가 각속도로 쌓임
+        // ㄴ 화면 안에서 구르는 롤(Z)이 주축. 별이 납작해서 Y축을 주면 옆면으로 사라져버림
+        // ㄴ 요/피치는 거들기만. 이 조합이 감아차기처럼 축이 비틀린 회전으로 보임
+        const pvx = (px - prevPx) / dt, pvy = (py - prevPy) / dt;
+        prevPx = px; prevPy = py;
+        spinV.z += (-pvx - pvy * 0.25) * SPIN_ROLL * dt;
+        spinV.y += pvx * 0.35 * SPIN_ROLL * dt;
+        spinV.x += -pvy * 0.35 * SPIN_ROLL * dt;
+        spinV.multiplyScalar(Math.exp(-SPIN_DAMP * dt));
+        spin.addScaledVector(spinV, dt);
+
+        // 다 돌고 나면 얼굴이 정면으로 오게 가까운 한 바퀴 지점으로 되돌림
+        const spinSpeed = spinV.length();
+        if (spinSpeed < SPIN_SETTLE) {
+          const k = Math.min(1, 1.6 * dt) * (1 - spinSpeed / SPIN_SETTLE);
+          spin.x += (Math.round(spin.x / TAU) * TAU - spin.x) * k;
+          spin.y += (Math.round(spin.y / TAU) * TAU - spin.y) * k;
+          spin.z += (Math.round(spin.z / TAU) * TAU - spin.z) * k;
+        }
 
         // 2단 스프링
         v1.addScaledVector(tmp.copy(grip).sub(p1).multiplyScalar(K1), dt).addScaledVector(v1, -C1 * dt);
@@ -2548,12 +2586,19 @@
         star.position.set(0, -GRIP * eff + Math.sin(t * 1.2) * 0.02 * eff, 0);
 
         // 지연 벡터를 로컬로 옮겨 굽힘값으로
+        // 기울기(관성) 위에 회전을 얹음
         tmp.copy(p2).sub(grip).multiplyScalar(BEND_GAIN / Math.max(eff, 1e-4));
-        star.rotation.z = clamp(-tmp.x * 0.7, -0.4, 0.4) + Math.sin(t * 0.9) * 0.03;
-        star.rotation.x = clamp(tmp.y * 0.45, -0.3, 0.3);
+        eul.set(clamp(tmp.y * 0.45, -0.3, 0.3), 0,
+                clamp(-tmp.x * 0.7, -0.4, 0.4) + Math.sin(t * 0.9) * 0.03);
+        qTilt.setFromEuler(eul);
+        eul.set(spin.x, spin.y, spin.z);
+        star.quaternion.copy(qTilt).multiply(qSpin.setFromEuler(eul));
+
         holder.updateMatrixWorld(true);
         invQ.copy(star.quaternion).invert();
         tmp.applyQuaternion(invQ);
+        // 빠르게 돌 때 굽힘까지 세면 변형이 모델을 타고 도는 것처럼 보임
+        tmp.multiplyScalar(1 / (1 + spinSpeed * 0.35));
         if (tmp.length() > BEND_MAX) tmp.setLength(BEND_MAX);
         uBend.value.copy(tmp);
 
