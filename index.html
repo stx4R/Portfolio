@@ -2405,9 +2405,11 @@
     };
 
     // ── 3. 포인터 ────────────────────────────────────────────
+    // ㄴ 기준을 #stage로 잡음. section은 전환 중 transform이 걸려서 rect가 어긋남
+    const root = document.getElementById('stage') || document.body;
     let mx = 0, my = 0, hasPointer = false;
     addEventListener('pointermove', e => {
-      const r = section.getBoundingClientRect();
+      const r = root.getBoundingClientRect();
       mx = e.clientX - r.left;
       my = e.clientY - r.top;
       hasPointer = true;
@@ -2504,9 +2506,14 @@
 
       // ── 크기/좌표 ──
       let W = 0, H = 0, perPx = 1, scale = 1;
+      // 크기는 반드시 레이아웃 값(clientWidth/Height)으로 잴 것
+      // ㄴ 페이지 전환 중 .page엔 rotateX(-44deg)가 걸리고 #stage엔 perspective가 있음
+      // ㄴ 그 타이밍에 getBoundingClientRect()를 쓰면 원근 왜곡된 박스(1705x318 같은)가 나옴
+      // ㄴ 캐시 더울 때 import/glb가 전환 창 안에서 끝나면 그대로 물려서 별이 3배로 커졌었음
       const resize = () => {
-        const r = section.getBoundingClientRect();
-        W = Math.max(1, r.width); H = Math.max(1, r.height);
+        const w = stage.clientWidth, h = stage.clientHeight;
+        if (w < 2 || h < 2 || (w === W && h === H)) return;
+        W = w; H = h;
         renderer.setSize(W, H, false);
         camera.aspect = W / H;
         camera.updateProjectionMatrix();
@@ -2516,6 +2523,9 @@
       };
       resize();
       addEventListener('resize', resize);
+      // 첫 측정이 0으로 나왔거나 창 크기 말고 레이아웃만 바뀐 경우까지 받아줌
+      // ㄴ 다만 이 콜백은 렌더링 스텝에 묶여 있어 탭이 안 그려지면 안 옴. resize 리스너가 본진
+      new ResizeObserver(resize).observe(stage);
       if (document.fonts) document.fonts.ready.then(measure);
 
       // ── 별 물리 ──
