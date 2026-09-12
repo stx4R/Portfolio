@@ -22,6 +22,16 @@
     }
   }
   </script>
+  <!-- 무거운 모듈은 head에서 바로 받기 시작 -->
+  <!-- ㄴ 모듈 스크립트는 문서 순서대로 도는데 첫 번째(파티클)가 three를 static import함 -->
+  <!-- ㄴ 안 걸어두면 랜야드/푸터의 import()가 three 다 받은 뒤에야 출발해서 직렬로 늘어짐 -->
+  <!-- ㄴ URL은 위 importmap과 반드시 같아야 함. 다르면 두 번 받음 -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js" />
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/loaders/GLTFLoader.js" />
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/+esm" />
+  <!-- 프리로더가 쓰는 굵기만 미리. 숫자가 시스템 폰트로 떴다가 바뀌는 거 안 보이게 -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="static/fonts/subset/Pretendard-Bold.subset.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="static/fonts/subset/Pretendard-SemiBold.subset.woff2" />
 
   <style>
     /* Pretendard 서브셋 -> static/fonts/subset */
@@ -49,6 +59,37 @@
     html, body { height: 100%; overflow: hidden; }
     ::-webkit-scrollbar { display: none; }
     html { scrollbar-width: none; }
+
+    /* Preloader (pro.reactbits.dev/docs/components/preloader) */
+    /* ㄴ percentage 변형 그대로. 배경 #000, 가운데 숫자, 바닥에 진행 바 */
+    /* ㄴ 숫자 위 라벨은 stairs 변형의 loadingText 방식(단어별 블러 등장). 99%부터 흐려짐 */
+    /* ㄴ Tailwind 안 씀. 이게 맨 처음 뜨는 화면이라 CSS 파일 기다리면 안 됨 */
+    #preloader {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #000; color: #fff;
+      transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #preloader.is-out { opacity: 0; pointer-events: none; }
+    #preloaderLabel {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.3em;
+      margin: 0; padding: 0 6vw;
+      font-weight: 600; letter-spacing: -0.01em; line-height: 1.3;
+      font-size: clamp(1rem, 3vw, 1.625rem); color: #a3a3a3;
+      transition: opacity 320ms ease, filter 320ms ease;
+    }
+    #preloaderLabel span { animation: preloaderWord 600ms ease both; }
+    #preloaderLabel span:nth-child(2) { animation-delay: 110ms; }
+    #preloaderLabel span:nth-child(3) { animation-delay: 220ms; }
+    @keyframes preloaderWord { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+    #preloader.is-textfade #preloaderLabel { opacity: 0; filter: blur(10px); }
+    #preloaderCount {
+      font-weight: 700; line-height: 1; letter-spacing: -0.05em;
+      font-size: min(25vw, 200px); font-variant-numeric: tabular-nums;
+    }
+    #preloaderCount .sign { font-size: min(12vw, 100px); opacity: 0.5; }
+    #preloaderBar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #1f1f1f; }
+    #preloaderFill { height: 100%; width: 0; background: #fff; }
     #projectWheel .wheel-item { position: absolute; top: 50%; left: 12px; white-space: nowrap; line-height: 1; font-weight: 300; transform-origin: left center; cursor: pointer; font-size: clamp(1.5rem, 2.4vw, 2.25rem); color: color-mix(in srgb, #ffffff calc(var(--wp, 0) * 100%), #a6a6a6); }
     #projectWheel .wheel-item--selected { font-weight: 600; }
     #fuckBentoBox.is-on #projectWheel .wheel-item { will-change: transform, opacity, filter; }
@@ -531,6 +572,169 @@
   <link rel="stylesheet" href="static/tailwind.css">
 </head>
 <body class="bg-neutral-900 text-white">
+
+  <!-- Preloader (pro.reactbits.dev/docs/components/preloader) -->
+  <!-- ㄴ 아래 스크립트들이 각자 몫을 등록하고 전부 끝나야 걷힘. 숫자는 진짜 진행률 -->
+  <!-- ㄴ 랜야드/푸터 별처럼 원래 늦게 받던 것도 이 뒤에서 다 받음. 페이지 열었는데 빈 칸 뜨는 일 없게 -->
+  <div id="preloader" role="progressbar" aria-label="Preparing for PERFECT..." aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <p id="preloaderLabel" aria-hidden="true"><span>Preparing</span><span>for</span><span>PERFECT...</span></p>
+    <div id="preloaderCount"><span id="preloaderNum">0</span><span class="sign">%</span></div>
+    <div id="preloaderBar"><div id="preloaderFill"></div></div>
+  </div>
+  <noscript><style>#preloader { display: none; }</style></noscript>
+
+  <script>
+  // Preloader 진행률 집계
+  // ㄴ 등록표(JOBS)에 무게를 미리 박아둠. 큰 파일 받는 동안 숫자가 한 자리에 멈춰 있지 않게 KB 비율
+  // ㄴ 각 스크립트가 claim()으로 자기 몫을 가져감. DOMContentLoaded까지 아무도 안 가져간 건 그 환경에서 안 쓰는 것이니 뺌
+  // ㄴ 모듈 스크립트도 DOMContentLoaded 전에 다 돌기 때문에 가능. 단 claim은 첫 await 전에 해야 함
+  // ㄴ 최소 1초는 보여줌. 캐시 있으면 100ms 만에 끝나서 뭐가 떴는지도 모르고 지나감
+  (() => {
+    const root = document.getElementById('preloader');
+    const num  = document.getElementById('preloaderNum');
+    const fill = document.getElementById('preloaderFill');
+    if (!root) return;
+
+    const MIN_MS  = 1000;    // 이 전엔 100 안 찍음
+    const MAX_MS  = 20000;   // 이 넘으면 덜 받았어도 걷음. 뭔가 영영 안 오면 사이트 자체를 못 봄
+    const HOLD_MS = 400;     // 100% 보여주는 시간
+    const FADE_MS = 500;     // CSS transition과 같아야 함
+    const TEXT_FADE_AT = 99; // 라벨 흐려지기 시작하는 퍼센트
+    const TAU = 0.18;        // 숫자가 목표를 따라붙는 시정수(s). 작을수록 팍팍 뜀
+
+    // 무게 = 대략 KB(gzip). 정확할 필요 없고 비율만
+    const JOBS = {
+      document: 250,   // HTML, CSS, 이모지, 사진. window load
+      fonts:    400,   // Pretendard 서브셋 6개
+      three:    260,
+      particle: 400,   // 인트로 사진 + 파티클 빌드
+      logos:    150,   // 스택 로고 26장
+      rapier:   770,
+      cardGlb: 1300,
+      lanyard:  200,   // 텍스처 + 씬 구성
+      starGlb:  480,   // 데스크톱만
+      star:      50
+    };
+    const jobs = new Map();
+    const dropped = new Set();
+    let total = 0;
+    for (const k in JOBS) total += JOBS[k];
+
+    function claim(key) {
+      const had = jobs.get(key);
+      if (had) return had.h;
+      const w = JOBS[key] || 100;
+      // 표에 없거나 마감 뒤에 온 건 그때 더함
+      if (!(key in JOBS) || dropped.has(key)) { total += w; dropped.delete(key); }
+      const j = { w, p: 0, h: null };
+      j.h = {
+        progress(p) { if (j.p < 1) j.p = Math.max(j.p, Math.min(1, p)); },
+        done() { j.p = 1; }
+      };
+      jobs.set(key, j);
+      return j.h;
+    }
+    function real() {
+      let acc = 0;
+      jobs.forEach(j => { acc += j.w * j.p; });
+      return total > 0 ? acc / total : 1;
+    }
+    addEventListener('DOMContentLoaded', () => {
+      for (const k in JOBS) if (!jobs.has(k)) { total -= JOBS[k]; dropped.add(k); }
+    }, { once: true });
+
+    // 큰 파일은 여기서 받음. 바이트 단위로 진행률이 나와서 숫자가 실제 속도로 감
+    // ㄴ 결과는 ArrayBuffer. GLTFLoader.parseAsync에 그대로 넣으면 됨
+    const assets = new Map();
+    function asset(key, url) {
+      if (assets.has(key)) return assets.get(key);
+      const h = claim(key);
+      const p = fetch(url).then(async res => {
+        if (!res.ok) throw new Error(url + ' ' + res.status);
+        if (!res.body) return res.arrayBuffer();
+        // Content-Length는 전송(압축) 크기고 got은 푼 크기. gzip 걸리면 1 넘는데 progress()가 잘라줌
+        const size = +res.headers.get('Content-Length') || 0;
+        const reader = res.body.getReader();
+        const parts = [];
+        let got = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          parts.push(value);
+          got += value.byteLength;
+          if (size) h.progress(got / size);
+        }
+        const out = new Uint8Array(got);
+        let at = 0;
+        for (const c of parts) { out.set(c, at); at += c.byteLength; }
+        return out.buffer;
+      });
+      p.then(h.done, h.done);
+      assets.set(key, p);
+      return p;
+    }
+
+    // 문서 자체 + 폰트. 폰트는 load 뒤에 봐야 함. 그 전엔 아직 요청도 안 한 폰트가 있어서 ready가 바로 풀림
+    const doc = claim('document');
+    const fonts = claim('fonts');
+    addEventListener('load', () => {
+      doc.done();
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(fonts.done, fonts.done);
+    }, { once: true });
+
+    let resolveReady;
+    const api = {
+      active: true,
+      ready: new Promise(r => { resolveReady = r; }),
+      claim,
+      done(key) { claim(key).done(); },
+      asset
+    };
+    window.preloader = api;
+
+    // 숫자는 목표를 지수적으로 따라감. 목표 = 실제 진행률, 단 첫 1초는 경과 시간 비율이 상한
+    const t0 = performance.now();
+    let shown = 0, last = 0, lastInt = -1;
+
+    function paint() {
+      const n = Math.floor(shown);
+      if (n !== lastInt) {
+        lastInt = n;
+        num.textContent = n;
+        root.setAttribute('aria-valuenow', n);
+      }
+      fill.style.width = shown.toFixed(2) + '%';
+      root.classList.toggle('is-textfade', shown >= TEXT_FADE_AT);
+    }
+
+    function leave() {
+      setTimeout(() => {
+        root.classList.add('is-out');
+        setTimeout(() => {
+          root.remove();
+          api.active = false;
+          resolveReady();
+        }, FADE_MS + 40);
+      }, HOLD_MS);
+    }
+
+    function frame(now) {
+      const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+      last = now;
+      const age = now - t0;
+      let target = Math.min(real(), age / MIN_MS) * 100;
+      if (age > MAX_MS) target = 100;
+      // 뒤로는 안 감. 마감 뒤에 claim이 들어와 총량이 늘어도 숫자가 줄어드는 건 안 보여줌
+      if (target > shown) shown += (target - shown) * (1 - Math.exp(-dt / TAU));
+      if (target >= 100 && shown > 99.5) shown = 100;
+      paint();
+      if (shown >= 100) { leave(); return; }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+  </script>
+
 <main id="stage" class="w-full h-screen">
 
 
@@ -639,6 +843,12 @@
     const introPage = document.getElementById('fuckintro');
     if (!stage) return;
 
+    // 프리로더 : three는 위 import가 풀린 시점, 파티클은 build() 끝난 시점
+    const pre = window.preloader;
+    if (pre) pre.done('three');
+    const job = pre && pre.claim('particle');
+    const settle = () => { if (job) job.done(); };
+
     const SRC = 'https://images.unsplash.com/photo-1574359587026-daf1bfd26baa?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
     const PARTICLE_OPACITY = 0.9;    // 최대 불투명도
@@ -676,8 +886,11 @@
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onerror = fallback;
-    img.onload = () => { try { build(img); } catch (err) { console.warn('[ParticleImage]', err); fallback(); } };
+    img.onerror = () => { fallback(); settle(); };
+    img.onload = () => {
+      try { build(img); } catch (err) { console.warn('[ParticleImage]', err); fallback(); }
+      settle();
+    };
     img.src = SRC;
 
     function build(image) {
@@ -845,6 +1058,8 @@
       scene.add(new THREE.Points(geo, material));
       const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 10);
       camera.position.z = 1;
+      // 셰이더는 지금 컴파일. 안 하면 커버 열리는 첫 프레임에서 컴파일하느라 걸림
+      renderer.compile(scene, camera);
 
       function resize() {
         const w = stage.clientWidth  || window.innerWidth;
@@ -979,41 +1194,29 @@
     </section>
 
     <script type="module">
-    // 랜야드 씬 지연 로드
-    // ㄴ three + rapier wasm + card.glb 합쳐 2MB 가까움. 첫 화면이랑 같이 받으면 초반에 걸림
-    // ㄴ 첫 페인트 끝난 뒤 idle에 시작. 카드 페이지가 먼저 열리면 그 즉시 시작
+    // 랜야드 씬
+    // ㄴ three + rapier wasm + card.glb 합쳐 2MB 가까움. 전엔 첫 화면 뒤 idle에 받았음
+    // ㄴ 지금은 프리로더가 다 받을 때까지 안 걷히니 그냥 바로 받음. 카드 페이지 열었는데 빈 칸인 일 없음
     const stage = document.getElementById('lanyardStage');
-    if (stage) schedule(bootLanyard);
-
-    function schedule(run) {
-      let done = false;
-      const go = () => { if (done) return; done = true; run(); };
-      const page = stage.closest('.page');
-      if (page && page.classList.contains('is-on')) return go();
-      if (page) {
-        const mo = new MutationObserver(() => {
-          if (!page.classList.contains('is-on')) return;
-          mo.disconnect();
-          go();
-        });
-        mo.observe(page, { attributes: true, attributeFilter: ['class'] });
-      }
-      const idle = () => window.requestIdleCallback
-        ? requestIdleCallback(go, { timeout: 1500 })
-        : setTimeout(go, 200);
-      if (document.readyState === 'complete') idle();
-      else addEventListener('load', idle, { once: true });
+    const pre = window.preloader;
+    if (stage) {
+      const job = pre && pre.claim('lanyard');
+      bootLanyard()
+        .catch(err => console.warn('[Lanyard]', err))
+        .finally(() => { if (job) job.done(); });
     }
 
     async function bootLanyard() {
+      const CARD_GLB = 'static/card.glb';
+      // glb는 프리로더가 받음(바이트 진행률). rapier는 import 풀리면 끝
+      const glb = pre ? pre.asset('cardGlb', CARD_GLB) : fetch(CARD_GLB).then(r => r.arrayBuffer());
+      const rapierJob = pre && pre.claim('rapier');
       const [THREE, { GLTFLoader }, RapierModule] = await Promise.all([
         import('three'),
         import('three/addons/loaders/GLTFLoader.js'),
-        import('rapier')
+        import('rapier').finally(() => { if (rapierJob) rapierJob.done(); })
       ]);
       const RAPIER = RapierModule.default ?? RapierModule;
-
-      const CARD_GLB = 'static/card.glb';
 
       const position = [0, 0, 30];
       const gravity = { x: 0, y: -40, z: 0 };
@@ -1090,7 +1293,7 @@
       pmrem.dispose();
 
       const [gltf, frontTex, backTex, bandTex] = await Promise.all([
-        new GLTFLoader().loadAsync(CARD_GLB),
+        glb.then(buf => new GLTFLoader().parseAsync(buf, 'static/')),
         loadImage(frontImage),
         loadImage(backImage),
         loadImage(lanyardImage)
@@ -2273,10 +2476,10 @@
   </section>
 
   <script type="module">
-  // Footer : 마우스 따라다니는 별 + 부딪힌 글자 흩뿌리기
-  // ㄴ 참고 🍆.ws — 커서에 오브젝트가 붙고 몸통이 관성으로 늦게 따라붙는 구조
-  // ㄴ 거긴 wiggle 본 5개를 쓰는데 profile.glb엔 뼈대가 없음. 정점 셰이더에서 굽혀 같은 그림 만듦
-  // ㄴ 글자는 ReactBits Text Scatter 재현. 충돌 임펄스 -> 감쇠 -> 스프링 복귀
+  // Footer : 3D Model(Profile) + Bounce Effect
+  // ㄴ 파쿠리~ (🍆.ws) — 커서 오브젝트 link, 몸통 관성으로 delay 되는 구조
+  // ㄴ wiggle 본 5개 사용인데 profile.glb엔 뼈대가 없으니 그냥 과감히 포기하도록 하고요
+  // ㄴ 글자는 ReactBits Text Scatter 파쿠리 해보고요. (충돌 임펄스 -> 감쇠 -> 스프링 복귀)
   (() => {
     const section = document.getElementById('fuckfooter');
     const stage = document.getElementById('footerStage');
@@ -2422,20 +2625,16 @@
       hasPointer = true;
     }, { passive: true });
 
-    // ── 4. 씬 지연 로드 ──────────────────────────────────────
-    // ㄴ three + glb 0.5MB. 첫 화면이랑 같이 받을 이유 없음
-    let booted = false;
-    const boot = () => { if (booted) return; booted = true; run(); };
-    if (section.classList.contains('is-on')) boot();
-    else {
-      const mo = new MutationObserver(() => {
-        if (!section.classList.contains('is-on')) return;
-        mo.disconnect(); boot();
-      });
-      mo.observe(section, { attributes: true, attributeFilter: ['class'] });
-    }
+    // ── 4. 씬 로드 ──────────────────────────────────────────
+    // ㄴ three + glb 0.5MB. 전엔 푸터 열릴 때 받았는데 프리로더가 생겨서 바로 받음
+    const pre = window.preloader;
+    const job = pre && pre.claim('star');
+    run()
+      .catch(err => console.warn('[Footer]', err))
+      .finally(() => { if (job) job.done(); });
 
     async function run() {
+      const glb = pre ? pre.asset('starGlb', STAR_GLB) : fetch(STAR_GLB).then(r => r.arrayBuffer());
       const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
         import('three'),
         import('three/addons/loaders/GLTFLoader.js'),
@@ -2501,7 +2700,7 @@
             'float metalnessFactor = mix(0.25, metalness, smoothstep(0.35, 0.65, vColor.r));');
       };
 
-      const gltf = await new GLTFLoader().loadAsync(STAR_GLB);
+      const gltf = await new GLTFLoader().parseAsync(await glb, 'static/');
       let geometry = null;
       gltf.scene.traverse(o => { if (o.isMesh) geometry = o.geometry; });
       if (!geometry) return;
@@ -2859,7 +3058,10 @@
     lockInput(v) { locked = !!v; }
   };
 
-  const busy = () => locked || moving || mode !== 'base';
+  // 프리로더 걷힐 때까지 입력 막음. 오버레이가 포인터는 막는데 키보드는 못 막음
+  let held = !!(window.preloader && window.preloader.active);
+  if (held) window.preloader.ready.then(() => { held = false; });
+  const busy = () => held || locked || moving || mode !== 'base';
 
   // 모바일에서 페이지 안에 세로로 넘치는 영역([data-mscroll])이 생김
   // ㄴ 그 안이 남았으면 먼저 굴리고, 끝에 닿아야 페이지를 넘김
@@ -3447,6 +3649,17 @@
   const lastX = [];
   let index = 0;
 
+  // 로고는 CDN에서 옴. lazy 걸어두면 페이지 열 때 하나씩 늦게 뜨니 프리로더에서 다 받음
+  const pre = window.preloader;
+  const job = pre && pre.claim('logos');
+  let logoTotal = 0, logoGot = 0;
+  function logoSettled() {
+    logoGot++;
+    if (!job) return;
+    job.progress(logoGot / logoTotal);
+    if (logoGot >= logoTotal) job.done();
+  }
+
   STACKS.forEach(s => {
     const a = document.createElement('a');
     a.href = s.url;
@@ -3462,12 +3675,13 @@
       card.appendChild(t);
     } else {
       const img = document.createElement('img');
-      img.src = s.logo;
       img.alt = s.name;
-      img.loading = 'lazy';
       img.className = 'w-[54%] object-contain';
       if (s.mono) img.style.filter = 'brightness(0) invert(1)';
-      img.onerror = () => { img.style.display = 'none'; };
+      img.onload = logoSettled;
+      img.onerror = () => { img.style.display = 'none'; logoSettled(); };
+      logoTotal++;
+      img.src = s.logo;
       card.appendChild(img);
     }
     const label = document.createElement('span');
@@ -3479,6 +3693,7 @@
     items.push(a);
     cards.push(card);
   });
+  if (job && !logoTotal) job.done();
 
   let H = 0, R = 1, step = 1, cardW = 0, cardH = 0, shiftY = 0, sized = false;
 
