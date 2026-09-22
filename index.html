@@ -78,11 +78,15 @@
       font-size: clamp(1rem, 3vw, 1.625rem); color: #a3a3a3;
       transition: opacity 320ms ease, filter 320ms ease;
     }
-    #preloaderLabel span { animation: preloaderWord 600ms ease both; }
-    #preloaderLabel span:nth-child(2) { animation-delay: 110ms; }
-    #preloaderLabel span:nth-child(3) { animation-delay: 220ms; }
+    /* 단어 단위만. 안쪽 글자 span까지 걸리면 PERFECT 글자마다 블러가 따로 돎 */
+    #preloaderLabel > span { animation: preloaderWord 600ms ease both; }
+    #preloaderLabel > span:nth-child(2) { animation-delay: 110ms; }
+    #preloaderLabel > span:nth-child(3) { animation-delay: 220ms; }
     @keyframes preloaderWord { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
     #preloader.is-textfade #preloaderLabel { opacity: 0; filter: blur(10px); }
+    /* Decrypted Text (reactbits.dev/text-animations/decrypted-text) */
+    /* ㄴ 아직 안 풀린 글자는 한 단계 어둡게 */
+    #preloaderDecrypt .enc { color: #737373; }
     #preloaderCount {
       font-weight: 700; line-height: 1; letter-spacing: -0.05em;
       font-size: min(25vw, 200px); font-variant-numeric: tabular-nums;
@@ -185,6 +189,27 @@
       #introQuoteBy { position: static; margin-top: 1.1rem; }
     }
 
+    /* Depth Text (reactbits.dev/text-animations/depth-text) */
+    /* ㄴ 인용구 두 줄. 같은 글자를 뒤로 겹겹이 깔고 스테이지째 기울임. 장 쌓는 건 스크립트 */
+    /* ㄴ 글꼴/크기/자간/줄높이는 .q1 .q2 것 상속. 원본 CSS의 line-height 0.86, nowrap은 안 씀. 모바일에서 줄바꿈 돼야 함 */
+    /* ㄴ 원근/그림자는 원본 px를 em으로. 두 줄 크기가 두 배 차이라 px면 작은 줄이 뭉개짐 */
+    /* ㄴ 원근 900px은 단어 하나용. 문장 한 줄(1000px+)에 걸면 양끝이 가운데로 쏠려서 잔상처럼 번짐. 멀리 두면 뒷장이 평행하게 밀려 두께로 읽힘 */
+    .depth-text { perspective: 30em; perspective-origin: 50% 48%; isolation: isolate; }
+    .depth-text__stage {
+      position: relative; display: inline-grid; place-items: center;
+      transform-style: preserve-3d; transform: rotateX(-2.4deg) rotateY(3.15deg); transform-origin: 50% 50%;
+    }
+    #fuckintro.is-on .depth-text__stage { will-change: transform; }
+    .depth-text__layer, .depth-text__face {
+      grid-area: 1 / 1; display: inline-block;
+      transform-style: preserve-3d; backface-visibility: hidden; text-rendering: geometricPrecision;
+    }
+    .depth-text__layer { position: absolute; inset: 0; z-index: 0; filter: saturate(0.95) brightness(0.92); pointer-events: none; }
+    .depth-text__face {
+      position: relative; z-index: 1; transform: translateZ(0.6px);
+      text-shadow: 0 0.2em 0.3em rgba(0, 0, 0, 0.36), 0 0.04em 0.07em rgba(0, 0, 0, 0.28);
+    }
+
     /* 1번 박스, Heavy. */
     #introHead, #introSign {
       opacity: calc(var(--in, 0) * var(--live, 1));
@@ -230,14 +255,13 @@
     .page.is-front { pointer-events: auto; }
     .page { transform-origin: 50% 50%; backface-visibility: hidden; }
 
-    /* Star Scatter : 마우스 따라다니는 별 + 글자 흩뿌리기. 푸터랑 첫 화면(인용구) 둘 다 */
+    /* Footer : 마우스 따라다니는 별 + 글자 흩뿌리기 */
     /* ㄴ 캔버스가 글자 위에 깔림. 별이 글자를 쓸고 지나가는 게 보여야 물리적으로 읽힘 */
-    /* ㄴ 인트로 쪽은 #introHelloLayer 안. 스크롤로 인용구 흐려질 때 별도 같이 흐려지게 */
-    #footerStage, #introStarStage { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-    #footerStage canvas, #introStarStage canvas { display: block; width: 100%; height: 100%; }
+    #footerStage { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+    #footerStage canvas { display: block; width: 100%; height: 100%; }
     /* inline-block 이어야 transform이 먹음. pre는 어절 사이 공백 안 죽게 */
-    .sc-l { display: inline-block; white-space: pre; }
-    #fuckfooter.is-on .sc-l, #fuckintro.is-on .sc-l { will-change: transform; }
+    #fuckfooter .sc-l { display: inline-block; white-space: pre; }
+    #fuckfooter.is-on .sc-l { will-change: transform; }
 
     /* Index. 페이지 */
     #indexTitle {
@@ -414,7 +438,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .folder, .folder__front, .paper { transition: none; }
-      .drift-wall__plane, .drift-wall__track { will-change: auto; }
+      .drift-wall__plane, .drift-wall__track, .depth-text__stage { will-change: auto; }
     }
 
     #clickSpark { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
@@ -578,7 +602,8 @@
   <!-- ㄴ 아래 스크립트들이 각자 몫을 등록하고 전부 끝나야 걷힘. 숫자는 진짜 진행률 -->
   <!-- ㄴ 랜야드/푸터 별처럼 원래 늦게 받던 것도 이 뒤에서 다 받음. 페이지 열었는데 빈 칸 뜨는 일 없게 -->
   <div id="preloader" role="progressbar" aria-label="Preparing for PERFECT..." aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <p id="preloaderLabel" aria-hidden="true"><span>Preparing</span><span>for</span><span>PERFECT...</span></p>
+    <!-- PERFECT는 아래 Decrypted Text 스크립트가 글자마다 span으로 쪼갬. 말줄임표는 안 뒤섞음 -->
+    <p id="preloaderLabel" aria-hidden="true"><span>Preparing</span><span>for</span><span><span id="preloaderDecrypt">PERFECT</span>...</span></p>
     <div id="preloaderCount"><span id="preloaderNum">0</span><span class="sign">%</span></div>
     <div id="preloaderBar"><div id="preloaderFill"></div></div>
   </div>
@@ -736,6 +761,61 @@
   })();
   </script>
 
+  <script>
+  // Decrypted Text (reactbits.dev/text-animations/decrypted-text)
+  // ㄴ sequential + revealDirection start 변형. 왼쪽부터 한 글자씩 확정, 나머진 틱마다 새로 뒤섞임
+  // ㄴ 한 번으로 안 끝냄. 다 풀리면 REPEAT 뒤 끝에서부터 다시 잠그고(clickMode toggle의 reverse) 또 풂. 로딩 길어져도 죽어 보이지 않게
+  // ㄴ 랜덤 글자는 전부 ASCII. 서브셋 마진에 들어 있어서 폴백 폰트 안 탐
+  (() => {
+    const el   = document.getElementById('preloaderDecrypt');
+    const root = document.getElementById('preloader');
+    if (!el || !root) return;
+
+    const TEXT   = el.textContent;
+    const SPEED  = 70;      // 글자 하나 확정/잠금 간격(ms)
+    const FIRST  = 360;     // 첫 해독 시작. 단어 블러 등장(220ms)이 좀 걷힌 뒤
+    const REPEAT = 2600;    // 다 풀린 채로 두는 시간(ms). 지나면 다시 잠금
+    const HOLD   = 260;     // 다 잠긴 채로 두는 시간(ms)
+    const CHARS  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*?';
+
+    const cells = [...TEXT].map(ch => {
+      const s = document.createElement('span');
+      s.textContent = ch;
+      return s;
+    });
+    el.replaceChildren(...cells);
+
+    const rand = () => CHARS[Math.floor(Math.random() * CHARS.length)];
+    // 방향이 start라 확정된 건 항상 앞쪽 prefix. 개수 하나면 됨
+    let revealed = 0, dir = 1, timer = 0;
+
+    const paint = () => {
+      cells.forEach((s, i) => {
+        const ok = i < revealed || TEXT[i] === ' ';
+        s.textContent = ok ? TEXT[i] : rand();
+        s.classList.toggle('enc', !ok);
+      });
+    };
+
+    const tick = () => {
+      if (dir > 0) {
+        if (revealed < TEXT.length) { revealed++; paint(); timer = setTimeout(tick, SPEED); return; }
+        // 라벨이 흐려지기 시작했으면 원문 그대로 두고 끝
+        if (root.classList.contains('is-textfade')) return;
+        timer = setTimeout(() => { dir = -1; tick(); }, REPEAT);
+        return;
+      }
+      if (revealed > 0) { revealed--; paint(); timer = setTimeout(tick, SPEED); return; }
+      timer = setTimeout(() => { dir = 1; tick(); }, HOLD);
+    };
+
+    // 처음부터 잠긴 채로. 원문이 잠깐 비쳤다 뒤섞이면 어색함
+    paint();
+    timer = setTimeout(tick, FIRST);
+    if (window.preloader) window.preloader.ready.then(() => clearTimeout(timer));
+  })();
+  </script>
+
 <main id="stage" class="w-full h-screen">
 
 
@@ -772,13 +852,14 @@
       <div id="introCover" class="absolute inset-0 pointer-events-none"></div>
 
       <!-- 커버 위 인용구 -->
+      <!-- ㄴ data-depth 두 줄은 아래 Depth Text 스크립트가 장을 쌓음. 출처는 평면 그대로 -->
       <div id="introHelloLayer" class="absolute inset-0 pointer-events-none">
         <div id="introQuote" class="text-center">
-          <p class="q1" data-scatter>Faber est suae quisque fortunae.</p>
+          <p class="q1" data-depth>Faber est suae quisque fortunae.</p>
           <!-- 출처는 2번 줄이랑 윗변 맞춰야 해서 같은 줄에 넣음 -->
           <div class="q2row">
-            <p class="q2" data-scatter>운명을 만드는 사람은 바로 자신이다.</p>
-            <p id="introQuoteBy" data-scatter>Appius Claudius Caecus<br />BC 312~BC 285</p>
+            <p class="q2" data-depth>운명을 만드는 사람은 바로 자신이다.</p>
+            <p id="introQuoteBy">Appius Claudius Caecus<br />BC 312~BC 285</p>
           </div>
         </div>
         <div id="introScrollHint">
@@ -786,8 +867,6 @@
             <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
         </div>
-        <!-- 별 캔버스 자리. 푸터 스크립트가 켜진 쪽으로 캔버스를 옮겨 넣음 -->
-        <div id="introStarStage"></div>
       </div>
     </div>
   </section>
@@ -832,6 +911,106 @@
     window.introMask = { set(p) { last = clamp01(p); paint(last); } };
     window.addEventListener('resize', () => paint(last));
     paint(0);
+  })();
+  </script>
+
+  <script>
+  // Depth Text (reactbits.dev/text-animations/depth-text)
+  // ㄴ 인용구 두 줄만. 출처(#introQuoteBy)는 평면
+  // ㄴ 같은 글자 LAYERS장을 뒤로 translateZ. 앞장은 원래 색, 뒤로 갈수록 DEPTH_COLOR에 가까워짐
+  // ㄴ 기울기는 커서. 두 줄이 따로 기울면 한 덩어리로 안 읽혀서 #introQuote 박스 하나 기준으로 같이 기움
+  // ㄴ 장 간격은 원본이 px인데 em으로 바꿈. 두 줄 크기가 두 배 차이 나고 모바일에선 1/3로 줄어듦
+  (() => {
+    const quote = document.getElementById('introQuote');
+    const page  = document.getElementById('fuckintro');
+    const els   = quote ? [...quote.querySelectorAll('[data-depth]')] : [];
+    if (!quote || !page || !els.length) return;
+
+    const LAYERS      = 34;         // 겹치는 장수
+    const DEPTH_EM    = 0.024;      // 장 사이 간격(em). 원본 2.4px / 112px
+    const DEPTH_COLOR = '#3f3f46';  // 맨 뒷장 색
+    const TILT        = 7.5;        // 커서 최대 기울기(deg)
+    const SMOOTHING   = 0.14;       // 커서 따라붙는 비율(프레임당). 클수록 빨리
+    const ORBIT_SPEED = 0.35;       // 커서 없을 때 도는 속도(바퀴/s)
+
+    const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const track  = !reduce && matchMedia('(hover: hover) and (pointer: fine)').matches;
+    // 기본 자세. 정면이면 두께가 안 보여서 살짝 틀어둠
+    const base = { x: -TILT * 0.32, y: TILT * 0.42 };
+
+    // 1. 장 쌓기
+    // ㄴ 뒷장부터 DOM에 넣음. 색 섞는 비율은 원본 그대로(progress² 이징, 앞장 76% -> 뒷장 4%)
+    const stages = els.map(el => {
+      const text = el.textContent;
+      const stage = document.createElement('span');
+      stage.className = 'depth-text__stage';
+      for (let i = LAYERS; i >= 1; i--) {
+        const p = i / LAYERS;
+        const mix = Math.round((1 - p * p) * 72 + 4);
+        const s = document.createElement('span');
+        s.className = 'depth-text__layer';
+        s.setAttribute('aria-hidden', 'true');
+        s.style.color = `color-mix(in srgb, currentColor ${mix}%, ${DEPTH_COLOR})`;
+        s.style.transform = `translateZ(${(-i * DEPTH_EM).toFixed(4)}em)`;
+        s.textContent = text;
+        stage.appendChild(s);
+      }
+      const face = document.createElement('span');
+      face.className = 'depth-text__face';
+      face.textContent = text;
+      stage.appendChild(face);
+      el.classList.add('depth-text');
+      el.replaceChildren(stage);
+      return stage;
+    });
+
+    // 2. 기울이기
+    const cur = { ...base }, aim = { ...base };
+    const apply = () => {
+      const tf = `rotateX(${cur.x.toFixed(3)}deg) rotateY(${cur.y.toFixed(3)}deg)`;
+      for (const s of stages) s.style.transform = tf;
+    };
+    if (reduce) { apply(); return; }
+
+    // 인용구 안 보일 땐 아무것도 안 함. 커버 열리기 시작하면(introProgress 0.2) 인용구는 이미 사라진 뒤
+    const live = () => !document.hidden && page.classList.contains('is-on') && (window.introProgress || 0) < 0.2;
+
+    let pointer = false;
+    if (track) {
+      addEventListener('pointermove', e => {
+        if (!live()) return;   // 다른 페이지에서 커서 움직일 때마다 rect 재는 거 막음
+        const r = quote.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        pointer = true;
+        const x = clamp((e.clientX - (r.left + r.width / 2)) / (r.width * 0.8), -1, 1);
+        const y = clamp((e.clientY - (r.top + r.height / 2)) / (r.height * 0.8), -1, 1);
+        aim.x = base.x - y * TILT;
+        aim.y = base.y + x * TILT;
+      }, { passive: true });
+      // pointerleave는 안 올라옴. window 말고 html에 걸어야 창 밖으로 나간 게 잡힘
+      const leave = () => { pointer = false; aim.x = base.x; aim.y = base.y; };
+      document.documentElement.addEventListener('pointerleave', leave);
+      addEventListener('blur', leave);
+    }
+
+    const t0 = performance.now();
+    const frame = now => {
+      requestAnimationFrame(frame);
+      if (!live()) return;
+      if (!pointer) {
+        // 커서 없을 땐 살살 도는 궤도. 커서가 창 밖으로 나간 거면 작게, 터치 기기면 크게
+        const orbit = ((now - t0) / 1000) * ORBIT_SPEED * Math.PI * 2;
+        const amt = track ? 0.18 : 0.55;
+        aim.x = base.x + Math.sin(orbit) * TILT * amt;
+        aim.y = base.y + Math.cos(orbit * 0.85) * TILT * amt;
+      }
+      cur.x += (aim.x - cur.x) * SMOOTHING;
+      cur.y += (aim.y - cur.y) * SMOOTHING;
+      apply();
+    };
+    apply();
+    requestAnimationFrame(frame);
   })();
   </script>
 
@@ -2479,25 +2658,14 @@
   </section>
 
   <script type="module">
-  // Star Scatter : 3D Model(Profile) + Bounce Effect
+  // Footer : 3D Model(Profile) + Bounce Effect
   // ㄴ 파쿠리~ (🍆.ws) — 커서 오브젝트 link, 몸통 관성으로 delay 되는 구조
   // ㄴ wiggle 본 5개 사용인데 profile.glb엔 뼈대가 없으니 그냥 과감히 포기하도록 하고요
   // ㄴ 글자는 ReactBits Text Scatter 파쿠리 해보고요. (충돌 임펄스 -> 감쇠 -> 스프링 복귀)
-  // ㄴ 푸터랑 첫 화면(인용구) 둘이 씀. 별은 하나고 캔버스가 켜진 쪽 stage로 옮겨 다님
   (() => {
-    // section : is-on 판정 / stage : 캔버스 자리 / base : 글자 좌표 기준(캔버스가 꽉 채우는 박스)
-    // ㄴ 인트로는 커버 열리기 시작하면(introProgress 0.2) 인용구가 사라지니 별도 거기서 끔
-    const HOSTS = [
-      { section: 'fuckintro',  stage: 'introStarStage', base: 'introHelloLayer', live: () => (window.introProgress || 0) < 0.2 },
-      { section: 'fuckfooter', stage: 'footerStage',    base: 'fuckfooter',      live: () => true }
-    ].map(h => ({
-      ...h,
-      section: document.getElementById(h.section),
-      stage: document.getElementById(h.stage),
-      base: document.getElementById(h.base),
-      letters: []
-    })).filter(h => h.section && h.stage && h.base);
-    if (!HOSTS.length) return;
+    const section = document.getElementById('fuckfooter');
+    const stage = document.getElementById('footerStage');
+    if (!section || !stage) return;
 
     // 데스크톱 전용
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2533,25 +2701,23 @@
 
     // ── 1. 글자 쪼개기 ───────────────────────────────────────
     // ㄴ <strong> 같은 구조 유지해야 해서 텍스트 노드만 교체
-    for (const h of HOSTS) {
-      h.section.querySelectorAll('[data-scatter]').forEach(el => {
-        const nodes = [];
-        const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        while (walk.nextNode()) nodes.push(walk.currentNode);
-        for (const node of nodes) {
-          const frag = document.createDocumentFragment();
-          for (const ch of node.nodeValue) {
-            const span = document.createElement('span');
-            span.className = 'sc-l';
-            span.textContent = ch;
-            frag.appendChild(span);
-            if (ch.trim()) h.letters.push({ el: span });   // 공백은 안 움직임
-          }
-          node.parentNode.replaceChild(frag, node);
+    const letters = [];
+    section.querySelectorAll('[data-scatter]').forEach(host => {
+      const nodes = [];
+      const walk = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+      while (walk.nextNode()) nodes.push(walk.currentNode);
+      for (const node of nodes) {
+        const frag = document.createDocumentFragment();
+        for (const ch of node.nodeValue) {
+          const span = document.createElement('span');
+          span.className = 'sc-l';
+          span.textContent = ch;
+          frag.appendChild(span);
+          if (ch.trim()) letters.push({ el: span });   // 공백은 안 움직임
         }
-      });
-    }
-    const letters = HOSTS.flatMap(h => h.letters);
+        node.parentNode.replaceChild(frag, node);
+      }
+    });
     if (!letters.length) return;
 
     // ── 2. 글자 물리 ─────────────────────────────────────────
@@ -2567,25 +2733,16 @@
     letters.forEach(reset);
 
     // offsetLeft/Top은 transform 영향을 안 받음. 흩어진 상태에서 재도 원위치가 나옴
-    // ㄴ 대신 조상에 걸린 배치용 transform(#introQuote의 translateY(-50%))은 직접 더함. 글자 자신 건 흩어진 변위라 뺌
-    const measure = host => {
-      for (const L of host.letters) {
+    const measure = () => {
+      for (const L of letters) {
         let x = 0, y = 0, n = L.el;
-        while (n && n !== host.base) {
-          x += n.offsetLeft; y += n.offsetTop;
-          if (n !== L.el) {
-            const tf = getComputedStyle(n).transform;
-            if (tf && tf !== 'none') { const m = new DOMMatrixReadOnly(tf); x += m.e; y += m.f; }
-          }
-          n = n.offsetParent;
-        }
+        while (n && n !== section) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
         L.hw = L.el.offsetWidth / 2;
         L.hh = L.el.offsetHeight / 2;
         L.cx = x + L.hw;
         L.cy = y + L.hh;
       }
     };
-    const measureAll = () => HOSTS.forEach(measure);
 
     const stepLetters = (dt, now) => {
       for (const L of letters) {
@@ -2613,9 +2770,9 @@
     };
 
     // 별이 글자에 처음 닿는 순간에만 임펄스. 겹쳐 있는 동안 계속 때리면 발산함
-    const collide = (list, sx, sy, svx, svy, now) => {
+    const collide = (sx, sy, svx, svy, now) => {
       const speed = Math.hypot(svx, svy);
-      for (const L of list) {
+      for (const L of letters) {
         const px = L.cx + L.x, py = L.cy + L.y;
         const nx = clamp(sx, px - L.hw, px + L.hw);
         const ny = clamp(sy, py - L.hh, py + L.hh);
@@ -2655,7 +2812,7 @@
     const pre = window.preloader;
     const job = pre && pre.claim('star');
     run()
-      .catch(err => console.warn('[StarScatter]', err))
+      .catch(err => console.warn('[Footer]', err))
       .finally(() => { if (job) job.done(); });
 
     async function run() {
@@ -2672,6 +2829,7 @@
       // ACES를 물리면 원본 아트웍 색이 어둡고 탁하게 눌림. 색을 그대로 살리려고 톤매핑 뺌
       renderer.toneMapping = THREE.NoToneMapping;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
       const FOV = 30, DIST = 10;
@@ -2741,7 +2899,7 @@
       // ㄴ 그 타이밍에 getBoundingClientRect()를 쓰면 원근 왜곡된 박스(1705x318 같은)가 나옴
       // ㄴ 캐시 더울 때 import/glb가 전환 창 안에서 끝나면 그대로 물려서 별이 3배로 커졌었음
       const resize = () => {
-        const w = current.stage.clientWidth, h = current.stage.clientHeight;
+        const w = stage.clientWidth, h = stage.clientHeight;
         if (w < 2 || h < 2 || (w === W && h === H)) return;
         W = w; H = h;
         renderer.setSize(W, H, false);
@@ -2749,23 +2907,14 @@
         camera.updateProjectionMatrix();
         perPx = (2 * Math.tan(FOV * Math.PI / 360) * DIST) / H;
         scale = STAR_PX * perPx;
-        measureAll();
+        measure();
       };
-      // 캔버스는 켜진 쪽 stage로. 같은 노드 옮기는 거라 WebGL 컨텍스트는 그대로
-      const wanted = () => HOSTS.find(h => h.section.classList.contains('is-on') && h.live()) || null;
-      let current = null;
-      const place = host => {
-        current = host;
-        host.stage.appendChild(renderer.domElement);
-        resize();
-      };
-      place(wanted() || HOSTS[0]);
+      resize();
       addEventListener('resize', resize);
       // 첫 측정이 0으로 나왔거나 창 크기 말고 레이아웃만 바뀐 경우까지 받아줌
       // ㄴ 다만 이 콜백은 렌더링 스텝에 묶여 있어 탭이 안 그려지면 안 옴. resize 리스너가 본진
-      const ro = new ResizeObserver(resize);
-      HOSTS.forEach(h => ro.observe(h.stage));
-      if (document.fonts) document.fonts.ready.then(measureAll);
+      new ResizeObserver(resize).observe(stage);
+      if (document.fonts) document.fonts.ready.then(measure);
 
       // ── 별 물리 ──
       // ㄴ holder가 커서를 빠르게 쫓고, p1/p2가 그 뒤를 스프링으로 늦게 따라옴
@@ -2791,10 +2940,8 @@
         last = t;
         if (dt <= 0) return;
 
-        const host = wanted();
-        if (host && host !== current) place(host);
-        // 포인터가 한 번도 안 움직였으면 안 띄움. 첫 화면에서 별이 인용구 한가운데 박혀서 글자부터 날리던 거
-        const active = !!host && hasPointer;
+        // 포인터가 한 번도 안 움직였으면 안 띄움. 화면 한가운데 박혀서 글자부터 날림
+        const active = section.classList.contains('is-on') && hasPointer;
         vis += ((active ? 1 : 0) - vis) * Math.min(1, 6 * dt);
         if (!active && vis < 0.01) {
           hasPrev = false;
@@ -2868,19 +3015,17 @@
         if (hasPrev) { svx = (sx - prevSx) / dt; svy = (sy - prevSy) / dt; }
         else { svx = svy = 0; hasPrev = true; }
         prevSx = sx; prevSy = sy;
-        if (active && vis > 0.5) collide(host.letters, sx, sy, svx, svy, t);
+        if (active && vis > 0.5) collide(sx, sy, svx, svy, t);
         stepLetters(dt, t);
 
         renderer.render(scene, camera);
       };
       raf = requestAnimationFrame(frame);
 
-      // 페이지를 벗어나면 글자 원위치
-      for (const h of HOSTS) {
-        new MutationObserver(() => {
-          if (!h.section.classList.contains('is-on')) { h.letters.forEach(reset); measure(h); }
-        }).observe(h.section, { attributes: true, attributeFilter: ['class'] });
-      }
+      // 푸터를 벗어나면 글자 원위치
+      new MutationObserver(() => {
+        if (!section.classList.contains('is-on')) { letters.forEach(reset); measure(); }
+      }).observe(section, { attributes: true, attributeFilter: ['class'] });
     }
   })();
   </script>
