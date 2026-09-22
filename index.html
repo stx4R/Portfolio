@@ -929,7 +929,9 @@
     const LAYERS      = 34;         // 겹치는 장수
     const DEPTH_EM    = 0.024;      // 장 사이 간격(em). 원본 2.4px / 112px
     const DEPTH_COLOR = '#3f3f46';  // 맨 뒷장 색
-    const TILT        = 7.5;        // 커서 최대 기울기(deg)
+    const TILT        = 16;         // 커서 최대 기울기(deg). 원본 7.5는 답답해서 두 배
+    const IDLE_TILT   = 7.5;        // 쉴 때 자세 + 자동 궤도 폭. 원본 기본값. 호버만 키우고 이건 안 건드림
+    const RANGE       = 0.25;       // 인용구 가운데서 화면 폭/높이의 이 비율만큼 가면 최대 기울기
     const SMOOTHING   = 0.14;       // 커서 따라붙는 비율(프레임당). 클수록 빨리
     const ORBIT_SPEED = 0.35;       // 커서 없을 때 도는 속도(바퀴/s)
 
@@ -937,7 +939,7 @@
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const track  = !reduce && matchMedia('(hover: hover) and (pointer: fine)').matches;
     // 기본 자세. 정면이면 두께가 안 보여서 살짝 틀어둠
-    const base = { x: -TILT * 0.32, y: TILT * 0.42 };
+    const base = { x: -IDLE_TILT * 0.32, y: IDLE_TILT * 0.42 };
 
     // 1. 장 쌓기
     // ㄴ 뒷장부터 DOM에 넣음. 색 섞는 비율은 원본 그대로(progress² 이징, 앞장 76% -> 뒷장 4%)
@@ -983,8 +985,10 @@
         const r = quote.getBoundingClientRect();
         if (!r.width || !r.height) return;
         pointer = true;
-        const x = clamp((e.clientX - (r.left + r.width / 2)) / (r.width * 0.8), -1, 1);
-        const y = clamp((e.clientY - (r.top + r.height / 2)) / (r.height * 0.8), -1, 1);
+        // 원점은 인용구 가운데, 범위는 화면 기준
+        // ㄴ 원본은 자기 박스 폭/높이의 80%. 근데 인용구 박스가 가로론 화면 꽉 차고 세로론 납작해서 가로는 둔하고 세로는 60px만 가도 끝이었음
+        const x = clamp((e.clientX - (r.left + r.width / 2)) / (innerWidth * RANGE), -1, 1);
+        const y = clamp((e.clientY - (r.top + r.height / 2)) / (innerHeight * RANGE), -1, 1);
         aim.x = base.x - y * TILT;
         aim.y = base.y + x * TILT;
       }, { passive: true });
@@ -1002,8 +1006,8 @@
         // 커서 없을 땐 살살 도는 궤도. 커서가 창 밖으로 나간 거면 작게, 터치 기기면 크게
         const orbit = ((now - t0) / 1000) * ORBIT_SPEED * Math.PI * 2;
         const amt = track ? 0.18 : 0.55;
-        aim.x = base.x + Math.sin(orbit) * TILT * amt;
-        aim.y = base.y + Math.cos(orbit * 0.85) * TILT * amt;
+        aim.x = base.x + Math.sin(orbit) * IDLE_TILT * amt;
+        aim.y = base.y + Math.cos(orbit * 0.85) * IDLE_TILT * amt;
       }
       cur.x += (aim.x - cur.x) * SMOOTHING;
       cur.y += (aim.y - cur.y) * SMOOTHING;
