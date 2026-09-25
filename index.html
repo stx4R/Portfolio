@@ -169,11 +169,11 @@
     /* R3P0RT 보고서 (github.com/stx4R/R3P0RT) */
     /* ㄴ github.com 파일 화면 흉내. 색/간격은 GitHub 다크 기본 테마 값 그대로 */
     /* ㄴ 본문 스타일은 github-markdown-css가 함. 여기는 껍데기랑 Tailwind preflight가 지운 것만 */
-    /* ㄴ 박스 안만 브라우저 67%로 본 크기. 100%면 카드에 글이 몇 줄 안 들어감 */
+    /* ㄴ 박스 안만 브라우저 50%로 본 크기. 100%면 카드에 글이 몇 줄 안 들어감 */
     /* ㄴ zoom이라 흐려지지 않음. 폭 판정(@container)은 .gh-in 기준이라 줄어든 뒤 폭으로 잼 */
     #projectCardStage .gh {
       position: relative; height: 100%; overflow-y: auto; overscroll-behavior: contain;
-      zoom: 0.67;
+      zoom: 0.5;
       color: #f0f6fc; font-size: 14px; line-height: 1.5;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     }
@@ -718,7 +718,7 @@
       #bentoMain { flex: 1 1 auto; min-height: 0; }
       #bentoMain > .flex-shrink-0 > p { font-size: 0.85rem; margin-top: 0.75rem; }
       #projectCardStage { height: auto; flex: 1 1 auto; min-height: 0; margin-top: 0.85rem; }
-      /* 폰은 67%면 글자가 9px대라 못 읽음. 원래 크기 */
+      /* 폰은 50%면 글자가 8px라 못 읽음. 원래 크기 */
       #projectCardStage .gh { zoom: 1; }
       #bentoSide { flex: 0 0 10rem; height: 10rem; }
       #projectWheel .wheel-item { font-size: 1.05rem; left: 4px; }
@@ -2218,15 +2218,93 @@
 
     // 받아오기
     // ㄴ API는 로그인 없이 IP당 시간에 60번. 보고서 하나에 2번(본문, 커밋) 씀
-    // ㄴ 304는 안 깎여서 브라우저 캐시가 ETag로 재검증하면 공짜
-    // ㄴ 한도 넘으면 raw 받아서 marked로 직접 렌더. 코드 색이랑 제목 앵커만 빠지고 나머진 똑같음
+    // ㄴ 학교처럼 IP 하나 같이 쓰면 금방 바닥남. 그래서 받은 건 방문자 브라우저(localStorage)에 저장
+    // ㄴ 로그인 안 하면 304도 깎임(실측함). ETag로 보고서마다 물어봐도 못 아낌
+    // ㄴ 그래서 레포 최신 커밋 sha만 10분에 1번 물어봄. 그대로면 저장해둔 20개 전부 그대로 씀
+    // ㄴ 한도 넘으면(403) 저장해둔 걸 씀. 그것도 없으면 raw 받아서 marked로 직접 렌더
+    const CACHE = 'r3p0rt:v1:';   // localStorage 키 앞. 저장 모양 바꾸면 숫자 올릴 것
+    const FRESH = 10 * 60 * 1000; // sha 다시 물어보는 간격
     const store = new Map();   // 파일 → Promise
     const ready = new Map();   // 파일 → 다 받은 것
 
-    async function get(url, headers, json) {
-      const res = await fetch(url, { headers, signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
-      if (!res.ok) throw new Error(url + ' ' + res.status);
-      return json ? res.json() : res.text();
+    // 사생활 모드나 저장소 막힌 브라우저는 던짐. 없는 셈 침
+    function cacheGet(key) {
+      try { return JSON.parse(localStorage.getItem(CACHE + key)); } catch { return null; }
+    }
+    function cacheSet(key, value) {
+      const s = JSON.stringify(value);
+      try { localStorage.setItem(CACHE + key, s); return; } catch {}
+      // 꽉 찼으면 보고서 캐시 싹 비우고 한 번 더
+      try {
+        Object.keys(localStorage).filter(k => k.startsWith(CACHE)).forEach(k => localStorage.removeItem(k));
+        localStorage.setItem(CACHE + key, s);
+      } catch {}
+    }
+
+    const timeout = () => (AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined);
+
+    // 한도 넘으면 풀리는 시각까지 아예 안 부름. 어차피 403이고 기다리는 시간만 늘어남
+    async function api(url, accept) {
+      if (Date.now() < (cacheGet('block') || 0)) throw new Error('rate limited');
+      const res = await fetch(url, { headers: { Accept: accept }, signal: timeout() });
+      if (!res.ok) {
+        if (res.headers.get('X-RateLimit-Remaining') === '0') cacheSet('block', +res.headers.get('X-RateLimit-Reset') * 1000);
+        throw new Error(url + ' ' + res.status);
+      }
+      return accept.endsWith('json') ? res.json() : res.text();
+    }
+
+    // 레포 최신 커밋 sha. 모르면(한도, 오프라인) null
+    let headJob = null;
+    function head() {
+      if (headJob) return headJob;
+      const h = cacheGet('head');
+      if (h && Date.now() - h.t < FRESH) return (headJob = Promise.resolve(h.sha));
+      return (headJob = api(`${API}/commits/${BRANCH}`, 'application/vnd.github.sha')
+        .then(sha => { cacheSet('head', { sha, t: Date.now() }); return sha; }, () => null));
+    }
+
+    // 커밋은 쓰는 것만 남김. 통째로 두면 보고서마다 몇 KB씩 먹음
+    const slim = c => c && {
+      sha: c.sha, message: c.commit.message, date: c.commit.committer.date, url: c.html_url,
+      author: c.author && { login: c.author.login, avatar: c.author.avatar_url, url: c.author.html_url }
+    };
+
+    async function fetchReport(p, old, sha) {
+      const ref = sha || BRANCH;
+      // raw는 main 말고 sha로. main은 CDN이 5분 캐시해서 방금 push한 게 옛날 걸로 옴
+      const raw = fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${ref}/${p.path}`, { signal: timeout() })
+        .then(res => { if (!res.ok) throw new Error(res.status); return res.text(); })
+        .catch(err => { if (old) return old.raw; throw err; });
+      raw.catch(() => {});   // 아래서 await 하기 전에 터지면 콘솔에 빨간 줄 뜸
+      const commit = await api(`${API}/commits?sha=${ref}&per_page=1&path=${encodeURIComponent(p.path)}`, 'application/vnd.github+json')
+        .then(list => slim(list[0]) || null, () => null);
+      // 레포는 바뀌었어도 이 파일 마지막 커밋이 그대로면 본문 안 받음. 1번 아낌
+      const same = !!(commit && old && old.html && old.commit && old.commit.sha === commit.sha);
+      const html = same ? old.html : await api(`${API}/contents/${p.path}?ref=${ref}`, 'application/vnd.github.html').catch(() => null);
+      const entry = {
+        head: html ? sha : null,   // 본문 못 받았으면 sha 안 박음. 다음에 다시 시도
+        raw: await raw,
+        html: html || (old && old.html) || null,
+        commit: commit || (old && old.commit) || null
+      };
+      cacheSet(p.file, entry);
+      return entry;
+    }
+
+    async function getReport(p) {
+      let old = cacheGet(p.file);
+      if (!old || typeof old.raw !== 'string') old = null;
+      const sha = await head();
+      // 레포 그대로면 저장해둔 거. sha를 모르면(한도 등) 일단 저장해둔 거
+      if (old && old.html && (sha === null || old.head === sha)) return old;
+      return fetchReport(p, old, sha);
+    }
+
+    // 네트워크 안 타고 바로 뜨는지. 휠 대기시간 정할 때만 씀
+    function cached(p) {
+      const e = cacheGet(p.file), h = cacheGet('head');
+      return !!(e && e.html && h && e.head === h.sha && Date.now() - h.t < FRESH);
     }
 
     async function fallback(raw) {
@@ -2234,14 +2312,14 @@
       return `<article class="markdown-body">${marked.parse(raw)}</article>`;
     }
 
+    // 저장 모양 → 화면에 쓰는 모양
+    async function toView(e) {
+      return { raw: e.raw, html: e.html || await fallback(e.raw), commit: e.commit };
+    }
+
     function load(p) {
       if (store.has(p.file)) return store.get(p.file);
-      const raw = get(RAW + p.file);
-      const html = get(`${API}/contents/${p.path}?ref=${BRANCH}`, { Accept: 'application/vnd.github.html' })
-        .catch(() => raw.then(fallback));
-      const commit = get(`${API}/commits?sha=${BRANCH}&per_page=1&path=${encodeURIComponent(p.path)}`, undefined, true)
-        .then(list => list[0] || null, () => null);
-      const job = Promise.all([raw, html, commit]).then(([raw, html, commit]) => ({ raw, html, commit }));
+      const job = getReport(p).then(toView);
       // 실패한 건 다음에 다시 받게 뺌
       job.then(d => ready.set(p.file, d), () => store.delete(p.file));
       store.set(p.file, job);
@@ -2409,19 +2487,19 @@
       const c = d.commit;
       if (c) {
         const msg = root.querySelector('.gh-msg');
-        msg.textContent = c.commit.message.split('\n')[0];
-        msg.title = c.commit.message;
-        msg.href = c.html_url;
+        msg.textContent = c.message.split('\n')[0];
+        msg.title = c.message;
+        msg.href = c.url;
         // 기본값이 이미 OWNER라 다를 때만. 아바타 두 번 받음
         if (c.author && c.author.login !== OWNER) {
           const author = root.querySelector('.gh-author');
           author.textContent = c.author.login;
-          author.href = root.querySelector('.gh-avatar').href = c.author.html_url;
-          root.querySelector('.gh-avatar img').src = c.author.avatar_url + (c.author.avatar_url.includes('?') ? '&' : '?') + 's=40';
+          author.href = root.querySelector('.gh-avatar').href = c.author.url;
+          root.querySelector('.gh-avatar img').src = c.author.avatar + (c.author.avatar.includes('?') ? '&' : '?') + 's=40';
         }
-        const at = c.commit.committer.date;
+        const at = c.date;
         const sha = document.createElement('a');
-        sha.href = c.html_url;
+        sha.href = c.url;
         sha.target = '_blank';
         sha.rel = 'noopener';
         sha.textContent = c.sha.slice(0, 7);
@@ -2466,9 +2544,10 @@
       clearTimeout(loadTimer);
       if (ready.has(p.file)) return fill(p, ready.get(p.file));
       // 휠 빨리 굴리면 지나가는 것까지 다 받아서 API 한도 녹음. 멈춘 것만
+      // ㄴ 저장해둔 게 싱싱하면 네트워크 안 타니 안 기다림
       loadTimer = setTimeout(() => {
         load(p).then(d => { if (seq === renderSeq) fill(p, d); }, () => { if (seq === renderSeq) fail(p); });
-      }, store.has(p.file) ? 0 : 160);
+      }, store.has(p.file) || cached(p) ? 0 : 160);
     }
 
     function setMode(root, mode) {
