@@ -157,32 +157,145 @@
     #projectCardStage .cs-stack { position: absolute; inset: 0 0 40px 0; }
     #projectCardStage .cs-card {
       position: absolute; inset: 0;
-      border-radius: 12px; border: 1px solid #fff; background: #000; overflow: hidden;
+      border-radius: 12px; border: 1px solid #fff; background: #0d1117; overflow: hidden;
+      container-type: inline-size;
     }
     #projectCardStage .cs-card > * { animation: csEnter 340ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
     @keyframes csEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    #projectCardStage .cs-front { height: 100%; display: flex; flex-direction: column; padding: 16px 18px 12px; }
-    #projectCardStage .cs-front-head { flex-shrink: 0; padding-bottom: 12px; border-bottom: 1px solid #262626; }
-    #projectCardStage .cs-lead { font-size: 12px; line-height: 1.65; color: #a3a3a3; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #1c1c1c; }
-    #projectCardStage .cs-front-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 2px 24px 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 20px), transparent 100%); }
-    #projectCardStage .cs-front-foot { flex-shrink: 0; margin-top: 8px; padding-top: 10px; border-top: 1px solid #262626; }
-
-    #projectCardStage .cs-readme { font-size: 13px; line-height: 1.7; color: #d4d4d4; }
-    #projectCardStage .cs-readme h2 { color: #fff; font-weight: 700; font-size: 13px; margin: 16px 0 6px; padding-bottom: 5px; border-bottom: 1px solid #262626; }
-    #projectCardStage .cs-readme h2:first-child { margin-top: 0; }
-    #projectCardStage .cs-readme ul { margin: 6px 0 0; padding-left: 17px; }
-    #projectCardStage .cs-readme li { list-style: disc; margin-bottom: 7px; }
-    #projectCardStage .cs-readme strong { color: #fff; font-weight: 600; }
-    #projectCardStage .cs-readme p { margin-bottom: 10px; }
-    #projectCardStage .cs-readme p:last-child { margin-bottom: 0; }
-
     @media (max-width: 1023px) {
       #projectCardStage .cs-stack { inset: 0 0 16px 0; }
-      #projectCardStage .cs-front { padding: 12px 14px 10px; }
-      #projectCardStage .cs-front-head { padding-bottom: 9px; }
-      #projectCardStage .cs-readme { font-size: 12px; }
-      #projectCardStage .cs-lead { font-size: 11px; margin-bottom: 10px; padding-bottom: 10px; }
+    }
+
+    /* R3P0RT 보고서 (github.com/stx4R/R3P0RT) */
+    /* ㄴ github.com 파일 화면 흉내. 색/간격은 GitHub 다크 기본 테마 값 그대로 */
+    /* ㄴ 본문 스타일은 github-markdown-css가 함. 여기는 껍데기랑 Tailwind preflight가 지운 것만 */
+    #projectCardStage .gh {
+      position: relative; height: 100%; overflow-y: auto; overscroll-behavior: contain;
+      padding: 16px 24px 24px;
+      color: #f0f6fc; font-size: 14px; line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    #projectCardStage .gh-ico { display: inline-block; width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+    #projectCardStage .gh-copy .gh-ok { display: none; color: #3fb950; }
+    #projectCardStage .gh-copy.is-copied .gh-ico { display: none; }
+    #projectCardStage .gh-copy.is-copied .gh-ok { display: inline-block; }
+
+    #projectCardStage .gh-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 32px; padding: 0 12px; border: 1px solid #3d444d; border-radius: 6px;
+      background: #212830; color: #f0f6fc; font-size: 14px; font-weight: 500; white-space: nowrap;
+      transition: background-color 80ms;
+    }
+    #projectCardStage .gh-btn:hover { background: #262c36; }
+    #projectCardStage .gh-btn--sm { height: 28px; padding: 0 8px; font-size: 12px; }
+    #projectCardStage .gh-btn--icon { width: 32px; padding: 0; color: #9198a1; }
+    #projectCardStage .gh-btn--sm.gh-btn--icon { width: 28px; }
+    #projectCardStage .gh-btn--caret { width: 24px; }
+    #projectCardStage .gh-iconbtn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px; color: #9198a1; transition: background-color 80ms;
+    }
+    #projectCardStage .gh-iconbtn:hover { background: #656c7633; color: #f0f6fc; }
+    #projectCardStage .gh-group { display: inline-flex; }
+    #projectCardStage .gh-group > * { border-radius: 0; }
+    #projectCardStage .gh-group > * + * { margin-left: -1px; }
+    #projectCardStage .gh-group > :first-child { border-radius: 6px 0 0 6px; }
+    #projectCardStage .gh-group > :last-child { border-radius: 0 6px 6px 0; }
+
+    /* 경로 */
+    #projectCardStage .gh-crumb { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; margin-bottom: 16px; }
+    #projectCardStage .gh-path { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; font-size: 16px; font-weight: 600; }
+    #projectCardStage .gh-path a { color: #4493f8; }
+    #projectCardStage .gh-path a:hover { text-decoration: underline; }
+    #projectCardStage .gh-sep { margin: 0 6px; color: #9198a1; font-weight: 400; }
+    #projectCardStage .gh-file { color: #f0f6fc; word-break: break-all; }
+    #projectCardStage .gh-path .gh-iconbtn { margin-left: 4px; }
+
+    /* 최근 커밋 */
+    #projectCardStage .gh-commit {
+      display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 8px 8px 16px; margin-bottom: 16px;
+      border: 1px solid #3d444d; border-radius: 6px; color: #9198a1;
+    }
+    #projectCardStage .gh-avatar img { display: block; width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 0 0 1px #ffffff26; }
+    #projectCardStage .gh-author { color: #f0f6fc; font-weight: 600; }
+    #projectCardStage .gh-author:hover { text-decoration: underline; }
+    #projectCardStage .gh-msg { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    #projectCardStage .gh-msg:hover { color: #4493f8; text-decoration: underline; }
+    #projectCardStage .gh-when { font-size: 12px; white-space: nowrap; }
+    #projectCardStage .gh-when a:hover { color: #4493f8; text-decoration: underline; }
+    #projectCardStage .gh-hist { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 6px; color: #f0f6fc; font-weight: 600; white-space: nowrap; }
+    #projectCardStage .gh-hist:hover { background: #656c7633; }
+    #projectCardStage .gh-hist .gh-ico { color: #9198a1; }
+
+    /* 파일 박스. 머리는 스크롤해도 위에 붙어 있음 */
+    /* ㄴ sticky 기준이 .gh 패딩 안쪽이라 top 0이면 위에 16px 틈 생기고 글자가 비침. 패딩만큼 올림 */
+    #projectCardStage .gh-box { border: 1px solid #3d444d; border-radius: 6px; }
+    #projectCardStage .gh-head {
+      position: sticky; top: -16px; z-index: 3;
+      display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px;
+      background: #151b23; border-bottom: 1px solid #3d444d; border-radius: 6px 6px 0 0;
+    }
+    #projectCardStage .gh-seg { display: inline-flex; height: 32px; padding: 0; background: #010409; border: 1px solid #3d444d; border-radius: 6px; flex-shrink: 0; }
+    #projectCardStage .gh-seg > * { position: relative; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 6px; color: #f0f6fc; font-size: 14px; }
+    #projectCardStage .gh-seg > * + *::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: #3d444d; }
+    #projectCardStage .gh-seg > .is-on::before, #projectCardStage .gh-seg > .is-on + *::before { display: none; }
+    #projectCardStage .gh-seg > :not(.is-on):hover { background: #656c7633; }
+    #projectCardStage .gh-seg > .is-on { margin: -1px; background: #262c36; border: 1px solid #3d444d; font-weight: 600; }
+    #projectCardStage .gh-meta { margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9198a1; font-size: 12px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+    #projectCardStage .gh-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+    #projectCardStage .gh[data-mode="preview"] .gh-pane--code,
+    #projectCardStage .gh[data-mode="code"] .gh-pane--preview { display: none; }
+    #projectCardStage .gh-wait { display: flex; align-items: center; justify-content: center; min-height: 240px; color: #9198a1; }
+    #projectCardStage .gh-spinner, #projectCardStage .anim-rotate { animation: ghSpin 1s linear infinite; }
+    @keyframes ghSpin { to { transform: rotate(360deg); } }
+    #projectCardStage .gh-fail { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 64px 16px; color: #9198a1; text-align: center; }
+    #projectCardStage .gh-fail div { display: flex; gap: 8px; }
+
+    /* Code 탭 */
+    #projectCardStage .gh-code { display: flex; padding: 8px 0; overflow-x: auto; font-size: 12px; line-height: 20px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+    #projectCardStage .gh-ln { position: sticky; left: 0; flex: none; padding: 0 8px 0 16px; background: #0d1117; color: #9198a1; text-align: right; white-space: pre; user-select: none; }
+    #projectCardStage .gh-src { flex: 1 0 auto; margin: 0; padding: 0 16px 0 8px; font: inherit; color: #f0f6fc; white-space: pre; tab-size: 8; }
+
+    /* Preview 탭 */
+    #projectCardStage .gh-pane--preview .markdown-body { padding: 32px; background: transparent; }
+    #projectCardStage .markdown-body img { display: inline; vertical-align: baseline; }
+    #projectCardStage .markdown-body ul { list-style-type: disc; }
+    #projectCardStage .markdown-body ol { list-style-type: decimal; }
+    #projectCardStage .markdown-body ul ul { list-style-type: circle; }
+    #projectCardStage .markdown-body ul ul ul { list-style-type: square; }
+    #projectCardStage .markdown-body markdown-accessiblity-table { display: block; }
+    #projectCardStage .markdown-body .markdown-heading { position: relative; }
+    #projectCardStage .markdown-body .markdown-heading .anchor {
+      position: absolute; top: 50%; left: -28px; float: none; margin: 0; padding: 0;
+      display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+      border-radius: 6px; color: #f0f6fc; opacity: 0; transform: translateY(-50%);
+    }
+    #projectCardStage .markdown-body .markdown-heading:hover .anchor { opacity: 1; }
+    #projectCardStage .markdown-body .render-plaintext-hidden { display: none; }
+    #projectCardStage .markdown-body .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    #projectCardStage .gh-mermaid { display: flex; justify-content: center; margin-bottom: 16px; overflow-x: auto; }
+    #projectCardStage .gh-mermaid svg { display: block; max-width: 100%; height: auto; }
+    #projectCardStage .gh-mermaid .gh-wait { min-height: 100px; }
+
+    /* 박스가 좁을 때. 모바일이거나 창 줄였을 때 */
+    /* ㄴ GitHub도 좁아지면 줄 수랑 편집 버튼부터 숨김 */
+    @container (max-width: 560px) {
+      #projectCardStage .gh { padding: 12px 12px 16px; }
+      #projectCardStage .gh-head { top: -12px; }
+      #projectCardStage .gh-crumb { margin-bottom: 12px; }
+      #projectCardStage .gh-path { font-size: 14px; }
+      #projectCardStage .gh-commit { min-height: 40px; padding: 4px 4px 4px 12px; margin-bottom: 12px; }
+      #projectCardStage .gh-hist span { display: none; }
+      #projectCardStage .gh-meta, #projectCardStage .gh-edit, #projectCardStage .gh-outline { display: none; }
+      #projectCardStage .gh-seg > * { padding: 0 10px; }
+      #projectCardStage .gh-pane--preview .markdown-body { padding: 16px; font-size: 14px; }
+      #projectCardStage .markdown-body .markdown-heading .anchor { display: none; }
+    }
+    @container (max-width: 400px) {
+      #projectCardStage .gh-when, #projectCardStage .gh-group > :not(:first-child) { display: none; }
+      #projectCardStage .gh-group > :first-child { border-radius: 6px; }
     }
     #stackStage .stack-item { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); }
     #fuckinteraction.is-on #stackStage .stack-item { will-change: transform; }
@@ -1398,7 +1511,7 @@
           </h2>
 
           <div class="mt-8" data-reveal-group="200">
-            <h3 class="text-2xl md:text-3xl font-bold tracking-tight">stx4R</h3>
+            <h3 class="text-2xl md:text-3xl font-bold tracking-tight">유이준 / Yijun Yoo</h3>
 
             <div class="mt-6 grid grid-cols-2 gap-x-10 gap-y-5">
               <div>
@@ -2072,496 +2185,365 @@
 
   <script>
   (() => {
-    const projects = [
-      {
-        id: 'howto', name: 'HowTo',
-        shortDesc: 'Teachable Machine 기반 실시간 이미지 인식으로 분리수거 방법을 즉시 안내하는 AI 웹 앱',
-        github: 'https://github.com/stx4R/HowTo',
-        readme: `<h2>개요</h2>
-<p>사진 한 장으로 분리수거 방법을 즉시 알 수 있는 AI 기반 웹 애플리케이션입니다. Google Teachable Machine으로 학습한 분류 모델을 브라우저에서 직접 구동하여 별도 서버 없이 실시간 추론합니다.</p>
-<h2>핵심 기술</h2>
-<ul>
-  <li><strong>Motion Capture (Teachable Machine):</strong> 웹캠 스트림 또는 파일 업로드 이미지를 입력으로 받아 직접 수집·레이블링한 데이터셋으로 학습한 CNN 모델 적용. 지도학습(Supervised Learning) 방식으로 분리수거 카테고리를 분류.</li>
-  <li><strong>Discriminative AI:</strong> 입력 이미지가 어느 폐기물 클래스에 속하는지 판별하는 판별 모델(Discriminative Model) 사용. 생성 모델과 달리 클래스 경계 학습에 집중하여 추론 속도 최적화.</li>
-  <li><strong>Arduino 연동:</strong> 분류 결과를 시리얼 통신으로 Arduino에 전달, 물리적 분리수거함 자동 개폐 프로토타입과 연동 가능성 검증.</li>
-</ul>
-<h2>문제 인식</h2>
-<p>분리수거 기준은 지자체별로 상이하고 포털 검색으로는 한 번에 정확한 답을 얻기 어렵습니다. 카메라 앞에 쓰레기를 들기만 하면 올바른 분리 방법과 주의사항을 즉시 안내함으로써 진입 장벽을 낮추는 것을 목표로 합니다.</p>`
-      },
-      {
-        id: 'wtd', name: 'Plan-ME',
-        shortDesc: 'P2P 블록체인 + 학교 API 연동으로 일정 무결성을 보장하는 개인 스케줄 관리 앱',
-        github: 'https://github.com/stx4R/WTD',
-        readme: `<h2>개요</h2>
-<p>P2P 블록체인 아키텍처로 일정 데이터의 무결성을 보장하고, NEIS·SuperSchool 공식 API와 연동하여 학사 일정을 자동으로 가져오는 개인 스케줄 관리 웹 앱입니다.</p>
-<h2>핵심 기술</h2>
-<ul>
-  <li><strong>P2P Blockchain (SHA-256 Hash Chain):</strong> 각 일정 항목을 블록으로 구성하고, 이전 블록의 SHA-256 해시를 현재 블록에 포함하는 Hash Chain 구조로 사후 위변조를 탐지. 중앙 서버 없이 클라이언트 단에서 체인 무결성 검증.</li>
-  <li><strong>NEIS / SuperSchool API:</strong> 교육부 나이스(NEIS) 및 슈퍼스쿨 Open API를 통해 학교 공지사항, 급식 정보, 시간표를 실시간 Pull. RESTful 설계 원칙을 준수하여 엔드포인트 구조화.</li>
-  <li><strong>Supabase (Database):</strong> PostgreSQL 기반 Supabase BaaS로 사용자 일정 데이터 영속 저장 및 실시간 동기화.</li>
-  <li><strong>Deep-Link:</strong> 외부 앱 또는 서비스에서 특정 일정 항목으로 직접 진입하는 딥링크 URI 스킴 지원.</li>
-  <li><strong>WireShark 분석:</strong> 개발 과정에서 Wireshark 패킷 캡처를 통해 API 통신 구간의 보안 취약점 및 평문 노출 여부를 사전 점검.</li>
-</ul>
-<h2>설계 의도</h2>
-<p>단순 CRUD 일정 앱의 한계를 벗어나, 블록체인의 변조 방지 특성을 일상적 일정 관리에 적용함으로써 기술 개념의 실용적 활용 가능성을 탐색한 프로젝트입니다.</p>`
-      },
-      {
-        id: 'seat', name: 'SeatAutoAllocate',
-        shortDesc: 'Gale-Shapley를 넘어선 Random Endowment TTC로 전략증명적·파레토 최적 자리를 배치하는 시스템',
-        github: 'https://github.com/stx4R/SeatAutoAllocate',
-        readme: `<h2>개요</h2>
-<p>기존 랜덤 자리 배치의 한계를 극복하여 학생 개개인의 선호도를 반영하면서도 수학적으로 최적화된 배치를 보장하는 시스템입니다. 경제학의 매칭 이론을 교육 환경에 적용한 프로젝트입니다.</p>
-<h2>알고리즘 설계</h2>
-<ul>
-  <li><strong>Gale-Shapley → TTC 전환:</strong> Gale-Shapley는 양측 매칭(Bipartite Matching)을 전제하지만, 자리 배치는 학생만 선호도를 가지는 단방향 매칭(One-sided Matching) 문제입니다. 이에 자리를 "소유"하는 Random Endowment를 가정하고 Top Trading Cycles(TTC) 알고리즘을 적용.</li>
-  <li><strong>Pareto Efficiency:</strong> TTC 알고리즘은 파레토 효율성을 보장 — 어떤 학생도 다른 학생을 손해 보게 하지 않고 자신의 배치를 개선할 수 없는 상태로 수렴.</li>
-  <li><strong>Strategy-proofness:</strong> 학생이 선호도를 거짓으로 보고해도 실제 이득을 볼 수 없는 전략 불변성(Incentive Compatibility) 확보.</li>
-</ul>
-<h2>Trade-off 분석</h2>
-<p>알고리즘 최적성과 현실 제약(시력, 키, 교우 관계 등) 사이의 Trade-off를 분석하고, 관리자가 가중치를 조정할 수 있는 파라미터를 노출하여 이론과 실용 사이의 균형을 맞췄습니다.</p>`
-      },
-      {
-        id: 'fitness', name: 'PigScape',
-        shortDesc: '개인 신체 데이터 + InBody 측정값을 통합하여 BMR을 정밀 계산하고 맞춤형 운동 프로그램을 생성하는 헬스케어 앱',
-        readme: `<h2>개요</h2>
-<p>나이·성별·키·몸무게 등의 기초 신체 정보에 InBody 측정 데이터(근육량, 체지방률, 체수분량 등)를 결합하여 개인별 정밀 기초대사량(BMR)을 산출하고, 목표에 맞춘 운동 프로그램을 자동 생성하는 헬스케어 웹 앱입니다.</p>
-<h2>핵심 기술</h2>
-<ul>
-  <li><strong>BMR 계산 엔진:</strong> Mifflin-St Jeor 공식을 기반으로 기초대사량 산출. InBody의 근육량·체지방률을 보정 계수로 통합하여 표준 공식 대비 오차를 줄인 개인화 BMR 계산.</li>
-  <li><strong>데이터 통합 파이프라인:</strong> 수동 입력 및 InBody 결과 파싱을 통해 다양한 포맷의 건강 데이터를 표준화. 입력값 유효성 검증 및 이상치 처리 로직 포함.</li>
-  <li><strong>맞춤형 운동 루틴 생성:</strong> 사용자의 목표(체중 감량/증가/유지)와 활동 수준을 입력으로 받아 TDEE(총 일일 에너지 소비량)를 계산하고, 유산소·무산소 운동 비율, 세트·반복 횟수를 자동으로 설계.</li>
-  <li><strong>진행 시각화:</strong> 주간·월간 체중 및 체지방률 변화 추이를 차트로 표현하여 목표 달성률을 직관적으로 확인 가능.</li>
-</ul>`
-      },
-      {
-        id: 'population', name: 'PopInT',
-        shortDesc: '동물 순위제(Pecking Order)를 방향 그래프로 모델링하고 서열을 자동 분석하는 교육용 시각화 툴',
-        readme: `<h2>개요</h2>
-<p>생물학의 순위제(Pecking Order) 현상을 그래프 이론으로 수학적 모델링하고, 인터랙티브 방향 그래프로 시각화·분석하는 교육용 웹 애플리케이션입니다. 생명과학과 컴퓨터 과학의 융합을 목표로 합니다.</p>
-<h2>핵심 개념</h2>
-<ul>
-  <li><strong>방향 그래프 (Directed Graph):</strong> 개체 간 우열 관계를 노드(Node)와 방향성 간선(Directed Edge)으로 모델링. A가 B를 쪼는 행위 → A→B 화살표로 표현.</li>
-  <li><strong>인접 행렬 (Adjacency Matrix):</strong> N×N 행렬로 상호작용 데이터를 구조화. 사용자가 직접 값을 입력할 수 있는 인터랙티브 행렬 UI 제공.</li>
-  <li><strong>진출 차수 기반 서열 분석:</strong> 각 노드의 Out-degree(다른 개체를 쪼는 횟수)를 서열 지표로 산출. 높은 Out-degree → 높은 서열.</li>
-  <li><strong>위상 정렬 변형 알고리즘:</strong> DAG(비순환 방향 그래프)에서 완전한 선형 서열 도출. A→B→C→A 순환 관계 감지 시 "서열 불명확 그룹" 알림으로 예외 처리.</li>
-</ul>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>시각화:</strong> D3.js / Cytoscape.js 기반 드래그 가능한 인터랙티브 그래프</li>
-  <li><strong>프론트엔드:</strong> Vanilla HTML/CSS/JS (교육 목적, 의존성 최소화)</li>
-  <li><strong>내보내기:</strong> 완성된 그래프 + 분석 결과를 PNG/PDF로 저장하여 학교 과제 제출 가능</li>
-</ul>`
-      },
-      {
-        id: 'moguk', name: 'MoGuk',
-        shortDesc: '100명 대표·12개 동아리가 58일간 참여하는 정책 기반 모의국회 전자 운영 플랫폼',
-        github: 'https://github.com/stx4R/MoGuk',
-        readme: `<h2>개요</h2>
-<p>"보이지 않는 곳에서 보이는 것을 위하여" — 100명의 대표와 12개 동아리가 58일간 참여하는 <strong>제 3회 오량모의국회</strong>의 전자 운영 플랫폼입니다. 정책 발의, 토론, 전자 투표를 하나의 웹 서비스로 통합합니다.</p>
-<h2>핵심 기능</h2>
-<ul>
-  <li><strong>전자 투표 시스템:</strong> 의안별 찬반 투표 및 실시간 집계. 투표 결과 시각화.</li>
-  <li><strong>의안 토론 포럼:</strong> 참여 대표들 간의 구조화된 비동기 토론 채널.</li>
-  <li><strong>역할 기반 접근 제어:</strong> 일반 대표·운영진·관리자 권한 분리 (Supabase Row Level Security 활용).</li>
-  <li><strong>관리자 대시보드:</strong> 의안 등록·관리, 참여 현황 모니터링, 회원 관리.</li>
-</ul>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>Frontend:</strong> Next.js 14 (App Router), TypeScript</li>
-  <li><strong>Database:</strong> Supabase (PostgreSQL + Row Level Security + PLpgSQL Functions)</li>
-  <li><strong>스타일링:</strong> Tailwind CSS, Geist 폰트 (next/font)</li>
-  <li><strong>배포:</strong> Vercel (CI/CD 자동화)</li>
-</ul>
-<h2>참여 현황</h2>
-<p>참여 대표 100명 · 협력 동아리 12개 (DCN, DOYL, Flow Communicators, NALSSAM, ONE-PRESS, Path Finder, Inspire, 교집합, EUNOIA, Right-us, UNIFY, L-INK) · 운영 기간 58일</p>`
-      },
-      {
-        id: 'link', name: 'L-INK Interview',
-        shortDesc: 'L-INK 동아리 온라인 면접 평가 시스템 — 지원자별 평가 항목 수집·집계·시각화 웹앱',
-        github: 'https://github.com/stx4R/L-INK',
-        readme: `<h2>개요</h2>
-<p>L-INK 동아리의 온라인 면접 평가를 위해 제작된 전용 웹 애플리케이션입니다. 면접관이 지원자별 평가 항목을 실시간으로 입력하고, 결과를 자동 집계·시각화하여 면접 운영 효율을 높입니다.</p>
-<h2>핵심 기능</h2>
-<ul>
-  <li><strong>지원자별 평가 시트:</strong> 면접 항목(태도, 역량, 잠재력 등)을 구조화된 폼으로 제공. 각 항목에 점수 및 코멘트 입력 가능.</li>
-  <li><strong>실시간 집계:</strong> 복수 면접관의 평가 데이터를 즉시 취합하여 지원자별 총점 및 평균 산출.</li>
-  <li><strong>결과 시각화:</strong> 지원자 간 점수 비교, 항목별 레이더 차트 등으로 평가 결과를 한눈에 파악.</li>
-  <li><strong>경량 단독 배포:</strong> 별도 백엔드 없이 클라이언트 단에서 동작하는 SPA 구조로, 빠른 접근과 유지보수 용이.</li>
-</ul>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>Frontend:</strong> React 18 + TypeScript</li>
-  <li><strong>빌드 도구:</strong> Vite (HMR 지원으로 개발 생산성 극대화)</li>
-  <li><strong>스타일링:</strong> Tailwind CSS</li>
-  <li><strong>배포:</strong> Vercel</li>
-</ul>
-<h2>설계 의도</h2>
-<p>오프라인 면접의 종이 평가지 한계를 디지털로 대체하여, 면접 종료 직후 결과를 즉시 정리할 수 있도록 설계하였습니다. 동아리 특성에 맞는 평가 항목 커스터마이징을 전제로 확장성을 고려했습니다.</p>`
-      },
-      {
-        id: 'agdecision', name: 'AGDecision.',
-        shortDesc: '질문지법(15명)·면접법(6명) 혼합연구로 "알고리즘 의사결정은 객관적"이라는 통념을 실증 검증한 사회과학 연구',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>"알고리즘 기반 의사결정은 과연 객관적인가"를 질문지법과 면접법을 병행한 혼합연구로 검증한 사회과학 연구입니다. 선행 연구들이 알고리즘 '출력'의 차별을 밝혔다면, 본 연구는 그 차별이 사용자 인식 차원에서 왜 의심 없이 받아들여지는지를 규명합니다.</p>
-<h2>연구 설계</h2>
-<ul>
-  <li><strong>혼합연구(Mixed Methods):</strong> 양적 연구(6개 영역 18문항, 표준화된 5점 리커트 척도)와 질적 연구(반구조화 면접, 공통 질문 4개 + 신뢰 성향별 심화 질문)를 병행하여 두 자료가 서로의 한계를 보완하도록 설계.</li>
-  <li><strong>객관성 확보:</strong> 긍정·부정 진술 혼합, 유도성 표현 배제, 면접 시 연구자 가설 비노출 원칙 적용.</li>
-  <li><strong>통계 검증:</strong> 교차분석과 비모수 검정(Mann-Whitney U)으로 집단 간 차이를 검증.</li>
-</ul>
-<h2>핵심 발견 — 4가지 패턴</h2>
-<ul>
-  <li><strong>이해할수록 덜 신뢰:</strong> 코딩 경험자(작동 이해도 4.0)가 비경험자보다 알고리즘을 덜 신뢰(2.8 vs 4.1). 이해도-신뢰도 상관계수 −0.26, 이해도 집단 차이 p = 0.013.</li>
-  <li><strong>블랙박스 신뢰:</strong> "AI는 객관적이다" 4.13 대비 "작동 과정을 이해한다" 2.53 — 원리를 모르는 상태에서 형성되는 신뢰 양상을 '블랙박스 신뢰'로 개념화.</li>
-  <li><strong>고위험 영역 수용:</strong> 사법 위험도 예측 신뢰(3.73)가 채용·대출·의료보다 높음 — 가장 신중해야 할 판단에서 오히려 근거 없는 신뢰가 수용됨.</li>
-  <li><strong>객관 ≠ 공정:</strong> "객관적이다" 4.13 vs "감정·편견 없이 공정하다" 3.07 — 응답자들은 일관성과 공정성을 직관적으로 구분.</li>
-</ul>
-<h2>종합 분석</h2>
-<p>면접에서 도출한 세 신뢰 유형(부분 신뢰형·강한 신뢰형·강한 불신형)을 캐시 오닐의 『대량살상수학무기』, ProPublica의 COMPAS 분석, Buolamwini &amp; Gebru의 Gender Shades 연구와 교차 분석하여, 알고리즘이 사회의 편향을 학습·증폭해 '객관성'이라는 인증 아래 차별을 재생산한다는 연구 가설을 지지하는 결론을 도출했습니다.</p>
-<h2>의의 및 제언</h2>
-<ul>
-  <li>작동 원리를 이해하는 집단일수록 비판적 수용이 가능 — 알고리즘 리터러시 교육의 필요성.</li>
-  <li>고위험 영역(채용·대출·사법)의 설명 가능성 확보와 인간 최종 검토 의무화 제안.</li>
-  <li>후속 연구: 자체 개발 모델 HowTo의 학습 데이터 양과 오분류율 상관 실험으로 인식 차원의 가설을 기술 차원에서 실증.</li>
-</ul>`
-      },
-      {
-        id: 'bbpre', name: 'BBPre.',
-        shortDesc: 'KBO·MLB 17,000+ 경기 데이터로 관중 수요를 예측하고, 매진 시대의 Truncation 문제까지 진단한 앙상블 ML 연구 (Test R² 0.671)',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>"야구 관중 수는 단순한 시계열 트렌드인가, 아니면 날씨·라이벌전·팀 순위 등 복잡한 이벤트들의 상호작용인가?" — 이 질문에서 출발해 KBO 2,584경기와 MLB 14,456경기(2023–2026)를 Gradient Boosting 계열 앙상블로 예측한 머신러닝 연구입니다. 1차 분석에서 구축한 예측 파이프라인을 2026 시즌 데이터로 확장·재검증하고, 그 과정에서 드러난 Truncation 문제까지 진단했습니다.</p>
-<h2>연구의 발전 과정</h2>
-<ul>
-  <li><strong>1차 — 예측 가능성 검증:</strong> KBO 2023–2025 2,160경기와 MLB 2020–2025 13,046경기로 5개 모델(XGBoost·LightGBM·CatBoost·Voting·Stacking)을 비교. Voting Ensemble이 Test R² <strong>0.697</strong>, MAE 2,362명으로 관중 수가 예측 가능한 대상임을 확인.</li>
-  <li><strong>2차 — 검증 설계 강화:</strong> 무작위 분할이 아닌 시간적 홀드아웃(학습 2023–2025 / 테스트 2026 전반기 424경기)으로 전환하고 데이터를 17,000경기 규모로 확장. 그 결과 Test R² <strong>0.671</strong> — 수치는 낮아졌지만 미래 시점을 실제로 맞힌 성능이라는 점에서 신뢰도는 오히려 상승.</li>
-  <li><strong>수치 하락의 해석:</strong> 성능 저하가 아니라 검증 난이도의 상승입니다. 낙관적으로 부풀려진 지표를 걷어내는 과정 자체가 이 연구의 핵심 성과입니다.</li>
-</ul>
-<h2>데이터 파이프라인</h2>
-<ul>
-  <li><strong>멀티 소스 수집:</strong> KBO 공식 데이터 + 기상청 날씨(기온·습도·강수량·풍속) + MLB Stats API 통합.</li>
-  <li><strong>특성 공학 (6개 카테고리):</strong> 불쾌지수(DI) 환경 변수, 주말·공휴일 일정 가중치, 순위 경쟁도(시즌 진행률 × 승률), 최근 10경기 모멘텀, 팀 인기도 확장 평균, 구장 수용인원·점유율 및 돔 구장 효과, 라이벌전 여부.</li>
-  <li><strong>이중 누수 차단:</strong> 모든 동적 변수(승률·인기도)에 shift(1)을 적용해 경기 이전 정보만 사용하고, 학습·테스트를 시간 순서로 완전 분리.</li>
-</ul>
-<h2>모델 성능</h2>
-<ul>
-  <li><strong>KBO:</strong> Voting Ensemble이 Test R² 0.671, MAE 2,418명(평균 관중 대비 약 13.4% 오차)으로 최고 성능. 단일 모델 중에서는 CatBoost가 과적합 격차 0.196으로 최소.</li>
-  <li><strong>MLB:</strong> CatBoost 단일 모델이 RMSE 6,941명으로 최적 — 두 리그 모두에서 CatBoost의 안정성 우위를 재확인.</li>
-  <li><strong>특성 중요도:</strong> 홈팀 인기도 23.1% &gt; 최근 10경기 승률 9.8% — 관중 유치는 단기 성적이 아닌 팬 기반(브랜드)의 함수.</li>
-</ul>
-<h2>세이버메트릭스 분석</h2>
-<ul>
-  <li>26,092개 MLB 게임로그에서 OPS, wRC+, WAR, BABIP, ISO 산출.</li>
-  <li>2023 피치클락 도입 후 TTO% 감소·도루 증가 등 규칙 변경 영향 정량화.</li>
-</ul>
-<h2>핵심 인사이트</h2>
-<ul>
-  <li>홈팀 인기도가 관중의 약 25%에 영향 — 브랜드 파워가 단기 성적보다 유의미.</li>
-  <li>고척 돔의 폭염 효과 — DI 높은 8월에 타 구장 대비 차별적 관중 흡입.</li>
-  <li>라이벌전 프리미엄 — 동일 조건 대비 관중 수 유의미한 증가.</li>
-</ul>
-<h2>핵심 발견 — Truncation</h2>
-<p>관측 관중 = min(수요, 수용인원). 매진이 일상화되면 예측 문제가 "수요 예측"에서 "공급 제약"으로 변합니다. 홈팀 인기 경기의 잔차가 체계적으로 음의 방향(예측 &gt; 실제 상한)에 몰리는 패턴은 좌석 공급이 잠재 수요를 제약하고 있다는 정량적 증거입니다.</p>
-<h2>한계 및 확장</h2>
-<ul>
-  <li>매진 경기의 잠재 수요 추정을 위한 Tobit 회귀 등 절단 데이터 방법론 도입.</li>
-  <li>SARIMA(장기 트렌드)와 ML(경기별 이벤트 효과)을 분담하는 하이브리드 구조 설계.</li>
-</ul>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>ML:</strong> XGBoost, LightGBM, CatBoost, Scikit-learn</li>
-  <li><strong>데이터:</strong> Python, Pandas, NumPy</li>
-  <li><strong>시각화:</strong> Matplotlib, Seaborn, Jupyter Notebook</li>
-  <li><strong>배포:</strong> GitHub Pages</li>
-</ul>`
-      },
-      {
-        id: 'gini', name: 'Gini.',
-        shortDesc: 'UCI Adult 학습 블라인드 분류기의 성별 격차를 정적분 지표로 드러내고, 미분 최적화로 임계값 t*를 해석적으로 도출한 감사 연구',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>UCI Adult 소득 데이터(32,561건)로 학습한 블라인드 분류기가 성별 격차를 어떻게 재현하는지 두 단계로 감사한 연구입니다. 1단계에서 정적분(로렌츠 곡선·지니계수)으로 표준 지표의 한계를 드러내고, 2단계에서 미분 최적화로 정확도와 공정성을 동시에 고려한 최적 판정 임계값을 해석적으로 도출했습니다.</p>
-<h2>Phase 1 — 지니계수가 숨긴 차별</h2>
-<ul>
-  <li><strong>대리변수 효과:</strong> 성별·인종을 학습에서 완전히 제외(검증 AUC 0.900)했음에도, 모델은 현실 격차(여 10.9% / 남 30.4%)를 거의 그대로 재현(여 11.5% / 남 30.1%).</li>
-  <li><strong>평균 불변성:</strong> 지니계수는 분포의 집중도만 측정해 집단 간 평균 격차에 둔감 — 통합 지니 0.569 하나로는 성차별의 근거를 전혀 찾을 수 없음.</li>
-  <li><strong>격차지수 D:</strong> 두 집단 로렌츠 곡선 사이 넓이로 정의한 D(0.064)가 xⁿ 모델의 닫힌식과 0.06 수준에서 일치하며 격차를 직접 포착.</li>
-</ul>
-<h2>Phase 2 — 공정성 적분 감사기</h2>
-<ul>
-  <li><strong>목적함수 설계:</strong> J(t) = Acc(t) − λD(t)를 정의하고, 미적분의 기본정리(FTC)와 연쇄법칙으로 1계 조건 J′(t*) = 0을 도출.</li>
-  <li><strong>모형 검증:</strong> λ = 0에서 해석해가 베이즈 최적 임계값으로 정확히 환원(Acc′(t*) ≈ 4.6×10⁻¹⁷)되고, 실데이터 격자탐색과 정확도 1.9% 이내로 일치.</li>
-  <li><strong>Trade-off 정량화:</strong> DP 격차를 0.149 → 0.018로 줄이는 데 정확도 약 7%p가 소모되고 t*는 0.98로 포화 — 임계값 조정만으로는 완전한 공정에 도달할 수 없음을 확인.</li>
-</ul>
-<h2>결론</h2>
-<p>D ∝ (p_A − p_B)² — 차별의 근원은 모델 결함이 아닌 기저율 격차(+0.207)입니다. AI 공정성 감사는 단일 지니계수 대신 집단 격차 적분 지표를 병행해야 하며, 후처리(임계값 조정)만으로는 구조적 근원을 건드릴 수 없어 재가중 등 전처리 기법과의 병행이 필요합니다.</p>
-<h2>기술 스택</h2>
-<ul>
-  <li><strong>분석:</strong> Python, scipy(brentq 해석해), scikit-learn(로지스틱 회귀), matplotlib</li>
-  <li><strong>방법론:</strong> 로렌츠 곡선 사다리꼴 적분, 로짓정규 적합, 격자탐색 교차 검증</li>
-</ul>`
-      },
-      {
-        id: 'infgain', name: 'InfGain.',
-        shortDesc: 'Play Tennis 14개 샘플을 손 계산으로 완주하며 로그함수가 결정 트리(ID3)의 분기 기준을 결정하는 원리를 검증한 연구',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>고등학교 수학의 로그함수가 머신러닝 기초 알고리즘인 결정 트리(Decision Tree)의 분기 기준을 어떻게 결정하는지, Play Tennis 데이터셋 14개 샘플을 전 과정 손 계산으로 검증한 연구입니다. 섀넌 엔트로피 → 정보 이득 → ID3 트리 생성까지 추적하고 결과를 실물 모형으로 재구성했습니다.</p>
-<h2>수학적 배경</h2>
-<ul>
-  <li><strong>섀넌 엔트로피:</strong> H(X) = −Σ p log₂ p. 데이터의 불순도를 비트 단위로 측정 — 한 종류뿐이면 0, 두 종류가 균등하면 최대 1비트.</li>
-  <li><strong>밑 2의 의미:</strong> 엔트로피는 "한 샘플의 분류를 알아내는 데 필요한 평균 예/아니오 질문 횟수" — 이진 탐색의 log₂N과 같은 원리.</li>
-  <li><strong>정보 이득:</strong> IG(S, A) = 분기 전 엔트로피 − 분기 후 가중 평균 엔트로피. 클수록 좋은 질문.</li>
-</ul>
-<h2>손 계산 검증</h2>
-<ul>
-  <li>루트 엔트로피 H(S) = 0.940비트 (Yes 9 / No 5) — 초기 불순도가 높은 상태.</li>
-  <li>정보 이득 비교: Outlook 0.246 &gt; Humidity 0.151 &gt; Wind 0.048 &gt; Temperature 0.029 → Outlook이 루트 노드로 선택.</li>
-  <li>Overcast 분기는 엔트로피 0으로 즉시 분류 완료, Sunny 분기는 Humidity(IG 0.971), Rain 분기는 Wind(IG 0.971)가 하위 기준으로 결정.</li>
-</ul>
-<h2>실물 모형</h2>
-<p>트리의 노드를 구(빨강 = H &gt; 0 내부 노드, 파랑 = H = 0 잎 노드)로 부호화하고 경로별 누적 정보 이득(Overcast 0.246 vs 나머지 경로 1.217)을 표기하여, "정보 이득이 큰 특성을 먼저 선택할수록 더 적은 분기로 분류가 끝난다"는 가설이 트리 구조에서 그대로 관찰됨을 시각적·정량적으로 입증했습니다.</p>
-<h2>결론</h2>
-<p>로그는 계산을 빠르게 하는 도구가 아니라 불확실성을 정량화하는 도구이며, 'AI가 학습한다'의 실체가 매 분기마다 엔트로피를 비교해 가장 정보량이 큰 선택을 반복하는 수학적 과정임을 손 계산으로 체감한 연구입니다. 후속 과제로 지니 불순도·Gain Ratio 비교와 scikit-learn 구현 검증, 가지치기(pruning) 탐구를 계획하고 있습니다.</p>`
-      },
-      {
-        id: 'resall', name: 'ResAll.',
-        shortDesc: '코스타리카 빈곤 데이터(PMT)로 지원 대상 가구를 분류하고, Fairness 애드온으로 편향 감사와 Reweighing 완화까지 수행한 프로젝트',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>코스타리카 가구 빈곤 수준 데이터(IADB 대리수단조사, PMT)로 "한정된 복지 예산을 누구에게 배분할 것인가"를 분류 문제로 구현한 프로젝트입니다. Orange3에서 세 모델을 학습·비교하고, 기본 패키지에 없는 Fairness 애드온을 직접 설치해 가구주 성별·지역을 보호속성으로 하는 알고리즘 공정성 감사와 편향 완화(Reweighing)까지 수행했습니다.</p>
-<h2>데이터 및 전처리</h2>
-<ul>
-  <li><strong>PMT 접근:</strong> 소득 증빙이 어려운 환경에서 주거·자산·교육·가구구성 등 관측 가능한 142개 특성 중 해석 가능한 약 20개를 선별.</li>
-  <li><strong>구조화:</strong> 가구주 행만 추출해 1행 = 1가구(약 3,000가구)로 정규화, 4단계 빈곤 등급을 '지원 필요 여부'로 이진화, 식별자·혼합 변수 제외로 데이터 누수 차단.</li>
-  <li><strong>계층 추출:</strong> 클래스·집단 비율을 보존한 70/30 분할 (훈련 2,082 / 테스트 891).</li>
-</ul>
-<h2>모델 비교</h2>
-<ul>
-  <li><strong>성능:</strong> 로지스틱 회귀가 AUC 0.852 · CA 0.783 · F1 0.776으로 최고, 랜덤 포레스트·결정 트리 순.</li>
-  <li><strong>지표 선택:</strong> 복지 맥락에서는 취약 가구를 놓치는 위음성 비용이 과다 지원보다 크므로, 정확도가 아닌 Recall·F1을 핵심 지표로 채택.</li>
-</ul>
-<h2>공정성 감사</h2>
-<ul>
-  <li><strong>정확 ≠ 공정:</strong> 성능 1위 로지스틱 회귀가 공정성 지표(SPD −0.076, DI 0.899)는 최악, 성능 최저 결정 트리가 공정성은 최선 — 성능표만 보고 모델을 고르면 차별을 그대로 배포하게 됨.</li>
-  <li><strong>편향의 출발점:</strong> Dataset Bias 위젯으로 모델 학습 이전 데이터 자체에 DI·SPD 편향이 존재함을 확인 — 편향의 출발점은 알고리즘이 아닌 사회·데이터.</li>
-  <li><strong>완화와 Trade-off:</strong> Reweighing + Weighted Logistic Regression으로 정확도를 일부 양보한 대신 공정성이 개선되는 관계를 정량 관찰하고, 여러 공정성 기준(DI·SPD·AOD·EOD)의 동시 만족이 불가능함까지 확인.</li>
-</ul>
-<h2>결론</h2>
-<p>예측 결과는 처벌이 아닌 지원 대상 발굴에 한해 사용하고 최종 판단에 인간 검토를 두는 것을 전제로, 데이터 정제 → 모델 비교 → 공정성 감사 → 편향 완화의 전 과정을 스스로 설계하며 기술의 윤리적 영향까지 책임지는 AI 설계자의 태도를 경험한 프로젝트입니다.</p>`
-      },
-      {
-        id: 'csck', name: 'CSCK.',
-        shortDesc: '"학습이 불가능한 사용자"를 전제로 역산 설계한 출석체크 키오스크 — 단일 빌드가 데모·개발·운영 3환경에서 그대로 도는 웹앱',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>공용 태블릿 한 대로 수백 명이 지나가는 현장을 전제로, 출석체크 키오스크의 UI/UX를 사용자 경험에서 역산해 설계한 프로젝트입니다. "처음 보는 사람이 설명 없이 3초 안에 끝낼 수 있는가"를 유일한 기준으로 삼았고, 백엔드 유무·기기 종류·네트워크 상태와 무관하게 같은 빌드 하나가 그대로 동작하도록 구현했습니다.</p>
-<h2>제약이 설계를 정했다</h2>
-<ul>
-  <li><strong>기기가 공용이다:</strong> 로그인이 없다. 개인 계정을 전제할 수 없다.</li>
-  <li><strong>사용자가 매번 바뀐다:</strong> 학습이 불가능하다 — 두 번째 사용이 첫 번째보다 빠를 수 없다. 튜토리얼·설정·기억되는 상태가 전부 무의미해진다.</li>
-  <li><strong>줄이 서 있다:</strong> 한 사람의 지연이 뒤 전체의 지연이다. 막다른 길이 있으면 안 된다.</li>
-  <li><strong>현장 네트워크를 신뢰할 수 없다:</strong> 서버가 죽어도 접수는 계속되어야 한다.</li>
-</ul>
-<h2>UX 설계 — 5가지 장치</h2>
-<ul>
-  <li><strong>점진적 좁힘:</strong> 전화번호를 전부 입력시키지 않고, 한 자리마다 접두 일치로 명단을 걸러 남은 후보 수를 실시간 표시. 지시를 따르는 것이 아니라 목록에 자기 이름이 보이는 순간이 곧 멈추는 시점이 된다.</li>
-  <li><strong>확인 카드:</strong> 대형 화면에서 오터치는 예외가 아니라 상시 조건. 행을 누르면 이름을 최대 크기로 인쇄한 확인 단계를 거친다 — 확인 대상은 "출석할 것인가"가 아니라 "이 사람이 맞는가"다.</li>
-  <li><strong>막다른 길 제거:</strong> 명단에 없는 사람을 거부하면 그 지점에서 줄이 멈춘다. 예외 경로를 정상 경로 안에 두되 <strong>강제</strong> 플래그로 기록에 남겨, 현장 처리와 사후 정합성을 동시에 확보.</li>
-  <li><strong>3초 자동 복귀:</strong> 성공 연출 후 모든 상태가 스스로 초기화된다. 초기화 조작을 사용자에게 요구하는 순간 그것이 학습 대상이 되기 때문. 과장된 피드백도 장식이 아니라 재시도를 막는 장치다.</li>
-  <li><strong>중복 3중 방어:</strong> 연타 차단(플래그) · 클라이언트 대조 · DB 유일 제약. 앞의 둘은 UX, 마지막은 정합성 — 다른 기기가 방금 저장한 것은 클라이언트가 알 수 없으므로 최종 판정은 반드시 DB가 한다.</li>
-</ul>
-<h2>범용성 — 같은 빌드가 세 환경에서 돈다</h2>
-<ul>
-  <li><strong>데이터 계층 격리:</strong> 백엔드 설정의 유무만으로 내장 명단+로컬 저장소(데모·개발)와 원격 테이블(운영)이 갈린다. 화면 코드에 환경 분기가 한 줄도 없다.</li>
-  <li><strong>폴백을 숨기지 않는다:</strong> 로컬 저장 모드일 때 헤더에 경고를 띄운다. 조용히 로컬에 저장하면 운영자는 서버에 쌓이고 있다고 믿고, 행사가 끝난 뒤에 알게 된다.</li>
-  <li><strong>실시간 이중화:</strong> 변경 구독은 네트워크가 끊기면 조용히 죽고 그 사실이 화면에 안 나타나므로, 폴링과 복귀 이벤트 3종(가시성·포커스·온라인)을 함께 돌린다.</li>
-  <li><strong>서버 측 잠금:</strong> 관리자 화면은 미들웨어가 차단하고 비밀번호는 서버 전용 환경변수로 해시 대조. 클라이언트 검사 방식은 번들을 열면 그대로 보인다.</li>
-</ul>
-<h2>결론</h2>
-<p>학습 불가능성을 전제로 받아들이면 남는 것은 지금 화면에 보이는 것뿐이고, 그것만으로 끝나야 합니다. 확인 단계의 비용은 오기록의 비용보다 싸고, 막다른 길이 곧 병목이며, 잠금은 화면 전환이 아니라 서버 응답이어야 한다는 결론에 도달했습니다.</p>
-<h2>한계 및 계획</h2>
-<ul>
-  <li>표준 PWA 요건 미충족 — 웹 매니페스트와 서비스워커가 없어 오프라인 동작이 로컬 저장 폴백에 한정된다.</li>
-  <li>가로 대화면 전제 — 세로 태블릿·휴대폰에서는 레이아웃이 성립하지 않는다.</li>
-  <li>확대 차단은 저시력 접근성과 맞바꾼 값이며, "3초"는 설계 목표이지 측정값이 아니다 — 현장 계측이 다음 과제.</li>
-</ul>`
-      },
-      {
-        id: 'sirius', name: 'Sirius.',
-        shortDesc: '확률·통계를 설명문이 아닌 판정 규칙에 심은 도트 보드게임 — 시드 고정 몬테카를로 9,000회로 밸런스를 검증하고 단일 exe로 패키징',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>확률과 통계를 규칙 자체에 심은 도트 그래픽 보드게임을 제작하고, 부스 노트북에서 돌아가는 단일 exe로 패키징한 프로젝트입니다. 교과서 성취기준을 UI 위의 설명문이 아니라 게임의 판정 규칙으로 옮겼고, 밸런스는 감이 아니라 시드 고정 몬테카를로 9,000회로 검증했습니다.</p>
-<h2>교과 연계 — 교과서가 설계를 고쳤다</h2>
-<ul>
-  <li><strong>1:1 매핑:</strong> 공허 50장에서 8장 드로우(경우의 수) · 확률 패널(확률의 뜻·덧셈정리) · 매 턴 독립 드로우(독립과 종속) · 떠돌이 판정표(기댓값) · 공허 반환 대 비복원(모집단과 표본)으로 각 시스템을 성취기준에 대응.</li>
-  <li><strong>표기 정정:</strong> 교과서 표기는 <strong>큰수의법칙</strong>(붙여쓰기)이며, 확률 단원이 아니라 이항분포의 학습 요소였다.</li>
-  <li><strong>단원 재배치:</strong> 비복원추출을 조건부확률 맥락으로 설명하던 것을 모집단과 표본 맥락으로 전량 재작성.</li>
-  <li><strong>서술 금지 규칙:</strong> 교과서 지도상 유의점이 시간적 순서·인과관계 해석을 금지 — "이미 ~했으니 이제" 형태의 표현이 문항 작성의 절대 금지 규칙이 되었고 조건부확률 문항 전량이 다시 쓰였다.</li>
-</ul>
-<h2>학습 레이어 4종</h2>
-<ul>
-  <li><strong>STAR-CHART:</strong> 여사건으로 "다음 8장에 1장 이상 나올 확률"을 계산해 상시 표시. 팩토리얼 대신 누적곱을 쓴다 — C(50,8)이 이미 5.4×10⁸이라 분자·분모를 따로 세우면 나눗셈 전에 답이 사라진다. <strong>수학적 확률과 통계적 확률을 같은 화면에 나란히</strong> 놓아, 계산은 다섯 줄 모두 85%인데 실제는 100/80/100/60/100%로 흩어지는 것을 학생이 설명 없이 본다.</li>
-  <li><strong>ORION'S WAGER:</strong> 드로우 직전 예측 베팅. 모달이 확률 패널을 덮어 문항이 풀 수 없는 문제가 되던 결함을, <strong>문항 패널에 잔여 장수만 싣고 확률은 타입에 담지 않는</strong> 방식으로 해소 — 안전장치를 조건문이 아니라 자료구조에 두었다.</li>
-  <li><strong>DRIFT ORACLE:</strong> 떠돌이 판정 경우를 표로 전부 공개하고 기댓값을 묻는다. 경우의 수가 1가지일 때도 출제한다 — 실측 170턴 중 71%가 강제 선택이라 여기서 침묵하면 학습 기회의 7할이 사라진다.</li>
-  <li><strong>CONSTELLATION LOG:</strong> 주기 종료 통계 리포트. 비율에 반드시 표본 수를 붙이고("5문항 중 3문항"), 찍었을 때의 범위를 함께 써서 <strong>표본이 작다는 사실 자체를 표시</strong>한다. 3주기 누적으로 흔한 차이가 6.3% → 3.6%로 줄어드는 수렴이 관측됐다.</li>
-</ul>
-<h2>아키텍처와 시뮬레이션</h2>
-<ul>
-  <li><strong>단일 상태 기계:</strong> core/game.ts 하나를 시뮬레이터·스토어·테스트가 공유. 시뮬레이터가 자기 루프를 가지면 측정한 밸런스와 실제 출시 게임이 다른 구현이 되어 검증이 무의미해진다.</li>
-  <li><strong>시드 기반 난수:</strong> Math.random()을 코드베이스 어디에서도 직접 호출하지 않는다. 모든 무작위성은 주입받으며, 대사 출력용 난수까지 게임 RNG와 분리 — 소비하면 시드 재현이 깨진다.</li>
-  <li><strong>9조합 × 1,000회:</strong> 부스판에서는 확률을 하나도 못 맞혀도 71.3% 클리어(학습 장치가 진입 장벽이 되지 않음), 풀버전에서는 예측 베팅이 승패를 지배(+36.2%p) — 두 버전에 다른 원칙을 적용한 판단이 수치로 정당화됐다.</li>
-  <li><strong>시뮬레이터가 결함을 발견:</strong> 별자리 보유 한도 처리 버그가 풀버전 수치만 반대 방향으로 움직인 데서 드러났고, 수정 후 풀버전 클리어율이 28.1% → 11.7%로 정정됐다.</li>
-</ul>
-<h2>패키징 — 배포 형태는 운영 제약이 정한다</h2>
-<ul>
-  <li>1인 운영·5분 회전·불확실한 네트워크라는 부스 조건에서 설치 없는 <strong>portable exe</strong>는 편의가 아니라 요구사항. 네트워크를 한 번도 쓰지 않고, 대당 설정이 없다.</li>
-  <li>셸의 설계 결정 대부분이 그 제약에서 도출 — 배경색 선지정(흰 화면 대신 어둠에서 시작), 메뉴바 제거, Esc는 전체화면일 때만 가로채기(게임 자신이 쓰는 키), 새 창 열기 거부(학교 PC의 exe가 브라우저가 되면 안 된다).</li>
-  <li>프로덕션 빌드는 부스판만 노출 — 풀버전 8주기 약 40분은 좌석 하나가 표 하나를 잃는 것과 같다. 런타임 설정을 쓰지 않아 대당 편차가 생길 수 없다.</li>
-</ul>
-<h2>검증 결과</h2>
-<ul>
-  <li>타입 검사 클린 · 단위 테스트 <strong>429개 통과</strong>(25파일) · 자동 스크린샷 27장 exit 0 · portable exe 산출.</li>
-  <li>테스트에 설계 규약 가드 포함 — 확률 공식을 BigInt 정확 조합과 대조, 고정 캔버스 상자 겹침 실측, 밸런스 곡선 픽스처.</li>
-  <li><strong>처리량 재산정:</strong> "부스판 15분"은 어떤 측정도 아니었다. 실제 계산 결과 32.4분이었고, 해설 축소로 27.6분까지 줄였다. 시간당 처리 인원은 12명에서 5.5명으로 내려갔다.</li>
-</ul>
-<h2>한계 및 계획</h2>
-<ul>
-  <li>동반성 30종은 효과 미구현 — 여는 순간 9조합 재측정이 필요해 타입 수준에서 봉인. 보류 중인 밸런스 부채 3건은 개별이 아니라 한 번에 처리해야 한다.</li>
-  <li>27.6분은 계산이지 측정이 아니며, 실제 참여자가 random(하한)과 greedy(상한) 사이 어디인지 알 수 없다.</li>
-  <li>검증한 것은 "개념이 규칙에 심겼는가"와 "게임이 돌아가는가"이지 "학생이 실제로 배웠는가"가 아니다 — 사전·사후 검사 설계가 다음 단계.</li>
-</ul>`
-      },
-      {
-        id: 'sundo', name: 'SunDO.',
-        shortDesc: '백엔드 없이 행 수준 접근 제어만으로 권한을 강제하고, 250 케이스 + 44종 규칙 변형 역검증으로 "거부가 실제로 일어남"까지 증명한 학교 PWA',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>학생 선도 기록을 다루는 학교 PWA에서, 백엔드 서버 없이 행 수준 접근 제어(RLS)만으로 권한을 강제한 프로젝트입니다. 클라이언트 SDK가 데이터베이스에 직접 접근하는 구조라 보안 규칙이 유일한 방어선이었고, 규칙을 "통과하는가"가 아니라 <strong>"거부가 실제로 일어나는가"</strong>로 검증하기 위해 250개 케이스와 44종의 규칙 변형 역검증을 붙였습니다.</p>
-<h2>구조가 만든 제약</h2>
-<p>애플리케이션 서버가 없어 권한 판정을 할 수 있는 자리가 보안 규칙 한 곳뿐입니다. 화면에서 버튼을 숨기는 것은 방어가 아닙니다 — 콘솔에서 SDK를 직접 호출하면 그만입니다. <strong>화면은 편의를 담당하고 규칙은 강제를 담당하며, 둘이 다르면 실제로 막히는 것은 규칙이 막는 것뿐</strong>이라는 원칙에서 출발했습니다. 다루는 데이터가 미성년자의 생활지도 기록이라는 점이 이 구분을 필수로 만들었습니다.</p>
-<h2>규칙 설계</h2>
-<ul>
-  <li><strong>역할은 서버 문서에서 읽는다:</strong> 요청 본문에 role이 들어 있어도 규칙은 그것을 보지 않는다. 다만 가입 경로 3곳은 이 조회를 부르지 않도록 설계 — 부르면 가입 자체가 불가능해진다.</li>
-  <li><strong>get과 list는 분리된 권한이다:</strong> 이번 설계에서 가장 위험했던 지점. 뭉치면 목록 질의가 통째로 거부되어 화면이 죽거나, 유효한 가입 코드 전체가 유출된다. <strong>질의가 규칙 조건을 스스로 증명해야 한다</strong>는 것이 "규칙은 필터가 아니다"의 정확한 뜻이다. 가입 코드는 이 성질을 역이용해 단건 조회는 열되 목록은 잠가 열거를 불가능하게 만들었다.</li>
-  <li><strong>금지 목록이 아니라 허용 목록:</strong> 변경 가능 필드를 hasOnly로 못 박는다. 필드가 늘어날 때 금지 목록은 자동으로 뚫리지만 허용 목록은 자동으로 잠긴다.</li>
-  <li><strong>물리 삭제 전면 금지:</strong> 상태 전이(soft delete)만 허용하고 dev도 예외가 아니다. 되돌리기는 열지 않았다 — 여는 순간 "지운 것을 흔적 없이 되살리는" 경로가 생긴다.</li>
-  <li><strong>필드로 권한을 가른다:</strong> 부서 문서 갱신은 코드 재발급(dev)과 부장 양도(head)로 권한이 다르다. 넓은 쪽으로 뭉치면 통제가 성립하지 않으므로 hasOnly 목록으로 분기했고, 두 필드를 한 번에 바꾸는 요청은 양쪽이 다 깨져 거부된다.</li>
-  <li><strong>catch-all을 일부러 두지 않았다:</strong> 기본 거부는 엔진이 이미 하고 있다. 그 블록은 개발기 임시 규칙과 모양이 똑같아, 나중에 한 글자만 고치면 전 컬렉션이 다시 열린다. <strong>있는 그대로의 부재가 더 안전한 경우.</strong></li>
-</ul>
-<h2>실측이 문서를 고쳤다</h2>
-<ul>
-  <li><strong>정규식 앵커:</strong> 명세는 끝의 $를 필수 조건으로 규정했지만, 엔진의 matches()는 전체 일치라 $를 빼도 아무것도 바뀌지 않았다. <strong>진짜 급소는 끝에 .*가 붙는 것</strong>이었다 — 명세가 지목한 방어와 실제 방어가 달랐다.</li>
-  <li><strong>배치 안의 조회는 이전 상태를 본다:</strong> 부장 양도 배치에서 자기 권한을 먼저 버려도 뒤 연산이 통과한다. 반대로 형제 연산의 결과를 조건으로 거는 설계는 불가능하다.</li>
-  <li><strong>배치는 원자적이다:</strong> 3연산 중 1개가 거부되면 남은 문서가 0/2. 규칙이 표현하지 못하는 불변식을 배치 원자성으로 보완할 수 있다는 근거.</li>
-  <li><strong>규칙 안 조회는 연산당 10건 상한:</strong> 같은 문서는 몇 번 참조해도 1회로 계산되므로, 가독성을 위해 헬퍼 함수를 나누는 비용이 0이다.</li>
-</ul>
-<h2>검증 — 통과만 재는 검증은 무효다</h2>
-<ul>
-  <li><strong>1겹, 케이스 검증:</strong> 에뮬레이터 위 5개 스위트 <strong>250 케이스</strong> — 거부 157 / 허용 93. 거부가 허용의 1.7배인 것은 규칙 테스트의 본체가 "된다"가 아니라 "안 된다"이기 때문이다. 픽스처는 규칙을 끄고 심는다 — 통과시켜 심으면 테스트가 검증 대상에 의존해 결함을 가린다.</li>
-  <li><strong>2겹, 변형 역검증:</strong> 규칙의 조건을 하나씩 일부러 열고 돌려 그 조건을 지키던 테스트가 실제로 빨개지는지 본다. 빨개지지 않으면 그 조건은 아무 일도 하고 있지 않다는 뜻. <strong>44종의 변형</strong>과 각각이 깨뜨려야 할 케이스 ID를 선언했으며, "아무것도 깨지지 않는 것이 정답"인 변형($ 앵커 제거)도 포함된다.</li>
-  <li><strong>역검증이 실제로 잡은 것:</strong> 선언 목록 자체가 두 번 틀렸다. 변형이 검사한 것은 규칙만이 아니라 <strong>규칙과 테스트의 대응 관계</strong>였다.</li>
-</ul>
-<h2>규칙의 한계를 문서로 남긴다</h2>
-<p>"부장은 정확히 1명"(집합 질의 불가), "감사 로그 없이는 수정도 실패"(형제 연산 관측 불가), 필드 단위 읽기 제한(allow read는 문서 단위), 주차 계산, 동시 양도 경쟁 — 6항목을 열거하고 각각 배치 원자성·클라이언트 규율·서버 함수로 대체 방어를 배정했습니다. 특히 사용자 문서가 부서원에게 전 필드로 열려 있다는 것은 "이메일을 안 그린다"가 규칙이 아니라 <strong>약속</strong>이라는 뜻이며, 그것을 모른 채 "규칙이 막고 있다"고 믿는 것이 가장 위험합니다.</p>
-<h2>운영 절차</h2>
-<ul>
-  <li><strong>롤백 경로 동시 구축:</strong> 저장소 첫 커밋이라 이력에 이전 버전이 없어 표준 롤백이 성립하지 않는다. 임시 규칙을 별도 파일로 보존하고 되돌린 뒤 무엇을 해야 하는지까지 문서화했다.</li>
-  <li><strong>좁히기 전에 소비자를 센다:</strong> 권한을 좁히기 전 앱 소스에서 그 컬렉션을 만지는 곳을 전수 조회해 깨질 화면이 없음을 배포 전에 확인. <strong>넓히기와 좁히기는 배포 순서가 반대다.</strong></li>
-  <li><strong>규칙과 화면은 같은 문장:</strong> 한쪽만 고치면 "눌렀는데 실패"하거나 "할 수 있는데 버튼이 안 보인다"가 된다. 실제로 그 결함이 한 번 발생해, 이후 두 판정 함수는 서로가 사본임을 주석으로 명시했다.</li>
-</ul>
-<h2>한계 및 계획</h2>
-<ul>
-  <li>집합 불변식과 동시 양도 경쟁은 규칙으로 닫히지 않아 서버 함수(트랜잭션) 이관이 필요하다.</li>
-  <li>가입 코드 무차별 대입(456만 가지)의 짝인 레이트 리밋·앱 무결성 검사가 배포 회차로 이관된 상태.</li>
-  <li>역검증의 "깨져야 할 케이스" 선언이 손으로 관리되어 실제로 두 번 누락됐다 — 자동 수집이 다음 개선점.</li>
-  <li>감사 로그 무결성이 배치 원자성에 의존하므로, 앱을 우회한 SDK 직접 호출에서는 로그 없는 수정이 가능하다.</li>
-</ul>`
-      },
-      {
-        id: 'neo', name: 'Neo.',
-        shortDesc: '해외 수출 규제를 "그래서 당신은 이걸 해야 한다"로 변환하는 PWA — 법령 61건·실행 항목 174건을 교차검증해 구축하고 완전 오프라인 동작 구현',
-        github: 'https://github.com/stx4R/R3P0RT',
-        readme: `<h2>개요</h2>
-<p>해외 수출 규제를 "이 법이 바뀌었다"가 아니라 <strong>"그래서 당신은 이걸 해야 한다"</strong>로 변환하는 PWA를 만든 프로젝트입니다. 법률·규제 대응팀이 없는 수출 중소기업 담당자를 사용자로 놓고, 4개 도착국 × 3개 품목의 법령 61건·실행 항목 174건을 사람이 조사·교차검증해 정적 데이터셋으로 구축했으며, 백엔드 없이 설치 후 네트워크가 끊겨도 전 화면이 열리도록 구현했습니다.</p>
-<h2>문제 인식</h2>
-<p>정보가 없어서 생기는 문제가 아닙니다. 법령은 관보에 공개되어 있고 법령 뉴스레터도 이미 많습니다. 없는 것은 <strong>"그래서 우리 제품에 걸리는가"</strong>의 판정이며, 이 앱이 팔아야 할 것은 정보가 아니라 조문 → 해당 여부 → 무엇을 언제까지의 <strong>변환</strong>입니다.</p>
-<h2>도메인 설계</h2>
-<ul>
-  <li><strong>단위는 국가가 아니라 조합:</strong> 같은 나라라도 품목마다 규제의 축이 다르다 — 베트남 화장품은 제품신고가 벽이고, 일본 화장품은 라벨이 아니라 처방과 등록이 벽이다. 그래서 국가 × 품목 12조합 + 공용 법령 4파일로 구성했다.</li>
-  <li><strong>HS 코드가 실제 매칭 키:</strong> 품목 분류는 사람이 읽는 이름이고, 법령이 지목하는 것은 HS 코드다. 접두 길이가 다른 것이 요점 — 법령이 규정한 만큼만 좁힌다. 없는 세분을 지어내면 걸리지 않는 제품을 걸리게 만든다.</li>
-  <li><strong>originScope:</strong> 한미 FTA 특혜관세는 출발국이 한국일 때만 성립한다. 출발국을 바꿨을 때 바뀐 척도, 안 바뀐 척도 하지 않고 <strong>빠진 법령 수를 세어 표시</strong>한다.</li>
-  <li><strong>위험도:</strong> 제재 강도 × 대응 시급성 × 자사 제품 해당 범위의 3축 곱으로 산정하되 화면에는 4단계 라벨만 노출 — 담당자가 알아야 할 것은 곱셈이 아니라 순서다.</li>
-</ul>
-<h2>데이터 — 자동 수집이 아니라 사람이 검증했다</h2>
-<ul>
-  <li><strong>모르는 건 비운다:</strong> 이 프로젝트에서 가장 큰 실패는 그럴듯한 값을 채우는 것이다.</li>
-  <li><strong>독립 출처 2개 이상 교차확인</strong>하고, 1차(관보·소관 부처)와 2차(로펌·법률DB)를 구분해 배지로 인쇄한다 — 사용자가 이 정보를 얼마나 믿을지 스스로 판단할 수 있어야 한다.</li>
-  <li><strong>"최종 확인" 날짜는 그 URL을 실제로 연 날</strong>이며, 기한은 법령에 명시된 것만 넣고 화면 숫자를 맞추려 역산하지 않는다.</li>
-  <li><strong>그 날짜가 우리 품목의 날짜인지 확인한다:</strong> 가정이 아니라 실제 함정이었다 — 법령에 적힌 날짜가 다른 품목의 유예 종료일인 경우가 있었고, 그대로 넣었다면 담당자는 존재하지 않는 마감에 맞춰 움직였을 것이다.</li>
-  <li><strong>제외한 법령과 그 사유까지 기록한다:</strong> 조사 문서에는 채택한 법령보다 제외 사유(초안 단계, 의무자가 수입자, 이미 다른 법령에 포함)와 확인하지 못해 비워 둔 값이 더 많은 지면을 차지한다. 없는 것을 없다고 적는 것이 이 데이터셋의 방법론이다.</li>
-</ul>
-<h2>소프트웨어</h2>
-<ul>
-  <li><strong>백엔드 0:</strong> 정적 JSON + localStorage. 런타임 의존성 5개, UI 라이브러리·바텀시트 라이브러리 미사용, CDN 의존 0 — 취향이 아니라 오프라인 요구에서 도출된 결정이라 지도·폰트·아이콘을 전부 정적 파일로 포함했다.</li>
-  <li><strong>전역 가변 상태 없음:</strong> 화면은 프로필이 가리키는 조합 하나를 펼친 Dataset을 인자로 받는다. null은 "데이터 없음"이 아니라 <strong>"아직 모른다"</strong>를 뜻하며, 그 프레임에는 스켈레톤을 그린다 — 없는 데이터를 0으로 채우지 않는다.</li>
-  <li><strong>파생값 원칙:</strong> 화면의 모든 수치를 데이터에서 계산한다. 문자열로 박으면 사용자가 액션 하나를 체크하는 순간 즉시 거짓말이 된다. <strong>검산에서 아트보드 수치가 틀린 것이 드러났다</strong>(미완 액션 10 → 실제 9). 아트보드의 D-45·D-14도 목 데이터에 맞춘 허구값이라 폐기하고, 배지는 실재하는 날짜에서만 나오게 했다.</li>
-  <li><strong>"기한 경과"가 아니라 "미이행":</strong> 시행일이 지난 상시 의무에 기한 경과를 붙이면 틀린 말이 된다 — 놓친 날짜가 있는 게 아니라 이미 지켜야 하는 의무를 아직 안 한 것이다. 상단바 시각도 동기화할 서버가 없으므로 "마지막 동기화"가 아니라 "출처를 언제 열어 봤는가"로 바꿨다.</li>
-  <li><strong>데이터 무결성 검사기:</strong> 타입 검사가 JSON을 통과시키지 못하므로 별도로 두었다 — 한 액션이 두 법령에 걸리거나, 어느 법령에도 안 걸린 액션이 있거나, HS 접두가 품목 범위 밖이면 실패. 현재 참조무결성 통과.</li>
-</ul>
-<h2>오프라인 — 실측이 설계를 뒤집었다</h2>
-<ul>
-  <li>계획서는 data/*.json 캐싱을 적었지만 그 JSON은 JS 청크 안에 들어 있어 <strong>독립된 URL이 없다.</strong> 캐싱할 수 있는 것은 실제로 URL을 갖는 것뿐이다.</li>
-  <li><strong>cache-first 런타임 캐싱만으로는 부족했다:</strong> 실제로 요청된 것만 담으므로 온라인에서 이미 열어 본 화면만 오프라인에서 열렸다. 빌드를 띄우고 홈만 연 뒤 서버를 내리니 다른 화면이 빈 화면이 됐다.</li>
-  <li>해법은 빌드 훅 없이 — 프리캐시한 문서 HTML에서 정적 청크 참조를 뽑아 함께 담는다. 클라이언트 내비게이션 페이로드는 쿼리 해시가 빌드마다 달라 문서와 다른 캐시에 담는다.</li>
-  <li><strong>검증 방법은 실제로 끊어 보는 것:</strong> 서버 종료 상태에서 6화면 + 설정 + 법령 상세 61개가 전부 열리고 지도까지 그려진다. <strong>끊어 보지 않은 오프라인은 오프라인이 아니다.</strong></li>
-  <li>Lighthouse 12에서 PWA 카테고리가 제거되어, "점수가 몇 점인가"가 아니라 <strong>브라우저가 설치 가능하다고 판단하는가</strong>(설치 프롬프트 발화)를 직접 확인하는 기준으로 바꿨다.</li>
-</ul>
-<h2>접근성 — 맞바꾼 것을 적는다</h2>
-<p>터치 타겟 44px 6화면 전수 측정, 위험도 색면 위 글자 전부 AA 통과(최저 5.05:1), 저대비 토큰은 취소선이 함께 걸린 곳에만 사용해 색만으로 정보를 전하지 않게 했습니다. 다만 <strong>확대 금지는 WCAG 1.4.4를 어긴 의도적 선택</strong>이며, 그것을 숨기고 "접근성 준수"라고 적는 대신 어긴 기준의 번호와 되돌리는 방법(두 줄 제거)을 함께 남겼습니다.</p>
-<h2>결론</h2>
-<p>팔아야 할 것은 정보가 아니라 변환이고, 이 문제에서는 자동 수집보다 사람이 정확합니다. 화면의 숫자는 파생값이어야 정확할 뿐 아니라 <strong>틀릴 수 없고</strong>, 의존성을 늘리지 않는 것이 오프라인 요구사항을 지키는 방법이었습니다. 지원하지 않는 도착국도 설정 목록에 흐리게 남겨 "왜 4개국뿐인가"에 정직하게 답하도록 했습니다 — 지우면 사용자는 그 나라에 규제가 없는 줄 압니다.</p>
-<h2>한계 및 계획</h2>
-<ul>
-  <li>법률 분석 엔진은 범위 밖이다 — 조문을 자동 해석하는 기능은 없으며, 있는 척하지도 않는다.</li>
-  <li>정적 데이터셋이라 갱신 경로가 없다. 규모가 커지면 이 방식은 유지되지 않는다.</li>
-  <li>originScope를 가진 법령이 현재 1건이라, 다른 출발국 고유의 요건은 아직 데이터에 없다.</li>
-  <li>"신규 사용자가 60초 내 도달"을 성공 기준으로 세웠으나 실제 사용자 테스트는 하지 못했다.</li>
-  <li>알림은 화면뿐 — 앱을 열지 않아도 도달하는 푸시 경로가 있어야 이 앱의 명제가 완성된다.</li>
-</ul>`
-      }
+    // R3P0RT 보고서 (github.com/stx4R/R3P0RT)
+    // ㄴ 원래 보고서 글을 여기 통째로 박아뒀었음. 레포 고칠 때마다 여기도 따로 고쳐야 해서 좆같았음
+    // ㄴ 이제 레포에서 바로 받아옴. R3P0RT에 push하면 끝
+    // ㄴ github.com은 iframe 안 됨(X-Frame-Options: deny). 파일 화면 껍데기는 직접 그리고 본문만 GitHub이 렌더한 HTML 그대로
+    const OWNER = 'stx4R', REPO = 'R3P0RT', BRANCH = 'main', DIR = 'R';
+    const API  = `https://api.github.com/repos/${OWNER}/${REPO}`;
+    const GH   = `https://github.com/${OWNER}/${REPO}`;
+    const RAW  = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${DIR}/`;
+    const BLOB = `${GH}/blob/${BRANCH}/${DIR}/`;
+    const MARKDOWN_CSS = 'https://cdn.jsdelivr.net/npm/github-markdown-css@5.9.0/github-markdown-dark.css';
+    const MERMAID = 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
+    const MARKED  = 'https://cdn.jsdelivr.net/npm/marked@18.0.14/lib/marked.esm.js';
+    const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif';
+
+    // 휠 순서 = 이 순서. 파일명은 공백만 -로 바꾼 것
+    const NAMES = [
+      'HowTo', 'Plan-ME', 'Jari', 'MoGuk', 'L-INK Interview', 'CSCK', 'Sirius', 'SunDO', 'Neo', 'NeuralVisualizer',
+      'RotLab', 'BoardinG', 'Fly', 'PigScape.', 'PopInT.', 'AGDecision.', 'BBPre.', 'Gini.', 'InfGain.', 'ResAll.'
     ];
+    const projects = NAMES.map(name => {
+      const file = name.replace(/ /g, '-') + '_README.md';
+      return { name, file, path: `${DIR}/${file}`, blob: BLOB + file };
+    });
+
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = MARKDOWN_CSS;
+    document.head.appendChild(css);
+
+    // 받아오기
+    // ㄴ API는 로그인 없이 IP당 시간에 60번. 보고서 하나에 2번(본문, 커밋) 씀
+    // ㄴ 304는 안 깎여서 브라우저 캐시가 ETag로 재검증하면 공짜
+    // ㄴ 한도 넘으면 raw 받아서 marked로 직접 렌더. 코드 색이랑 제목 앵커만 빠지고 나머진 똑같음
+    const store = new Map();   // 파일 → Promise
+    const ready = new Map();   // 파일 → 다 받은 것
+
+    async function get(url, headers, json) {
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
+      if (!res.ok) throw new Error(url + ' ' + res.status);
+      return json ? res.json() : res.text();
+    }
+
+    async function fallback(raw) {
+      const { marked } = await import(MARKED);
+      return `<article class="markdown-body">${marked.parse(raw)}</article>`;
+    }
+
+    function load(p) {
+      if (store.has(p.file)) return store.get(p.file);
+      const raw = get(RAW + p.file);
+      const html = get(`${API}/contents/${p.path}?ref=${BRANCH}`, { Accept: 'application/vnd.github.html' })
+        .catch(() => raw.then(fallback));
+      const commit = get(`${API}/commits?sha=${BRANCH}&per_page=1&path=${encodeURIComponent(p.path)}`, undefined, true)
+        .then(list => list[0] || null, () => null);
+      const job = Promise.all([raw, html, commit]).then(([raw, html, commit]) => ({ raw, html, commit }));
+      // 실패한 건 다음에 다시 받게 뺌
+      job.then(d => ready.set(p.file, d), () => store.delete(p.file));
+      store.set(p.file, job);
+      return job;
+    }
+
+    // Octicons (primer.style/octicons)
+    const OCT = {
+      copy: '<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/>',
+      check: '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>',
+      download: '<path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/>',
+      pencil: '<path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"/>',
+      caret: '<path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"/>',
+      list: '<path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5Zm0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5Zm0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5ZM2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>',
+      kebab: '<path d="M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>',
+      history: '<path d="m.427 1.927 1.215 1.215a8.002 8.002 0 1 1-1.6 5.685.75.75 0 1 1 1.493-.154 6.5 6.5 0 1 0 1.18-4.458l1.358 1.358A.25.25 0 0 1 3.896 6H.25A.25.25 0 0 1 0 5.75V2.104a.25.25 0 0 1 .427-.177ZM7.75 4a.75.75 0 0 1 .75.75v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5A.75.75 0 0 1 7.75 4Z"/>'
+    };
+    const ico = (k, cls = '') => `<svg class="gh-ico ${cls}" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">${OCT[k]}</svg>`;
+    const copyIco = ico('copy') + ico('check', 'gh-ok');
+    const ext = 'target="_blank" rel="noopener"';
+    const spinner = size => `<div class="gh-wait"><svg class="gh-spinner" viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" aria-label="Loading"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-opacity="0.25" stroke-width="2" vector-effect="non-scaling-stroke"/><path d="M15 8a7.002 7.002 0 0 0-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></div>`;
+
+    // 빨간 박스 그대로. 경로 / 최근 커밋 / 파일 머리 / 본문
+    // ㄴ Copilot, Codespaces 버튼은 뺌. 눌러도 할 게 없음
+    function shellHTML(p) {
+      const avatar = `https://avatars.githubusercontent.com/${OWNER}?s=40`;
+      return `
+        <div class="gh" data-scroll-lock data-mode="preview">
+          <div class="gh-crumb">
+            <div class="gh-path">
+              <a href="${GH}" ${ext}>${REPO}</a><span class="gh-sep">/</span><a href="${GH}/tree/${BRANCH}/${DIR}" ${ext}>${DIR}</a><span class="gh-sep">/</span><h3 class="gh-file">${p.file}</h3>
+              <button type="button" class="gh-iconbtn gh-copy" data-copy="path" aria-label="Copy path">${copyIco}</button>
+            </div>
+            <a class="gh-btn gh-btn--icon" href="${p.blob}" ${ext} aria-label="More file actions">${ico('kebab')}</a>
+          </div>
+          <div class="gh-commit">
+            <a class="gh-avatar" href="https://github.com/${OWNER}" ${ext}><img src="${avatar}" alt="" width="20" height="20"></a>
+            <a class="gh-author" href="https://github.com/${OWNER}" ${ext}>${OWNER}</a>
+            <a class="gh-msg" ${ext}></a>
+            <span class="gh-when"></span>
+            <a class="gh-hist" href="${GH}/commits/${BRANCH}/${p.path}" ${ext}>${ico('history')}<span>History</span></a>
+          </div>
+          <div class="gh-box">
+            <div class="gh-head">
+              <div class="gh-seg" role="group" aria-label="File view">
+                <button type="button" class="is-on" data-mode="preview">Preview</button><button type="button" data-mode="code">Code</button><a href="${GH}/blame/${BRANCH}/${p.path}" ${ext}>Blame</a>
+              </div>
+              <span class="gh-meta"></span>
+              <div class="gh-actions">
+                <div class="gh-group">
+                  <a class="gh-btn gh-btn--sm" href="${RAW}${p.file}" ${ext}>Raw</a><button type="button" class="gh-btn gh-btn--sm gh-btn--icon gh-copy" data-copy="raw" aria-label="Copy raw file">${copyIco}</button><button type="button" class="gh-btn gh-btn--sm gh-btn--icon" data-download aria-label="Download raw file">${ico('download')}</button>
+                </div>
+                <div class="gh-group gh-edit">
+                  <a class="gh-btn gh-btn--sm gh-btn--icon" href="${GH}/edit/${BRANCH}/${p.path}" ${ext} aria-label="Edit file">${ico('pencil')}</a><a class="gh-btn gh-btn--sm gh-btn--icon gh-btn--caret" href="${p.blob}" ${ext} aria-label="More edit options">${ico('caret')}</a>
+                </div>
+                <a class="gh-iconbtn gh-outline" href="${p.blob}" ${ext} aria-label="Outline">${ico('list')}</a>
+              </div>
+            </div>
+            <div class="gh-pane--preview">${spinner(32)}</div>
+            <div class="gh-pane--code"></div>
+          </div>
+        </div>`;
+    }
+
+    // "3 hours ago" 같은 거. GitHub이 영어라 여기도 영어
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    function ago(iso) {
+      const s = (Date.now() - Date.parse(iso)) / 1000;
+      if (s < 60) return 'now';
+      const units = [['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60]];
+      const [unit, sec] = units.find(([, sec]) => s >= sec);
+      return rtf.format(-Math.floor(s / sec), unit);
+    }
+    const size = b => (b < 1024 ? `${b} Bytes` : `${(b / 1024).toFixed(1)} KB`);
+
+    function splitLines(raw) {
+      const lines = raw.split(/\r?\n/);
+      if (lines[lines.length - 1] === '') lines.pop();
+      return lines;
+    }
+
+    function codeHTML(raw) {
+      const lines = splitLines(raw);
+      const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+      return `<div class="gh-code"><div class="gh-ln" aria-hidden="true">${lines.map((_, n) => n + 1).join('\n')}</div><pre class="gh-src">${esc(lines.join('\n'))}</pre></div>`;
+    }
+
+    // 상대경로가 R/ 기준이라 여기선 다 깨짐. GitHub 페이지가 하는 것처럼 풀어줌
+    // ㄴ 링크는 github.com, 이미지는 raw. 다른 보고서 가리키면 휠 돌리게 표시만 해둠
+    const isAbs = s => /^([a-z][a-z\d+.-]*:|\/\/)/i.test(s);
+    const dec = s => { try { return decodeURIComponent(s); } catch { return s; } };
+    function fixLinks(root) {
+      root.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href.startsWith('#')) { a.dataset.hash = dec(href.slice(1)); return; }
+        const u = new URL(href, BLOB);
+        a.href = u.href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        const i = projects.findIndex(p => p.blob === u.origin + u.pathname);
+        if (i >= 0) { a.dataset.report = i; a.dataset.hash = dec(u.hash.slice(1)); }
+      });
+      root.querySelectorAll('img[src]').forEach(img => {
+        const src = img.getAttribute('src');
+        if (!isAbs(src)) img.src = new URL(src, RAW).href;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+      });
+    }
+
+    // Mermaid
+    // ㄴ GitHub은 viewscreen iframe으로 그리는데 그건 github.com 안에서만 됨. 직접 그림
+    // ㄴ 무거워서 mermaid 쓰는 보고서 처음 열 때 받음. 프리로더 도는 중이면 끝나고 받음. 랜야드 glb랑 대역폭 나눠 먹음
+    let mermaidLib = null, mermaidSeq = 0;
+    const mermaidSvg = new Map();   // 코드 → svg. 같은 보고서 다시 열 때 또 안 그리게
+    function mermaid() {
+      const gate = window.preloader ? window.preloader.ready : Promise.resolve();
+      return mermaidLib ||= gate.then(() => import(MERMAID)).then(m => {
+        m.default.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'strict', fontFamily: FONT });
+        return m.default;
+      });
+    }
+    function drawMermaid(root) {
+      // GitHub HTML은 section[data-type=mermaid], marked 폴백은 code.language-mermaid
+      const blocks = [
+        ...[...root.querySelectorAll('section[data-type="mermaid"]')].map(el => [el, el.querySelector('pre[lang="mermaid"]')]),
+        ...[...root.querySelectorAll('pre > code.language-mermaid')].map(el => [el.parentElement, el])
+      ];
+      for (const [el, src] of blocks) {
+        const code = src && src.textContent;
+        if (!code) continue;
+        const box = document.createElement('div');
+        box.className = 'gh-mermaid';
+        el.replaceWith(box);
+        if (mermaidSvg.has(code)) { box.innerHTML = mermaidSvg.get(code); continue; }
+        box.innerHTML = spinner(16);
+        const id = 'gh-mmd-' + ++mermaidSeq;
+        mermaid().then(mm => mm.render(id, code)).then(({ svg }) => {
+          mermaidSvg.set(code, svg);
+          box.innerHTML = svg;
+        }).catch(() => {
+          // 못 그리면 원문 코드라도
+          document.getElementById('d' + id)?.remove();
+          document.getElementById(id)?.remove();
+          const pre = document.createElement('pre');
+          pre.textContent = code;
+          box.className = '';
+          box.replaceChildren(pre);
+        });
+      }
+    }
 
     // CardSwap 카드 : 휠에서 가운데 온 프로젝트 자동 표시
     const csCard = document.querySelector('#projectCardStage .cs-card');
+    let current = null;       // 지금 떠 있는 { p, d }
+    let renderSeq = 0, loadTimer = 0;
+    let pendingHash = null;   // 다른 보고서 링크 눌렀을 때 { file, hash }
 
-    function githubButton(url) {
-      return `<a href="${url}" target="_blank" rel="noopener"
-        class="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-neutral-400 text-neutral-300 hover:text-white transition-colors">
-        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
-      </a>`;
+    function fill(p, d) {
+      const root = csCard.querySelector('.gh');
+      current = { p, d };
+
+      const c = d.commit;
+      if (c) {
+        const msg = root.querySelector('.gh-msg');
+        msg.textContent = c.commit.message.split('\n')[0];
+        msg.title = c.commit.message;
+        msg.href = c.html_url;
+        // 기본값이 이미 OWNER라 다를 때만. 아바타 두 번 받음
+        if (c.author && c.author.login !== OWNER) {
+          const author = root.querySelector('.gh-author');
+          author.textContent = c.author.login;
+          author.href = root.querySelector('.gh-avatar').href = c.author.html_url;
+          root.querySelector('.gh-avatar img').src = c.author.avatar_url + (c.author.avatar_url.includes('?') ? '&' : '?') + 's=40';
+        }
+        const at = c.commit.committer.date;
+        const sha = document.createElement('a');
+        sha.href = c.html_url;
+        sha.target = '_blank';
+        sha.rel = 'noopener';
+        sha.textContent = c.sha.slice(0, 7);
+        const time = document.createElement('time');
+        time.dateTime = at;
+        time.title = new Date(at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+        time.textContent = ago(at);
+        root.querySelector('.gh-when').replaceChildren(sha, ' · ', time);
+      }
+
+      const lines = splitLines(d.raw);
+      const loc = lines.filter(l => l.trim()).length;
+      root.querySelector('.gh-meta').textContent = `${lines.length} lines (${loc} loc) · ${size(new Blob([d.raw]).size)}`;
+
+      // template 안에서 고쳐서 넣음. 바로 innerHTML 하면 lazy 걸기 전에 이미지 20장이 한꺼번에 출발함
+      const tpl = document.createElement('template');
+      tpl.innerHTML = d.html;
+      fixLinks(tpl.content);
+      const pane = root.querySelector('.gh-pane--preview');
+      pane.replaceChildren(tpl.content);
+      drawMermaid(pane);
+      if (root.dataset.mode === 'code') root.querySelector('.gh-pane--code').innerHTML = codeHTML(d.raw);
+
+      if (pendingHash && pendingHash.file === p.file) scrollToHash(root, pendingHash.hash);
+      pendingHash = null;
     }
 
-    function frontCardHTML(p) {
-      return `
-        <div class="cs-front">
-          <div class="cs-front-head">
-            <h3 class="text-lg md:text-xl font-bold text-white leading-tight truncate">${p.name}</h3>
-          </div>
-          <div class="cs-front-body" data-scroll-lock>
-            <p class="cs-lead">${p.shortDesc}</p>
-            <div class="cs-readme">${p.readme}</div>
-          </div>
-          ${p.github ? `<div class="cs-front-foot">${githubButton(p.github)}</div>` : ''}
+    function fail(p) {
+      const pane = csCard.querySelector('.gh-pane--preview');
+      pane.innerHTML = `
+        <div class="gh-fail">
+          <p>보고서를 불러오지 못했습니다.</p>
+          <div><button type="button" class="gh-btn" data-retry>다시 시도</button><a class="gh-btn" href="${p.blob}" ${ext}>GitHub에서 보기</a></div>
         </div>`;
     }
 
     function renderProjectCards(index) {
-      csCard.innerHTML = frontCardHTML(projects[index]);
+      const p = projects[index];
+      const seq = ++renderSeq;
+      csCard.innerHTML = shellHTML(p);
+      current = null;
+      clearTimeout(loadTimer);
+      if (ready.has(p.file)) return fill(p, ready.get(p.file));
+      // 휠 빨리 굴리면 지나가는 것까지 다 받아서 API 한도 녹음. 멈춘 것만
+      loadTimer = setTimeout(() => {
+        load(p).then(d => { if (seq === renderSeq) fill(p, d); }, () => { if (seq === renderSeq) fail(p); });
+      }, store.has(p.file) ? 0 : 160);
     }
+
+    function setMode(root, mode) {
+      if (root.dataset.mode === mode) return;
+      root.dataset.mode = mode;
+      root.querySelectorAll('.gh-seg [data-mode]').forEach(b => b.classList.toggle('is-on', b.dataset.mode === mode));
+      const code = root.querySelector('.gh-pane--code');
+      if (mode === 'code' && current && !code.firstChild) code.innerHTML = codeHTML(current.d.raw);
+      // 머리가 위에 붙어 있을 만큼 내려가 있었으면 새 탭 맨 위부터
+      const box = root.querySelector('.gh-box');
+      if (root.scrollTop > box.offsetTop) root.scrollTop = box.offsetTop;
+    }
+
+    function scrollToHash(root, hash) {
+      if (!hash) { root.scrollTop = 0; return; }
+      const el = root.querySelector('#' + CSS.escape('user-content-' + hash));
+      if (!el) return;
+      const target = el.closest('.markdown-heading') || el;
+      const head = root.querySelector('.gh-head');
+      const go = () => { root.scrollTop += target.getBoundingClientRect().top - root.getBoundingClientRect().top - head.offsetHeight - 8; };
+      go();
+      // 위쪽 이미지랑 mermaid가 늦게 뜨면서 밀어냄. 잠깐 따라가다 사용자가 굴리면 놓음
+      const ro = new ResizeObserver(go);
+      ro.observe(root.querySelector('.gh-pane--preview'));
+      const stop = () => { ro.disconnect(); root.removeEventListener('wheel', stop); root.removeEventListener('pointerdown', stop); root.removeEventListener('touchstart', stop); };
+      root.addEventListener('wheel', stop, { passive: true });
+      root.addEventListener('pointerdown', stop);
+      root.addEventListener('touchstart', stop, { passive: true });
+      setTimeout(stop, 2500);
+    }
+
+    function copied(btn) {
+      btn.classList.add('is-copied');
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => btn.classList.remove('is-copied'), 2000);
+    }
+
+    csCard.addEventListener('click', e => {
+      const t = e.target instanceof Element ? e.target : null;
+      const root = t && t.closest('.gh');
+      if (!root) return;
+
+      const mode = t.closest('button[data-mode]');
+      if (mode) { setMode(root, mode.dataset.mode); return; }
+
+      const copy = t.closest('[data-copy]');
+      if (copy) {
+        const p = projects[wheel.selected];
+        const text = copy.dataset.copy === 'path' ? p.path : current && current.d.raw;
+        if (text && navigator.clipboard) navigator.clipboard.writeText(text).then(() => copied(copy), () => {});
+        return;
+      }
+
+      if (t.closest('[data-download]')) {
+        if (!current) { window.open(RAW + projects[wheel.selected].file, '_blank', 'noopener'); return; }
+        const url = URL.createObjectURL(new Blob([current.d.raw], { type: 'text/markdown;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = current.p.file;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
+
+      if (t.closest('[data-retry]')) { renderProjectCards(wheel.selected); return; }
+
+      // 보고서끼리 링크는 새 탭 말고 휠을 돌림
+      const a = t.closest('a[data-report], a[data-hash]');
+      if (!a) return;
+      e.preventDefault();
+      if (a.dataset.report == null) { scrollToHash(root, a.dataset.hash); return; }
+      const i = +a.dataset.report;
+      if (i === wheel.selected) { scrollToHash(root, a.dataset.hash); return; }
+      pendingHash = { file: projects[i].file, hash: a.dataset.hash };
+      setWheelTarget(i);
+    });
+
+    // 첫 보고서는 바로 받기 시작. 이 페이지까지 넘어올 즈음이면 이미 와 있음
+    load(projects[0]);
 
     const wheelEl = document.getElementById('projectWheel');
     const wheelUpBtn = document.getElementById('wheelUp');
@@ -2635,7 +2617,7 @@
         el.textContent = p.name;
         el.addEventListener('click', () => {
           if (i !== wheel.selected) setWheelTarget(i);
-          else if (p.github) window.open(p.github, '_blank', 'noopener');
+          else window.open(p.blob, '_blank', 'noopener');
         });
         wheelEl.appendChild(el);
         wheelItems.push(el);
@@ -2683,22 +2665,10 @@
             <p class="text-xs text-neutral-500">Visit Profile</p>
           </a>
 
-          <a href="https://github.com/L-INK-dshs" target="_blank" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-sky-500 hover:shadow-[0_0_30px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-2">
-            <img src="static/Organization.png" alt="Organization" class="w-12 h-12 mb-4 object-contain group-hover:scale-110 transition-transform">
-            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Organization</h3>
-            <p class="text-xs text-neutral-500">Visit L-INK-dshs</p>
-          </a>
-
           <a href="mailto:contact@stx4r.me" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
             <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 48 48"><path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/></svg>
             <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Gmail</h3>
             <p class="text-xs text-neutral-500">Send Gmail</p>
-          </a>
-
-          <a href="tel:+821021001648" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-green-500 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all duration-300 hover:-translate-y-2">
-            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><rect width="24" height="24" rx="5.5" fill="#22c55e"/><path fill="#ffffff" transform="translate(4.2 4.2) scale(0.65)" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
-            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Phone</h3>
-            <p class="text-xs text-neutral-500">Call Tel.</p>
           </a>
 
         </div>
