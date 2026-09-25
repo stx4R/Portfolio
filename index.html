@@ -3,8 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>stx4R</title>
+  <title>유이준 (Yoo Yijun) | 대전대신고등학교 · stx4R 포트폴리오</title>
   <link rel="icon" type="image/jpeg" href="static/favicon.ico" />
+
+  <!-- 검색용 -->
+  <!-- ㄴ 본문은 영어라 한글 학교명이 여기랑 JSON-LD에만 있음. 빼면 '대전대신고등학교 유이준' 검색 안 걸림 -->
+  <!-- ㄴ 도메인은 CNAME이랑 같아야 함 -->
+  <meta name="description" content="대전대신고등학교 재학생 유이준(Yoo Yijun, stx4R)의 포트폴리오. 컴퓨터공학·인공지능 지망 개발자로, 풀스택 웹 개발, 디자인, AI 프로젝트를 만듭니다." />
+  <meta name="author" content="유이준 (Yoo Yijun)" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://stx4r.me/" />
+  <meta property="og:type" content="profile" />
+  <meta property="og:site_name" content="stx4R" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:url" content="https://stx4r.me/" />
+  <meta property="og:title" content="유이준 (Yoo Yijun) | 대전대신고등학교 · stx4R 포트폴리오" />
+  <meta property="og:description" content="대전대신고등학교 재학생 유이준(Yoo Yijun, stx4R)의 포트폴리오. 컴퓨터공학·인공지능 지망 개발자." />
+  <meta property="og:image" content="https://stx4r.me/static/Profile.png" />
+  <meta property="profile:first_name" content="이준" />
+  <meta property="profile:last_name" content="유" />
+  <meta property="profile:username" content="stx4R" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- 구글/제미나이가 인물로 읽는 부분 -->
+  <!-- ㄴ 학교 바뀌면 affiliation, 링크 늘면 sameAs 같이 고칠 것 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "url": "https://stx4r.me/",
+    "name": "유이준 (Yoo Yijun) 포트폴리오",
+    "inLanguage": "ko-KR",
+    "mainEntity": {
+      "@type": "Person",
+      "@id": "https://stx4r.me/#person",
+      "name": "유이준",
+      "alternateName": ["Yoo Yijun", "Yijun Yoo", "stx4R"],
+      "url": "https://stx4r.me/",
+      "image": "https://stx4r.me/static/Profile.png",
+      "email": "mailto:contact@stx4r.me",
+      "jobTitle": "Creative Developer",
+      "description": "대전대신고등학교에 재학 중인 학생 개발자. 컴퓨터공학과 및 인공지능학과를 지망하며 풀스택 웹 개발, 디자인, AI 프로젝트를 만든다.",
+      "affiliation": {
+        "@type": "HighSchool",
+        "name": "대전대신고등학교",
+        "alternateName": "Daejeon Daeshin High School",
+        "address": { "@type": "PostalAddress", "addressLocality": "대전광역시", "addressCountry": "KR" }
+      },
+      "alumniOf": [
+        { "@type": "MiddleSchool", "name": "대전삼육중학교", "alternateName": "Daejeon Sahmyook Middle School" },
+        { "@type": "ElementarySchool", "name": "대전삼육초등학교", "alternateName": "Daejeon Sahmyook Elementary School" }
+      ],
+      "homeLocation": { "@type": "Place", "name": "대전광역시, 대한민국" },
+      "knowsLanguage": ["ko", "en", "zh", "ja"],
+      "knowsAbout": ["풀스택 웹 개발", "HTML", "CSS", "JavaScript", "Python", "UI 디자인", "인공지능"],
+      "sameAs": ["https://github.com/stx4R"]
+    }
+  }
+  </script>
 
   <!-- 연결/사진은 파싱 중에 미리 깔아둠 -->
   <!-- ㄴ 원래는 모듈 스크립트가 실행돼야 요청이 시작돼서 첫 화면이 그만큼 늦게 떴음 -->

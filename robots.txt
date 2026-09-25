@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://stx4r.me/sitemap.xml
