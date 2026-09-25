@@ -738,9 +738,9 @@
       #contactHead { flex: 0 0 auto; }
       #contactHead .mt-6 { margin-top: 1rem; }
       #contactHead p { font-size: 0.9rem; }
-      #fuckmailto a h3 { font-size: 0.95rem; }
-      #fuckmailto a svg, #fuckmailto a img { width: 2.25rem; height: 2.25rem; margin-bottom: 0.75rem; }
-      #fuckmailto .gap-4 { gap: 0.75rem; }
+      /* 📫도 I think / Be creative처럼 텍스트 아래로 */
+      #contactArt { display: flex; }
+      #contactArt .text-9xl { font-size: 4.25rem; line-height: 1; }
 
       /* --- Footer --- */
       #fuckfooter p { font-size: 1.5rem; padding: 0 1.5rem; }
@@ -2747,25 +2747,12 @@
 
         <div class="space-y-2 mt-6" data-reveal data-delay="200">
           <p class="text-neutral-300">새로운 인연과 대화는 언제나 환영합니다.</p>
+          <p class="text-neutral-300"><a href="mailto:contact@stx4r.me" class="underline hover:opacity-70">여기</a>를 눌러서 저와 소통할 수 있습니다.</p>
         </div>
       </div>
 
-      <div class="flex-1 flex items-center justify-center w-full">
-        <div class="grid grid-cols-2 gap-4 md:gap-6 w-full max-w-xl" data-reveal-group="300">
-
-          <a href="https://github.com/stx4R" target="_blank" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-neutral-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all duration-300 hover:-translate-y-2">
-            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" fill="#ffffff" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Github</h3>
-            <p class="text-xs text-neutral-500">Visit Profile</p>
-          </a>
-
-          <a href="mailto:contact@stx4r.me" class="group flex flex-col items-center justify-center p-6 md:p-8 bg-neutral-800 rounded-2xl border border-neutral-700 hover:border-red-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 hover:-translate-y-2">
-            <svg class="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" viewBox="0 0 48 48"><path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/></svg>
-            <h3 class="text-lg font-bold text-neutral-300 group-hover:text-white mb-1">Gmail</h3>
-            <p class="text-xs text-neutral-500">Send Gmail</p>
-          </a>
-
-        </div>
+      <div id="contactArt" class="hidden lg:flex flex-1 items-center justify-center" data-reveal data-delay="360">
+        <span class="text-9xl"><img class="emoji" src="static/emoji/1f4eb.svg" alt="📫"></span>
       </div>
     </div>
   </section>
