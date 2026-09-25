@@ -158,7 +158,6 @@
     #projectCardStage .cs-card {
       position: absolute; inset: 0;
       border-radius: 12px; border: 1px solid #fff; background: #0d1117; overflow: hidden;
-      container-type: inline-size;
     }
     #projectCardStage .cs-card > * { animation: csEnter 340ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
     @keyframes csEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -170,12 +169,15 @@
     /* R3P0RT 보고서 (github.com/stx4R/R3P0RT) */
     /* ㄴ github.com 파일 화면 흉내. 색/간격은 GitHub 다크 기본 테마 값 그대로 */
     /* ㄴ 본문 스타일은 github-markdown-css가 함. 여기는 껍데기랑 Tailwind preflight가 지운 것만 */
+    /* ㄴ 박스 안만 브라우저 67%로 본 크기. 100%면 카드에 글이 몇 줄 안 들어감 */
+    /* ㄴ zoom이라 흐려지지 않음. 폭 판정(@container)은 .gh-in 기준이라 줄어든 뒤 폭으로 잼 */
     #projectCardStage .gh {
       position: relative; height: 100%; overflow-y: auto; overscroll-behavior: contain;
-      padding: 16px 24px 24px;
+      zoom: 0.67;
       color: #f0f6fc; font-size: 14px; line-height: 1.5;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     }
+    #projectCardStage .gh-in { container-type: inline-size; padding: 16px 24px 24px; }
     #projectCardStage .gh-ico { display: inline-block; width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
     #projectCardStage .gh-copy .gh-ok { display: none; color: #3fb950; }
     #projectCardStage .gh-copy.is-copied .gh-ico { display: none; }
@@ -229,10 +231,9 @@
     #projectCardStage .gh-hist .gh-ico { color: #9198a1; }
 
     /* 파일 박스. 머리는 스크롤해도 위에 붙어 있음 */
-    /* ㄴ sticky 기준이 .gh 패딩 안쪽이라 top 0이면 위에 16px 틈 생기고 글자가 비침. 패딩만큼 올림 */
     #projectCardStage .gh-box { border: 1px solid #3d444d; border-radius: 6px; }
     #projectCardStage .gh-head {
-      position: sticky; top: -16px; z-index: 3;
+      position: sticky; top: 0; z-index: 3;
       display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px;
       background: #151b23; border-bottom: 1px solid #3d444d; border-radius: 6px 6px 0 0;
     }
@@ -282,8 +283,7 @@
     /* 박스가 좁을 때. 모바일이거나 창 줄였을 때 */
     /* ㄴ GitHub도 좁아지면 줄 수랑 편집 버튼부터 숨김 */
     @container (max-width: 560px) {
-      #projectCardStage .gh { padding: 12px 12px 16px; }
-      #projectCardStage .gh-head { top: -12px; }
+      #projectCardStage .gh-in { padding: 12px 12px 16px; }
       #projectCardStage .gh-crumb { margin-bottom: 12px; }
       #projectCardStage .gh-path { font-size: 14px; }
       #projectCardStage .gh-commit { min-height: 40px; padding: 4px 4px 4px 12px; margin-bottom: 12px; }
@@ -718,6 +718,8 @@
       #bentoMain { flex: 1 1 auto; min-height: 0; }
       #bentoMain > .flex-shrink-0 > p { font-size: 0.85rem; margin-top: 0.75rem; }
       #projectCardStage { height: auto; flex: 1 1 auto; min-height: 0; margin-top: 0.85rem; }
+      /* 폰은 67%면 글자가 9px대라 못 읽음. 원래 크기 */
+      #projectCardStage .gh { zoom: 1; }
       #bentoSide { flex: 0 0 10rem; height: 10rem; }
       #projectWheel .wheel-item { font-size: 1.05rem; left: 4px; }
       #bentoSide button { width: 2.5rem; height: 2.5rem; }
@@ -2268,38 +2270,40 @@
       const avatar = `https://avatars.githubusercontent.com/${OWNER}?s=40`;
       return `
         <div class="gh" data-scroll-lock data-mode="preview">
-          <div class="gh-crumb">
-            <div class="gh-path">
-              <a href="${GH}" ${ext}>${REPO}</a><span class="gh-sep">/</span><a href="${GH}/tree/${BRANCH}/${DIR}" ${ext}>${DIR}</a><span class="gh-sep">/</span><h3 class="gh-file">${p.file}</h3>
-              <button type="button" class="gh-iconbtn gh-copy" data-copy="path" aria-label="Copy path">${copyIco}</button>
-            </div>
-            <a class="gh-btn gh-btn--icon" href="${p.blob}" ${ext} aria-label="More file actions">${ico('kebab')}</a>
-          </div>
-          <div class="gh-commit">
-            <a class="gh-avatar" href="https://github.com/${OWNER}" ${ext}><img src="${avatar}" alt="" width="20" height="20"></a>
-            <a class="gh-author" href="https://github.com/${OWNER}" ${ext}>${OWNER}</a>
-            <a class="gh-msg" ${ext}></a>
-            <span class="gh-when"></span>
-            <a class="gh-hist" href="${GH}/commits/${BRANCH}/${p.path}" ${ext}>${ico('history')}<span>History</span></a>
-          </div>
-          <div class="gh-box">
-            <div class="gh-head">
-              <div class="gh-seg" role="group" aria-label="File view">
-                <button type="button" class="is-on" data-mode="preview">Preview</button><button type="button" data-mode="code">Code</button><a href="${GH}/blame/${BRANCH}/${p.path}" ${ext}>Blame</a>
+          <div class="gh-in">
+            <div class="gh-crumb">
+              <div class="gh-path">
+                <a href="${GH}" ${ext}>${REPO}</a><span class="gh-sep">/</span><a href="${GH}/tree/${BRANCH}/${DIR}" ${ext}>${DIR}</a><span class="gh-sep">/</span><h3 class="gh-file">${p.file}</h3>
+                <button type="button" class="gh-iconbtn gh-copy" data-copy="path" aria-label="Copy path">${copyIco}</button>
               </div>
-              <span class="gh-meta"></span>
-              <div class="gh-actions">
-                <div class="gh-group">
-                  <a class="gh-btn gh-btn--sm" href="${RAW}${p.file}" ${ext}>Raw</a><button type="button" class="gh-btn gh-btn--sm gh-btn--icon gh-copy" data-copy="raw" aria-label="Copy raw file">${copyIco}</button><button type="button" class="gh-btn gh-btn--sm gh-btn--icon" data-download aria-label="Download raw file">${ico('download')}</button>
-                </div>
-                <div class="gh-group gh-edit">
-                  <a class="gh-btn gh-btn--sm gh-btn--icon" href="${GH}/edit/${BRANCH}/${p.path}" ${ext} aria-label="Edit file">${ico('pencil')}</a><a class="gh-btn gh-btn--sm gh-btn--icon gh-btn--caret" href="${p.blob}" ${ext} aria-label="More edit options">${ico('caret')}</a>
-                </div>
-                <a class="gh-iconbtn gh-outline" href="${p.blob}" ${ext} aria-label="Outline">${ico('list')}</a>
-              </div>
+              <a class="gh-btn gh-btn--icon" href="${p.blob}" ${ext} aria-label="More file actions">${ico('kebab')}</a>
             </div>
-            <div class="gh-pane--preview">${spinner(32)}</div>
-            <div class="gh-pane--code"></div>
+            <div class="gh-commit">
+              <a class="gh-avatar" href="https://github.com/${OWNER}" ${ext}><img src="${avatar}" alt="" width="20" height="20"></a>
+              <a class="gh-author" href="https://github.com/${OWNER}" ${ext}>${OWNER}</a>
+              <a class="gh-msg" ${ext}></a>
+              <span class="gh-when"></span>
+              <a class="gh-hist" href="${GH}/commits/${BRANCH}/${p.path}" ${ext}>${ico('history')}<span>History</span></a>
+            </div>
+            <div class="gh-box">
+              <div class="gh-head">
+                <div class="gh-seg" role="group" aria-label="File view">
+                  <button type="button" class="is-on" data-mode="preview">Preview</button><button type="button" data-mode="code">Code</button><a href="${GH}/blame/${BRANCH}/${p.path}" ${ext}>Blame</a>
+                </div>
+                <span class="gh-meta"></span>
+                <div class="gh-actions">
+                  <div class="gh-group">
+                    <a class="gh-btn gh-btn--sm" href="${RAW}${p.file}" ${ext}>Raw</a><button type="button" class="gh-btn gh-btn--sm gh-btn--icon gh-copy" data-copy="raw" aria-label="Copy raw file">${copyIco}</button><button type="button" class="gh-btn gh-btn--sm gh-btn--icon" data-download aria-label="Download raw file">${ico('download')}</button>
+                  </div>
+                  <div class="gh-group gh-edit">
+                    <a class="gh-btn gh-btn--sm gh-btn--icon" href="${GH}/edit/${BRANCH}/${p.path}" ${ext} aria-label="Edit file">${ico('pencil')}</a><a class="gh-btn gh-btn--sm gh-btn--icon gh-btn--caret" href="${p.blob}" ${ext} aria-label="More edit options">${ico('caret')}</a>
+                  </div>
+                  <a class="gh-iconbtn gh-outline" href="${p.blob}" ${ext} aria-label="Outline">${ico('list')}</a>
+                </div>
+              </div>
+              <div class="gh-pane--preview">${spinner(32)}</div>
+              <div class="gh-pane--code"></div>
+            </div>
           </div>
         </div>`;
     }
@@ -2474,8 +2478,15 @@
       const code = root.querySelector('.gh-pane--code');
       if (mode === 'code' && current && !code.firstChild) code.innerHTML = codeHTML(current.d.raw);
       // 머리가 위에 붙어 있을 만큼 내려가 있었으면 새 탭 맨 위부터
-      const box = root.querySelector('.gh-box');
-      if (root.scrollTop > box.offsetTop) root.scrollTop = box.offsetTop;
+      const top = offsetIn(root.querySelector('.gh-box'), root);
+      if (root.scrollTop > top) root.scrollTop = top;
+    }
+
+    // .gh에 zoom 걸려 있어서 getBoundingClientRect(화면 px)랑 scrollTop(박스 안 px) 단위가 안 맞음. offsetTop으로 잼
+    function offsetIn(el, root) {
+      let y = 0;
+      for (let n = el; n && n !== root; n = n.offsetParent) y += n.offsetTop;
+      return y;
     }
 
     function scrollToHash(root, hash) {
@@ -2484,7 +2495,7 @@
       if (!el) return;
       const target = el.closest('.markdown-heading') || el;
       const head = root.querySelector('.gh-head');
-      const go = () => { root.scrollTop += target.getBoundingClientRect().top - root.getBoundingClientRect().top - head.offsetHeight - 8; };
+      const go = () => { root.scrollTop = offsetIn(target, root) - head.offsetHeight - 8; };
       go();
       // 위쪽 이미지랑 mermaid가 늦게 뜨면서 밀어냄. 잠깐 따라가다 사용자가 굴리면 놓음
       const ro = new ResizeObserver(go);
