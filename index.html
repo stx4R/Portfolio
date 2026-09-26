@@ -756,7 +756,7 @@
       #fuckhover h4 { font-size: 1rem; line-height: 1.5rem; }
 
       /* 명찰 : 모바일용 2D 랜야드 */
-      /* ㄴ 3D 랜야드는 rapier + glb 합쳐 2MB라 폰에선 안 받음. 끈이랑 카드만 CSS로 그림 */
+      /* ㄴ 3D 랜야드는 three 빼고도 rapier + glb 합쳐 850KB라 폰에선 안 받음. 끈이랑 카드만 CSS로 그림 */
       /* ㄴ 평소엔 살랑살랑, 옆으로 끌면 따라 기울었다 스프링으로 돌아옴. 처리는 About ME. 아래 스크립트 */
       #badge {
         display: block; width: 7.5rem;
@@ -926,9 +926,9 @@
       particle: 400,   // 인트로 사진 + 파티클 빌드
       logos:    150,   // 스택 로고 26장
       rapier:   770,
-      cardGlb: 1300,
+      cardGlb:   80,
       lanyard:  200,   // 텍스처 + 씬 구성
-      starGlb:  480,   // 데스크톱만
+      starGlb:  160,   // 데스크톱만
       star:      50
     };
     const jobs = new Map();
@@ -1682,7 +1682,7 @@
 
     <script type="module">
     // 랜야드 씬
-    // ㄴ three + rapier wasm + card.glb 합쳐 2MB 가까움. 전엔 첫 화면 뒤 idle에 받았음
+    // ㄴ three + rapier wasm + card.glb 합쳐 1MB쯤. 전엔 첫 화면 뒤 idle에 받았음
     // ㄴ 지금은 프리로더가 다 받을 때까지 안 걷히니 그냥 바로 받음. 카드 페이지 열었는데 빈 칸인 일 없음
     // ㄴ 폰은 아예 안 띄움. 그 자리는 CSS 명찰(#badge)이 대신함
     // ㄴ 폰에서 안 받은 건 프리로더가 DOMContentLoaded에 알아서 뺌. 창 줄였다 늘린 거면 데스크톱 되는 순간 받음
@@ -1704,7 +1704,8 @@
     }
 
     async function bootLanyard() {
-      const CARD_GLB = 'static/card.glb';
+      // ?v= 는 glb 안 텍스처 구성 바뀔 때 올림. 옛 glb가 캐시에 남아 있으면 ReactBits 그림이 종이로 깔림
+      const CARD_GLB = 'static/card.glb?v=2';
       // glb는 프리로더가 받음(바이트 진행률). rapier는 import 풀리면 끝
       const glb = pre ? pre.asset('cardGlb', CARD_GLB) : fetch(CARD_GLB).then(r => r.arrayBuffer());
       const rapierJob = pre && pre.claim('rapier');
@@ -1738,7 +1739,11 @@
       // ㄴ 그 띠를 repeat -4로 반복해서 로고가 줄줄이 이어진 것처럼 보이는 거임
       const BAND_TEX = { w: 1025, h: 250 };
       const BAND_LOGO_H = 159;
-      const CLEAN_PATCH = { x: 0, y: 1290, w: 800, h: 380 };
+      // 카드 텍스처 해상도(정사각)
+      // ㄴ 원래 card.glb엔 ReactBits 앞뒷면 그림(1678px, 1.1MB)이 통째로 있었는데 어차피 아래서 전부 덮어씀
+      // ㄴ 실제로 보이던 건 종이 질감뿐이라 glb엔 그 조각(610x290)만 남김. 앞뒷면은 이 크기 캔버스에 새로 그림
+      // ㄴ 조각 크기는 원래 비율(1678px에 800x380) 그대로 줄인 거라 이 값 바꾸면 질감 알갱이 크기도 같이 바뀜
+      const CARD_TEX = 1280;
 
       const loadImage = src => new Promise(resolve => {
         if (!src) return resolve(null);
@@ -1796,25 +1801,16 @@
       });
 
       function compositeCardMap(baseMap) {
-        if (!frontTex && !backTex) return baseMap;
-        const baseImg = baseMap.image;
-        const W = baseImg.width;
-        const H = baseImg.height;
+        const W = CARD_TEX;
+        const H = CARD_TEX;
         const canvas = document.createElement('canvas');
         canvas.width = W;
         canvas.height = H;
         const ctx = canvas.getContext('2d');
         if (!ctx) return baseMap;
-        ctx.drawImage(baseImg, 0, 0, W, H);
-
-        const patch = document.createElement('canvas');
-        patch.width = CLEAN_PATCH.w;
-        patch.height = CLEAN_PATCH.h;
-        patch.getContext('2d').drawImage(
-          baseImg, CLEAN_PATCH.x, CLEAN_PATCH.y, CLEAN_PATCH.w, CLEAN_PATCH.h,
-          0, 0, CLEAN_PATCH.w, CLEAN_PATCH.h
-        );
-        const paper = ctx.createPattern(patch, 'repeat');
+        // glb 이미지가 곧 종이 한 장. 캔버스 전체에 바둑판으로 깔고 그 위에 사진
+        ctx.fillStyle = ctx.createPattern(baseMap.image, 'repeat');
+        ctx.fillRect(0, 0, W, H);
 
         const drawFitted = (img, rect) => {
           const rx = rect.x * W;
@@ -1825,8 +1821,6 @@
           ctx.beginPath();
           ctx.rect(rx, ry, rw, rh);
           ctx.clip();
-          ctx.fillStyle = paper;
-          ctx.fillRect(rx, ry, rw, rh);
           const pick = imageFit === 'contain' ? Math.min : Math.max;
           const scale = pick(rw / img.width, rh / img.height);
           const dw = img.width * scale;
@@ -2240,7 +2234,7 @@
         </h2>
         <!-- 부제목이랑 간격은 Be creative 그대로. 제목 아래 24px, 덩어리 사이 40px -->
         <div class="mt-6 space-y-10" data-reveal-group="200">
-          <p class="text-neutral-300 leading-relaxed">끊임없이 질문하고 사고하며, 나만의 답을 찾아갑니다.</p>
+          <p class="text-neutral-300 leading-relaxed">끊임없이 질문하고 사고하며, 저만의 답을 찾습니다.</p>
 
           <div>
             <h3 class="text-xl font-semibold mb-4"><img class="emoji" src="static/emoji/1f3eb.svg" alt="🏫"> 컴퓨터공학과 및 인공지능학과 지망</h3>
