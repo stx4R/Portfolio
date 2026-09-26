@@ -653,14 +653,11 @@
     }
 
     /* I think / Feel free to contact. : 글 + 이모지 두 칸 */
-    /* ㄴ Be creative 기준. 거긴 글이 가운데서 시작해서 꽉 차 보이는데 여긴 글이 왼쪽 끝에 붙어서 가운데가 비어 보였음 */
-    /* ㄴ 둘을 한 묶음으로 화면 가운데. 사이 간격은 Be creative에서 잰 값(1440 기준 226px = 15.7vw) */
-    /* ㄴ 간격은 ::before가 먹음. 창 좁으면 이게 먼저 줄어서 안 넘침 */
+    /* ㄴ 원래 여백 96px이면 글이 왼쪽 끝에 붙어서 가운데가 비어 보였음. 제목 박스 왼쪽 여백 146px로 고정 */
+    /* ㄴ 146px은 1422px 화면 기준으로 직접 정한 값. 그보다 좁은 창에선 같은 비율(10.27vw)로 줄어서 이모지랑 안 겹침 */
+    /* ㄴ 이모지는 Be creative처럼 남은 칸 가운데. 두 칸 사이 gap 없앰(Contact의 lg:gap-16) */
     @media (min-width: 1024px) {
-      #thinkWrap, #contactWrap { justify-content: center; column-gap: 0; }
-      #thinkWrap > *, #contactWrap > * { flex: none; width: auto; }
-      #thinkWrap::before, #contactWrap::before { content: ""; order: 1; flex: 0 1 15.7vw; min-width: 0; }
-      #thinkArt, #contactArt { order: 2; }
+      #thinkWrap, #contactWrap { padding-left: min(146px, 10.27vw); column-gap: 0; }
     }
 
     /* 모바일 전용 부품. 데스크톱에선 안 보임 */
@@ -882,8 +879,9 @@
   <!-- Tailwind 빌드 결과 -->
   <!-- ㄴ Play CDN(400KB + 브라우저에서 CSS 컴파일) 걷어내고 미리 뽑아둔 것으로 대체 -->
   <!-- ㄴ 클래스 추가/삭제하면 node tools/build-tailwind.mjs 재실행 -->
+  <!-- ㄴ ?v= 는 그 스크립트가 CSS 내용 해시로 알아서 바꿈. 손으로 안 고쳐도 됨 -->
   <!-- ㄴ 위치는 head 맨 끝 고정. CDN이 여기에 꽂던 자리라 캐스케이드 순서 걸림 -->
-  <link rel="stylesheet" href="static/tailwind.css">
+  <link rel="stylesheet" href="static/tailwind.css?v=a0095372">
 </head>
 <body class="bg-neutral-900 text-white">
 
@@ -2239,7 +2237,7 @@
         </h2>
         <!-- 부제목이랑 간격은 Be creative 그대로. 제목 아래 24px, 덩어리 사이 40px -->
         <div class="mt-6 space-y-10" data-reveal-group="200">
-          <p class="text-neutral-300 leading-relaxed">끊임없이 질문하고 깊게 고민하며, 나만의 답을 찾아갑니다.</p>
+          <p class="text-neutral-300 leading-relaxed">끊임없이 질문하고 사고하며, 나만의 답을 찾아갑니다.</p>
 
           <div>
             <h3 class="text-xl font-semibold mb-4"><img class="emoji" src="static/emoji/1f3eb.svg" alt="🏫"> 컴퓨터공학과 및 인공지능학과 지망</h3>
