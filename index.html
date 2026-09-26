@@ -97,8 +97,26 @@
   <!-- ㄴ 안 걸어두면 랜야드/푸터의 import()가 three 다 받은 뒤에야 출발해서 직렬로 늘어짐 -->
   <!-- ㄴ URL은 위 importmap과 반드시 같아야 함. 다르면 두 번 받음 -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js" />
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/loaders/GLTFLoader.js" />
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/+esm" />
+  <script>
+  // 모바일 판정. 아래 CSS 모바일 블록이랑 같은 조건이어야 함
+  // ㄴ 767px 이하 + 가로모드 폰. 모바일은 자연 스크롤이라 페이지 넘김/3D 랜야드 안 씀
+  window.compactMQ = matchMedia('(max-width: 767px), (max-width: 1023px) and (max-height: 500px)');
+  // GLTFLoader, rapier는 랜야드/푸터 별 전용. 폰은 둘 다 안 띄우니 안 받음
+  // ㄴ link에 media 걸어도 modulepreload는 브라우저마다 무시해서 그냥 스크립트로 꽂음
+  if (!window.compactMQ.matches) {
+    for (const href of [
+      'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/loaders/GLTFLoader.js',
+      'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/+esm'
+    ]) {
+      const l = document.createElement('link');
+      l.rel = 'modulepreload';
+      l.href = href;
+      document.head.appendChild(l);
+    }
+  }
+  // 새로고침하면 폰이 스크롤 위치를 되살려서 인트로를 건너뜀. 항상 맨 위부터
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  </script>
   <!-- 프리로더가 쓰는 굵기만 미리. 숫자가 시스템 폰트로 떴다가 바뀌는 거 안 보이게 -->
   <link rel="preload" as="font" type="font/woff2" crossorigin href="static/fonts/subset/Pretendard-Bold.subset.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="static/fonts/subset/Pretendard-SemiBold.subset.woff2" />
@@ -139,6 +157,7 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       background: #000; color: #fff;
       transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      touch-action: none;   /* 폰은 문서가 스크롤돼서, 로딩 중에 밀면 뒤에서 인트로가 먼저 지나가버림 */
     }
     #preloader.is-out { opacity: 0; pointer-events: none; }
     #preloaderLabel {
@@ -309,7 +328,8 @@
       #projectCardStage .markdown-body .markdown-heading .anchor { display: none; }
     }
     @container (max-width: 400px) {
-      #projectCardStage .gh-when, #projectCardStage .gh-group > :not(:first-child) { display: none; }
+      /* 경로 복사 버튼은 폰 폭에서 혼자 다음 줄로 떨어짐 */
+      #projectCardStage .gh-when, #projectCardStage .gh-group > :not(:first-child), #projectCardStage .gh-path .gh-copy { display: none; }
       #projectCardStage .gh-group > :first-child { border-radius: 6px; }
     }
     #stackStage .stack-item { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -632,136 +652,220 @@
       [data-hl] { background-size: 100% 100%; color: var(--ink, #000); }
     }
 
-    /* ================= 모바일 ================= */
-    /* ㄴ 767px 이하 + 가로모드 폰(좁고 납작한 화면)까지 */
-    /* ㄴ 데스크톱 기준 가로 2단 레이아웃을 전부 세로로 갈아끼움 */
-    /* ㄴ Tailwind가 head 맨 끝에 붙어서 나중에 오니, 여기 선택자는 특이도로 이겨야 함 */
+    /* I think / Feel free to contact. : 글 + 이모지 두 칸 */
+    /* ㄴ Be creative 기준. 거긴 글이 가운데서 시작해서 꽉 차 보이는데 여긴 글이 왼쪽 끝에 붙어서 가운데가 비어 보였음 */
+    /* ㄴ 둘을 한 묶음으로 화면 가운데. 사이 간격은 Be creative에서 잰 값(1440 기준 226px = 15.7vw) */
+    /* ㄴ 간격은 ::before가 먹음. 창 좁으면 이게 먼저 줄어서 안 넘침 */
+    @media (min-width: 1024px) {
+      #thinkWrap, #contactWrap { justify-content: center; column-gap: 0; }
+      #thinkWrap > *, #contactWrap > * { flex: none; width: auto; }
+      #thinkWrap::before, #contactWrap::before { content: ""; order: 1; flex: 0 1 15.7vw; min-width: 0; }
+      #thinkArt, #contactArt { order: 2; }
+    }
+
+    /* 모바일 전용 부품. 데스크톱에선 안 보임 */
+    #badge, #indexList, #projectChips { display: none; }
+
+    /* 모바일 */
+    /* ㄴ 767px 이하 + 가로모드 폰(좁고 납작한 화면). JS는 window.compactMQ로 같은 조건 봄 */
+    /* ㄴ 페이지 한 장씩 넘기는 거 안 씀. 섹션이 문서 흐름대로 쌓이고 그냥 세로로 스크롤 */
+    /* ㄴ 전엔 데스크톱 2단을 한 화면에 억지로 접어 넣어서 폰마다 잘리고 비율 깨졌음 */
+    /* ㄴ Tailwind가 head 맨 끝이라 나중에 옴. 여기 선택자는 특이도로 이겨야 함 */
     @media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) {
 
-      /* 100vh는 주소창 높이를 안 뺌. 실제 보이는 만큼만 쓰게 dvh로 */
-      #stage { bottom: auto; height: 100vh; height: 100dvh; }
-      /* fuckmailto는 .relative가 .page의 absolute를 덮어서 높이가 내용 따라감 */
-      /* ㄴ 안쪽 h-screen을 100%로 바꾸는 순간 기준이 사라지니 페이지에 높이를 못 박음 */
-      .page { height: 100%; }
-      .page .h-screen { height: 100%; }
+      html, body { height: auto; overflow: visible; }
+      /* clip은 스크롤 컨테이너가 안 돼서 인트로 sticky 안 깨짐. hidden 쓰면 sticky 죽음 */
+      #stage { position: relative; inset: auto; height: auto; overflow: visible; overflow-x: clip; perspective: none; }
+      .page {
+        position: relative; inset: auto;
+        opacity: 1; visibility: visible; pointer-events: auto;
+        backface-visibility: visible;
+      }
+      .page.is-on { will-change: auto; }
+      .page .h-screen { height: auto; }
 
-      /* 좌우 32px는 375px 화면에서 과함 */
-      .page .px-8 { padding-left: 1.25rem; padding-right: 1.25rem; }
+      /* 섹션 공통. 좌우 24px, 가로모드는 가운데 좁은 단 */
+      .page--special > div,
+      #fuckindex > div {
+        max-width: 40rem; margin: 0 auto;
+        padding: 3.25rem 1.5rem;
+      }
 
-      /* 제목 nowrap 풀기. 안 그러면 죄다 화면 밖으로 나감 */
+      /* 제목 : 여섯 개 전부 같은 크기로 한 줄 */
+      /* ㄴ 제일 긴 Practice makes perfect.가 여백까지 글자크기의 11.55배. 그거 기준으로 폭에 맞춤 */
       .page--special h2[data-hl] {
-        white-space: normal;
-        font-size: clamp(1.5rem, 7.2vw, 2.05rem);
-        line-height: 1.16;
-        letter-spacing: -0.03em;
-        padding: 0.3em 0.4em;
-        margin-bottom: 0;
+        margin: 0; padding: 0.28em 0.42em;
+        font-size: min(2.25rem, calc((min(100vw, 40rem) - 3rem) / 11.6));
+        line-height: 1.15; letter-spacing: -0.02em;
       }
 
-      /* 세로로 넘치는 본문 페이지는 페이지 안에서 스크롤 */
-      /* ㄴ 페이지 넘김은 끝에 닿았을 때만. 처리는 nav 스크립트 쪽 scrollableAt() */
-      .page--special > [data-mscroll] {
-        height: 100%;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-      }
+      /* 본문 글자. 한글이 '찾아갑/니다'처럼 음절에서 끊기지 않게 어절 단위로 줄바꿈 */
+      #fuckhover .grid p,
+      #fuckscrollanimation p, #fuckhyperlink p, #fuckmailto p,
+      #stackHead p, #bentoMain > .flex-shrink-0 > p { font-size: 0.9375rem; line-height: 1.7; word-break: keep-all; overflow-wrap: break-word; }
+      #fuckscrollanimation h3, #fuckhyperlink h3 { font-size: 1.0625rem; }
 
-      /* --- About ME. --- */
-      /* ㄴ 랜야드를 위로 올리고 텍스트를 아래로. flex-row-reverse 무력화 */
-      #fuckhover > [data-mscroll] {
-        display: flex;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        align-items: stretch;
-        justify-content: flex-start;
-        gap: 0;
-        padding-top: 4vh;
-        padding-bottom: 5vh;
-      }
-      #fuckhover > [data-mscroll] > div:first-child { order: 2; flex: 0 0 auto; }
-      #lanyardCol {
-        display: flex;
-        order: 1;
-        flex: 0 0 auto;
-        height: clamp(170px, 32vh, 290px);
-        margin-bottom: 2vh;
-      }
-      /* .lanyard-wrapper 기본값이 100vh라 안 덮으면 칸이 화면 통째로 먹음 */
-      #lanyardCol .lanyard-wrapper { height: 100%; }
-      #fuckhover h3 { font-size: 1.4rem; }
-      #fuckhover .mt-8 { margin-top: 1.25rem; }
-      #fuckhover .mt-6 { margin-top: 1rem; }
-      #fuckhover .gap-y-5 { row-gap: 0.9rem; }
-      #fuckhover .gap-x-10 { column-gap: 1.25rem; }
-      #fuckhover h4 { font-size: 0.95rem; }
-      #fuckhover .grid p { font-size: 0.85rem; }
+      /* 인트로 */
+      /* ㄴ 화면은 sticky로 붙여두고 섹션 길이만큼 스크롤하는 동안 커버가 열림. 진행도는 nav 스크립트 */
+      /* ㄴ 높이 250svh = 붙어 있는 화면 1장 + 여는 데 쓰는 스크롤 1.5장 */
+      #fuckintro { height: 250vh; height: 250svh; }
+      #introStage { position: sticky; top: 0; height: 100vh; height: 100dvh; }
+      /* 가로모드 폰은 767 규칙을 못 받아서 출처가 오른쪽 끝에 붙음 */
+      #introQuote { padding: 0 6vw; }
 
-      /* --- I think / Be creative : 텍스트 한 단 + 이모지는 아래로 --- */
-      #fuckscrollanimation > [data-mscroll],
-      #fuckhyperlink > [data-mscroll] {
-        display: block;
-        padding-top: 9vh;
-        padding-bottom: 6vh;
+      /* Index. : Folder/Drift Wall 대신 누르면 그 섹션으로 내려가는 목록 */
+      #fuckindex > div { overflow: visible; }
+      #indexTitle {
+        position: static; opacity: 1; transform: none; text-shadow: none;
+        font-size: clamp(2.5rem, 12vw, 3.25rem); margin-bottom: 1.5rem;
       }
-      #thinkArt, #createArt {
-        display: flex;
-        padding-top: 1.5rem;
+      #indexScene, #indexFolderLayer { display: none; }
+      /* 데스크톱에서 폴더가 들어가 앉는 자리. 여기선 닫힌 폴더 그림만 */
+      #folderDock {
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 88.4'%3E%3Crect width='32' height='18' rx='5' fill='%23EABB71'/%3E%3Crect y='8.4' width='100' height='80' rx='10' fill='%23FFCC7B'/%3E%3C/svg%3E") center / contain no-repeat;
       }
-      #thinkArt .text-9xl, #createArt .text-9xl { font-size: 4.25rem; line-height: 1; }
-      #fuckscrollanimation .mt-12 { margin-top: 1.75rem; }
-      #fuckscrollanimation .space-y-8 > * + * { margin-top: 1.5rem; }
-      #fuckhyperlink .mt-6 { margin-top: 1.25rem; }
-      #fuckhyperlink .space-y-10 > * + * { margin-top: 1.75rem; }
-      #fuckscrollanimation h3, #fuckhyperlink h3 { font-size: 1.05rem; }
-      #fuckscrollanimation p, #fuckhyperlink p { font-size: 0.9rem; }
+      #indexList { display: grid; gap: 0.75rem; }
+      .idx-row {
+        display: flex; align-items: center; gap: 0.875rem;
+        padding: 0.9rem 1rem; border-radius: 14px;
+        background: #d7d7d7; color: #3d3d3d;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .idx-row:active { background: #c6c6c6; }
+      .idx-row__no { min-width: 1.4em; font-weight: 800; font-size: 0.8125rem; color: #8a8a8a; font-variant-numeric: tabular-nums; }
+      .idx-row__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+      .idx-row__title {
+        display: inline-block; white-space: nowrap;
+        padding: 0.22em 0.45em; background: var(--hl); color: var(--ink);
+        font-weight: 700; font-size: 1.0625rem; line-height: 1.15;
+      }
+      .idx-row__sub { font-weight: 700; font-size: 0.8125rem; line-height: 1.3; }
+      .idx-row__go { flex: none; width: 1.1rem; height: 1.1rem; }
 
-      /* --- Practice makes perfect. --- */
-      /* ㄴ 스택 카드가 자리를 먹으니 스크롤 없이 화면 안에 딱 맞춤 */
-      #fuckinteraction > div { padding-top: 8vh; padding-bottom: 2vh; }
-      #stackHead { flex-direction: column; align-items: stretch; gap: 0.75rem; }
-      #stackNav { top: 0; justify-content: flex-start; padding-bottom: 0; }
-      #stackNav button { width: 2.75rem; height: 2.75rem; }
-      #fuckinteraction .mt-6 { margin-top: 0.85rem; }
-      #fuckinteraction .mt-6 p { font-size: 0.85rem; line-height: 1.55; }
-      #stackWrap { margin-top: 1.25rem; }
-      #stackStage .stack-item { gap: 10px; }
+      /* About ME. : 명찰 위, 글 아래 */
+      #fuckhover > div { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding-top: 0; }
+      #fuckhover > div > * { flex: none; }
+      #lanyardCol { display: flex; order: -1; height: auto; justify-content: center; margin-bottom: 1.75rem; }
+      #lanyardStage { display: none; }
+      /* 이름이 박스랑 <Residence/> 딱 가운데 오게. 데스크톱이랑 같은 방식으로 글자 윤곽 재서 맞춤 */
+      /* ㄴ 이름 24/32px면 윤곽 위아래 여백이 5.2px씩, h4 16/24px면 윗여백 5.2px */
+      /* ㄴ 박스~이름 = 29.2 + 5.2, 이름~<Residence/> = 5.2 + 24 + 5.2. 둘 다 34.4px */
+      #fuckhover h2 + div { margin-top: 1.825rem; }
+      #fuckhover h3 { font-size: 1.5rem; line-height: 2rem; }
+      #fuckhover .grid { margin-top: 1.5rem; grid-template-columns: 1fr; row-gap: 1.1rem; }
+      #fuckhover .grid > .col-span-2 { grid-column: auto; }
+      #fuckhover h4 { font-size: 1rem; line-height: 1.5rem; }
 
-      /* --- Efforts never betray. --- */
-      /* ㄴ 위에서부터 제목 / 카드(남는 공간 전부) / 프로젝트 휠 */
-      #bentoWrap { padding-top: 7.5vh; padding-bottom: 1rem; gap: 0.5rem; }
-      #bentoMain { flex: 1 1 auto; min-height: 0; }
-      #bentoMain > .flex-shrink-0 > p { font-size: 0.85rem; margin-top: 0.75rem; }
-      #projectCardStage { height: auto; flex: 1 1 auto; min-height: 0; margin-top: 0.85rem; }
+      /* 명찰 : 모바일용 2D 랜야드 */
+      /* ㄴ 3D 랜야드는 rapier + glb 합쳐 2MB라 폰에선 안 받음. 끈이랑 카드만 CSS로 그림 */
+      /* ㄴ 평소엔 살랑살랑, 옆으로 끌면 따라 기울었다 스프링으로 돌아옴. 처리는 About ME. 아래 스크립트 */
+      #badge {
+        display: block; width: 7.5rem;
+        transform-origin: 50% 0;
+        animation: badgeSway 5.2s ease-in-out infinite;
+        touch-action: pan-y; user-select: none; -webkit-user-select: none;
+      }
+      #badge .badge-strap {
+        width: 1.375rem; height: 6.75rem; margin: 0 auto;
+        background-color: #050505;
+        background-image: url(static/DSHS.png), url(static/DSHS.png), url(static/DSHS.png);
+        background-size: 0.875rem; background-repeat: no-repeat;
+        background-position: 50% 18%, 50% 52%, 50% 86%;
+      }
+      /* 끈 끝 금속 고리. 카드 위로 올려서 밑동이 구멍에 걸린 것처럼 */
+      #badge .badge-clip {
+        position: relative; z-index: 1;
+        width: 0.75rem; height: 1.15rem; margin: -2px auto 0;
+        border: 2px solid #8c8c8c; border-top: 0; border-radius: 0 0 0.5rem 0.5rem;
+      }
+      #badge .badge-card {
+        position: relative; margin-top: -0.55rem;
+        display: grid; place-items: center;
+        aspect-ratio: 5 / 7; border-radius: 0.55rem;
+        background: linear-gradient(165deg, #f0f0f0, #d9d9d9);
+        box-shadow: 0 1.25rem 2rem -0.9rem rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+      }
+      /* 끈 꿰는 구멍 */
+      #badge .badge-card::before {
+        content: ""; position: absolute; top: 0.4rem; left: 50%;
+        width: 1.5rem; height: 0.3rem; margin-left: -0.75rem;
+        border-radius: 99px; background: #a3a3a3; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35);
+      }
+      #badge .badge-card img { width: 80%; pointer-events: none; -webkit-user-drag: none; }
+
+      /* I think / Be creative / Feel free to contact. : 한 단, 큰 이모지는 제목 위 아이콘으로 */
+      #thinkWrap, #fuckhyperlink > div, #contactWrap {
+        display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0;
+      }
+      #thinkWrap > *, #fuckhyperlink > div > *, #contactWrap > * { flex: none; }
+      #thinkArt, #createArt, #contactArt { display: flex; order: -1; justify-content: flex-start; margin-bottom: 1rem; }
+      #thinkArt .text-9xl, #createArt .text-9xl, #contactArt .text-9xl { font-size: 3.25rem; line-height: 1; }
+      #fuckscrollanimation h2 + div, #fuckhyperlink h2 + div, #contactHead h2 + div { margin-top: 1rem; }
+      #fuckscrollanimation .space-y-10 > * + *, #fuckhyperlink .space-y-10 > * + * { margin-top: 1.75rem; }
+      #fuckscrollanimation h3 { margin-bottom: 0.6rem; }
+      #fuckscrollanimation .space-y-2 > * + * { margin-top: 0.25rem; }
+      #fuckhyperlink .mb-3 { margin-bottom: 0.6rem; }
+
+      /* Practice makes perfect. : 원형 캐러셀 대신 옆으로 미는 두 줄 */
+      /* ㄴ 줄은 화면 끝까지 붙여야 밀 수 있다는 게 보임. 그래서 이 섹션만 좌우 여백을 머리글에 줌 */
+      #fuckinteraction > div { display: block; padding-left: 0; padding-right: 0; }
+      #stackHead { display: block; padding: 0 1.5rem; }
+      #stackHead .mt-6 { margin-top: 1rem; }
+      #stackNav { display: none; }
+      #stackWrap { margin-top: 1.5rem; }
+      #stackStage {
+        position: static; display: grid;
+        grid-auto-flow: column; grid-template-rows: auto auto; grid-auto-columns: 6.5rem;
+        gap: 1rem 0.75rem; padding: 0.25rem 1.5rem 0.5rem;
+        overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+        scroll-snap-type: x mandatory; scroll-padding: 0 1.5rem;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+                mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+      }
+      #stackStage .stack-item { position: static; gap: 0.5rem; scroll-snap-align: start; transition: none; }
+      #stackStage .stack-card { width: 100%; aspect-ratio: 7 / 9; border-radius: 14px; }
+      #stackStage .stack-item > span { font-size: 0.8125rem; line-height: 1.2; text-align: center; white-space: nowrap; }
+
+      /* Efforts never betray. : 휠 대신 칩, 보고서 카드는 폰 높이의 2/3 */
+      /* ㄴ 카드 안 스크롤이 끝나면 페이지로 넘어가게 overscroll은 풀어둠 */
+      #bentoWrap { display: block; }
+      #bentoSide { display: none; }
+      #bentoMain > .flex-shrink-0 > p { margin-top: 1rem; }
+      #projectChips {
+        position: relative; display: flex; gap: 0.5rem;
+        margin: 1.25rem -1.5rem 0; padding: 0 1.5rem;
+        overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+                mask-image: linear-gradient(to right, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+      }
+      .proj-chip {
+        flex: none; padding: 0.45rem 0.9rem; border-radius: 99px;
+        border: 1px solid #404040; background: #262626; color: #d4d4d4;
+        font-size: 0.875rem; font-weight: 500; line-height: 1.2; white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .proj-chip.is-sel { border-color: #E0A800; background: #E0A800; color: #000; font-weight: 700; }
+      #projectCardStage { height: 66vh; height: min(66svh, 36rem); margin-top: 0.875rem; }
+      #projectCardStage .cs-stack { inset: 0; }
       /* 폰은 50%면 글자가 8px라 못 읽음. 원래 크기 */
-      #projectCardStage .gh { zoom: 1; }
-      #bentoSide { flex: 0 0 10rem; height: 10rem; }
-      #projectWheel .wheel-item { font-size: 1.05rem; left: 4px; }
-      #bentoSide button { width: 2.5rem; height: 2.5rem; }
+      #projectCardStage .gh { zoom: 1; overscroll-behavior: auto; }
 
-      /* --- Feel free to contact. --- */
-      /* 가운데 정렬은 유지하되 넘칠 땐 위가 안 잘리게 auto 마진으로 */
-      /* ㄴ justify-content: center는 넘치면 위쪽을 못 잡음 */
-      #contactWrap { padding-top: 8vh; padding-bottom: 4vh; gap: 1.75rem; justify-content: flex-start; }
-      /* 둘 다 flex-1이면 남는 공간을 애들이 다 먹어서 auto 마진이 안 먹음 */
-      #contactWrap > :first-child { flex: 0 0 auto; margin-top: auto; }
-      #contactWrap > :last-child { flex: 0 0 auto; margin-bottom: auto; }
-      #contactHead { flex: 0 0 auto; }
+      /* Feel free to contact. */
       #contactHead .mt-6 { margin-top: 1rem; }
-      #contactHead p { font-size: 0.9rem; }
-      /* 📫도 I think / Be creative처럼 텍스트 아래로 */
-      #contactArt { display: flex; }
-      #contactArt .text-9xl { font-size: 4.25rem; line-height: 1; }
 
-      /* --- Footer --- */
-      #fuckfooter p { font-size: 1.5rem; padding: 0 1.5rem; }
+      /* Footer */
+      #fuckfooter > div { padding: 5rem 1.5rem 6rem; gap: 0.75rem; }
+      #fuckfooter p:first-child { font-size: min(2.25rem, calc((100vw - 3rem) / 10.4)); }
+      #fuckfooter p + p { font-size: 0.875rem; color: #a3a3a3; }
+    }
 
-      /* --- Index : 폴더 / 드리프트 월 --- */
-      #indexTitle { left: 6vw; top: 22vh; font-size: clamp(2rem, 11vw, 3rem); }
-      /* 손가락엔 hover가 없음. 타일이 계속 어두우면 글씨가 안 읽혀서 기본값을 올림 */
-      .drift-wall { --dw-edge: 34%; }
-      .drift-wall__overlay { opacity: 0.16; }
-      .drift-wall__tile.is-active .drift-wall__inner { transform: translateZ(40px); }
+    @keyframes badgeSway {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(2.4deg); }
+      75% { transform: rotate(-2.4deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #badge { animation: none; }
     }
 
     /* 터치 기기 : hover가 눌러붙는 것 방지 */
@@ -1510,6 +1614,8 @@
         <div id="indexWall"><div class="drift-wall"><div class="drift-wall__plane" id="driftPlane"></div></div></div>
       </div>
       <div id="indexFolderLayer"><div id="indexFolder"></div></div>
+      <!-- 모바일 목차. 줄은 아래 목차 스크립트가 CARDS로 채움 -->
+      <nav id="indexList" aria-label="목차"></nav>
     </div>
   </section>
 
@@ -1520,17 +1626,20 @@
     <!-- 저사양 기기에서 원활히 돌아가는지 확인 필요 -->
 
     <section id="fuckhover" class="bg-neutral-900 text-white page page--special">
-      <div class="h-screen w-full flex items-center flex-row-reverse gap-16 px-8 md:px-16 lg:px-24" data-mscroll>
-        
+      <div class="h-screen w-full flex items-center flex-row-reverse gap-16 px-8 md:px-16 lg:px-24">
+
         <div class="flex-1 flex flex-col justify-center">
           <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 inline-block w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#c084fc; --ink:#000;">
             About ME.
           </h2>
 
-          <div class="mt-8" data-reveal-group="200">
+          <!-- 이름이 박스랑 <Residence/> 딱 가운데 오게 -->
+          <!-- ㄴ 박스 여백 말고 글자 윤곽 기준으로 잼. 이름 위아래 5/4px, <Residence/> 위 6.5px -->
+          <!-- ㄴ 박스~이름 = 32 + 14 + 5 = 51, 이름~<Residence/> = 4 + 40 + 6.5 = 50.5 -->
+          <div class="mt-3.5" data-reveal-group="200">
             <h3 class="text-2xl md:text-3xl font-bold tracking-tight">유이준 / Yijun Yoo</h3>
 
-            <div class="mt-6 grid grid-cols-2 gap-x-10 gap-y-5">
+            <div class="mt-10 grid grid-cols-2 gap-x-10 gap-y-5">
               <div>
                 <h4 class="text-lg font-semibold text-neutral-200">&lt;Residence/&gt;</h4>
                 <p class="text-neutral-400 mt-1">Republic of Korea &mdash; Daejeon</p>
@@ -1560,6 +1669,12 @@
 
         <div id="lanyardCol" class="hidden lg:flex flex-1 items-center justify-center h-full">
           <div id="lanyardStage" class="lanyard-wrapper select-none"></div>
+          <!-- 모바일 명찰. 3D 랜야드 대신 -->
+          <div id="badge" aria-hidden="true">
+            <div class="badge-strap"></div>
+            <div class="badge-clip"></div>
+            <div class="badge-card"><img src="static/Profile.png" alt="" loading="lazy" decoding="async" draggable="false"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1568,9 +1683,19 @@
     // 랜야드 씬
     // ㄴ three + rapier wasm + card.glb 합쳐 2MB 가까움. 전엔 첫 화면 뒤 idle에 받았음
     // ㄴ 지금은 프리로더가 다 받을 때까지 안 걷히니 그냥 바로 받음. 카드 페이지 열었는데 빈 칸인 일 없음
+    // ㄴ 폰은 아예 안 띄움. 그 자리는 CSS 명찰(#badge)이 대신함
+    // ㄴ 폰에서 안 받은 건 프리로더가 DOMContentLoaded에 알아서 뺌. 창 줄였다 늘린 거면 데스크톱 되는 순간 받음
     const stage = document.getElementById('lanyardStage');
     const pre = window.preloader;
-    if (stage) {
+    const mq = window.compactMQ;
+    if (stage && !mq.matches) boot();
+    else if (stage) mq.addEventListener('change', function wait() {
+      if (mq.matches) return;
+      mq.removeEventListener('change', wait);
+      boot();
+    });
+
+    function boot() {
       const job = pre && pre.claim('lanyard');
       bootLanyard()
         .catch(err => console.warn('[Lanyard]', err))
@@ -1592,10 +1717,6 @@
       const position = [0, 0, 30];
       const gravity = { x: 0, y: -40, z: 0 };
       const fov = 20;
-      // 모바일은 칸이 납작해서 fov 20 그대로 두면 카드가 좁쌀만 하게 찍힘
-      // ㄴ 세로로 담을 world 높이를 줄이고 카메라를 카드 쪽으로 내려서 꽉 채움
-      const MOBILE_SPAN = 5.2;
-      const MOBILE_EYE_Y = -1.1;
       const transparent = true;
       const frontImage = 'static/Profile.png';
       const backImage = 'static/Profile.png';
@@ -1618,11 +1739,6 @@
       const BAND_LOGO_H = 159;
       const CLEAN_PATCH = { x: 0, y: 1290, w: 800, h: 380 };
 
-      // 위 CSS 모바일 블록과 같은 조건이어야 함
-      // ㄴ 안 맞추면 가로모드 폰에서 칸만 납작해지고 카메라는 데스크톱 그대로라 카드가 안 보임
-      const compact = () => window.matchMedia('(max-width: 767px), (max-width: 1023px) and (max-height: 500px)').matches;
-      let isMobile = compact();
-
       const loadImage = src => new Promise(resolve => {
         if (!src) return resolve(null);
         const image = new Image();
@@ -1632,7 +1748,7 @@
       });
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: transparent });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1740,7 +1856,7 @@
 
       const cardMesh = new THREE.Mesh(nodes.card.geometry, new THREE.MeshPhysicalMaterial({
         map: cardMap,
-        clearcoat: isMobile ? 0 : 1,
+        clearcoat: 1,
         clearcoatRoughness: 0.15,
         roughness: 0.9,
         metalness: 0.8
@@ -1832,8 +1948,8 @@
 
       const bandMap = buildBandTexture(bandTex);
 
-      let bandSegments = isMobile ? 16 : 32;
-      let bandGeometry = new BandGeometry(bandSegments);
+      const bandSegments = 32;
+      const bandGeometry = new BandGeometry(bandSegments);
       const bandMesh = new THREE.Mesh(bandGeometry, new THREE.MeshBasicMaterial({
         color: bandMap ? lanyardColor : 0x000000,
         map: bandMap,
@@ -1847,7 +1963,7 @@
 
       await RAPIER.init();
       const world = new RAPIER.World(gravity);
-      world.timestep = isMobile ? 1 / 30 : 1 / 60;
+      world.timestep = 1 / 60;
 
       function segment(x, y, z, fixedBody) {
         const desc = (fixedBody ? RAPIER.RigidBodyDesc.fixed() : RAPIER.RigidBodyDesc.dynamic())
@@ -1959,23 +2075,9 @@
       function resize() {
         const width = stage.clientWidth;
         const height = stage.clientHeight;
+        // 모바일 되면 칸이 display:none이라 여기서 끝남. 폰용 카메라 따로 안 둠
         if (!width || !height) return;
-        const nextMobile = compact();
-        if (nextMobile !== isMobile) {
-          isMobile = nextMobile;
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
-          world.timestep = isMobile ? 1 / 30 : 1 / 60;
-          cardMesh.material.clearcoat = isMobile ? 0 : 1;
-          bandSegments = isMobile ? 16 : 32;
-          bandGeometry.dispose();
-          bandGeometry = new BandGeometry(bandSegments);
-          bandMesh.geometry = bandGeometry;
-        }
         camera.aspect = width / height;
-        camera.fov = isMobile
-          ? (2 * Math.atan(MOBILE_SPAN / 2 / position[2]) * 180) / Math.PI
-          : fov;
-        camera.position.y = isMobile ? MOBILE_EYE_Y : position[1];
         camera.updateProjectionMatrix();
         renderer.setSize(width, height, false);
       }
@@ -2041,6 +2143,86 @@
     }
     </script>
 
+    <script>
+    // 명찰 흔들기 (모바일)
+    // ㄴ 옆으로 끌면 손가락 따라 기울고, 놓으면 감쇠 스프링으로 돌아옴. 톡 치면 한 번 튕김
+    // ㄴ 다 멈추면 CSS 살랑(badgeSway)한테 다시 넘김. 그동안은 JS가 transform 직접 씀
+    // ㄴ 세로로 밀면 스크롤이라 브라우저가 가져감(touch-action: pan-y). 그땐 pointercancel 옴
+    (() => {
+      const badge = document.getElementById('badge');
+      if (!badge || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const MAX = 32;          // 최대 기울기(deg)
+      const K = 60, C = 5;     // 스프링 세기, 감쇠. 주기 0.8초쯤, 두세 번 흔들리고 멈춤
+      const KICK = 90;         // 톡 쳤을 때 초속(deg/s)
+      const TAP = 6;           // 이만큼 안 움직였으면 끈 게 아니라 친 것(px)
+
+      let ang = 0, vel = 0, raf = 0, last = 0, drag = null;
+      const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+      const put = () => { badge.style.transform = 'rotate(' + ang.toFixed(2) + 'deg)'; };
+
+      // 살랑 중간에 잡으면 그 각도에서 이어받음. 안 그러면 0도로 툭 튐
+      function takeOver() {
+        if (badge.style.animation === 'none') return;
+        const m = getComputedStyle(badge).transform.match(/matrix\(([^)]+)\)/);
+        if (m) { const [a, b] = m[1].split(',').map(Number); ang = Math.atan2(b, a) * 180 / Math.PI; }
+        vel = 0;
+        badge.style.animation = 'none';
+        put();
+      }
+
+      function frame(t) {
+        const dt = Math.min((t - last) / 1000, 0.032);
+        last = t;
+        vel += (-K * ang - C * vel) * dt;
+        ang += vel * dt;
+        if (Math.abs(ang) < 0.05 && Math.abs(vel) < 0.5) {
+          raf = 0; ang = vel = 0;
+          badge.style.transform = '';
+          badge.style.animation = '';
+          return;
+        }
+        put();
+        raf = requestAnimationFrame(frame);
+      }
+      function swing() {
+        if (raf) return;
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
+
+      badge.addEventListener('pointerdown', e => {
+        takeOver();
+        cancelAnimationFrame(raf); raf = 0;
+        const r = badge.getBoundingClientRect();
+        // 매달린 점(위 가운데)에서 손가락까지 거리. 가까이 잡을수록 조금만 끌어도 많이 기움
+        drag = { x: e.clientX, a0: ang, len: Math.max(40, e.clientY - r.top), t: e.timeStamp, moved: 0 };
+        try { badge.setPointerCapture(e.pointerId); } catch {}
+      });
+      badge.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const dx = e.clientX - drag.x;
+        const next = clamp(drag.a0 + Math.atan(dx / drag.len) * 180 / Math.PI, -MAX, MAX);
+        const dt = Math.max((e.timeStamp - drag.t) / 1000, 1 / 120);
+        vel = (next - ang) / dt;
+        ang = next;
+        drag.t = e.timeStamp;
+        drag.moved = Math.max(drag.moved, Math.abs(dx));
+        put();
+      });
+      // 스크롤로 뺏긴 거(cancel)면 안 튕기고 그 자리에서 돌아오기만
+      const release = tapped => {
+        if (!drag) return;
+        if (tapped && drag.moved < TAP) vel = KICK * (Math.random() < 0.5 ? -1 : 1);
+        drag = null;
+        vel = clamp(vel, -400, 400);
+        swing();
+      };
+      badge.addEventListener('pointerup', () => release(true));
+      badge.addEventListener('pointercancel', () => release(false));
+    })();
+    </script>
+
   <!-- Page 3 -->
 <!-- 바이브 코딩 탈출기 -->
 <!-- 1차시 ScrollAnimation 실험 -->   
@@ -2050,12 +2232,15 @@
      <!-- ㄴ 코드 존나 더러움 -->
 
   <section id="fuckscrollanimation" class="bg-neutral-900 text-white page page--special">
-    <div class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24" data-mscroll>
+    <div id="thinkWrap" class="h-screen w-full flex items-center px-8 md:px-16 lg:px-24">
       <div class="flex-1 flex flex-col justify-center">
-        <h2 class="text-4xl md:text-6xl font-bold mb-8 px-4 py-3 inline-block w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#22d3ee; --ink:#000;">
+        <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 inline-block w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#22d3ee; --ink:#000;">
           I think, therefore, I am.
         </h2>
-        <div class="mt-12 space-y-8" data-reveal-group="200">
+        <!-- 부제목이랑 간격은 Be creative 그대로. 제목 아래 24px, 덩어리 사이 40px -->
+        <div class="mt-6 space-y-10" data-reveal-group="200">
+          <p class="text-neutral-300 leading-relaxed">끊임없이 질문하고 깊게 고민하며, 나만의 답을 찾아갑니다.</p>
+
           <div>
             <h3 class="text-xl font-semibold mb-4"><img class="emoji" src="static/emoji/1f3eb.svg" alt="🏫"> 컴퓨터공학과 및 인공지능학과 지망</h3>
             <div class="space-y-2">
@@ -2090,7 +2275,7 @@
     <!-- 3d 구현 하나에 다하고 싶은데 외부 파일 안불러오는게 좋을듯 --> 
 
   <section id="fuckhyperlink" class="bg-neutral-900 text-white page page--special">
-      <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24" data-mscroll>
+      <div class="h-screen w-full flex items-center flex-row-reverse px-8 md:px-16 lg:px-24">
         <div class="flex-1 flex flex-col justify-center">
           <h2 class="text-5xl md:text-6xl font-bold px-4 py-3 w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#861616; --ink:#fff; --ink0:#fff;">
             Be creative, Be better.
@@ -2177,6 +2362,9 @@
           </h2>
           <p class="text-neutral-300 mt-6" data-reveal data-delay="200">노력이 쌓여 만들어진 프로젝트들입니다.</p>
         </div>
+
+        <!-- 모바일은 휠 대신 이거. 버튼은 아래 스크립트가 휠이랑 같이 만듦 -->
+        <div id="projectChips" role="group" aria-label="프로젝트 선택" data-reveal data-delay="260"></div>
 
         <div id="projectCardStage" class="relative w-full mt-6 h-[40vh] lg:h-auto lg:flex-1 min-h-0" data-reveal data-delay="300">
           <div class="cs-stack">
@@ -2702,12 +2890,27 @@
       wheel.raf = requestAnimationFrame(wheelFrame);
     }
 
+    // 모바일 칩 : 휠이랑 같은 걸 가리킴. 고른 게 칩 줄 가운데 오게 가로로만 굴림
+    // ㄴ scrollIntoView 쓰면 페이지까지 세로로 끌려감
+    const chipsEl = document.getElementById('projectChips');
+    const chips = [];
+    function syncChips(v, smooth) {
+      chips.forEach((b, i) => {
+        b.classList.toggle('is-sel', i === v);
+        b.setAttribute('aria-pressed', String(i === v));
+      });
+      const b = chips[v];
+      if (!b || !chipsEl.clientWidth) return;
+      chipsEl.scrollTo({ left: b.offsetLeft - (chipsEl.clientWidth - b.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' });
+    }
+
     function setWheelTarget(value) {
       const v = Math.round(Math.min(Math.max(value, 0), projects.length - 1));
       wheel.target = v;
       if (v !== wheel.selected) {
         wheel.selected = v;
         wheelItems.forEach((el, i) => el.classList.toggle('wheel-item--selected', i === v));
+        syncChips(v, true);
         renderProjectCards(v);
       }
       wheelUpBtn.disabled = v === 0;
@@ -2726,8 +2929,17 @@
         });
         wheelEl.appendChild(el);
         wheelItems.push(el);
+
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'proj-chip';
+        chip.textContent = p.name;
+        chip.addEventListener('click', () => { if (i !== wheel.selected) setWheelTarget(i); });
+        chipsEl.appendChild(chip);
+        chips.push(chip);
       });
       wheelItems[0].classList.add('wheel-item--selected');
+      syncChips(0, false);
       renderProjectCards(0);
       wheelUpBtn.disabled = true;
       measureWheel();
@@ -2749,7 +2961,7 @@
     <!-- 아무도 연락 안 할듯  -->
 
 <section id="fuckmailto" class="bg-neutral-900 text-white page page--special relative overflow-hidden">
-    <div id="contactWrap" class="h-screen w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 px-8 md:px-16 lg:px-24 relative z-10" data-mscroll>
+    <div id="contactWrap" class="h-screen w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 px-8 md:px-16 lg:px-24 relative z-10">
 
       <div id="contactHead" class="flex-1 flex flex-col justify-center w-full">
         <h2 class="text-4xl md:text-6xl font-bold px-4 py-3 inline-block w-fit whitespace-nowrap" data-reveal data-hl style="--hl:#3b82f6; --ink:#000;">
@@ -3189,6 +3401,7 @@
 //   pos 2  목차(Index.)
 //   pos 3~8  각 주제 페이지
 //   pos 9  Footer
+// ㄴ 모바일은 이거 안 쓰고 자연 스크롤. 맨 아래 startScroll()
 (() => {
   const stage = document.getElementById('stage');
   const PAGE_IDS = ['fuckintro', 'fuckindex', 'fuckhover', 'fuckscrollanimation',
@@ -3369,37 +3582,17 @@
   if (held) window.preloader.ready.then(() => { held = false; });
   const busy = () => held || locked || moving || mode !== 'base';
 
-  // 모바일에서 페이지 안에 세로로 넘치는 영역([data-mscroll])이 생김
-  // ㄴ 그 안이 남았으면 먼저 굴리고, 끝에 닿아야 페이지를 넘김
-  let scrollableCache = new WeakMap();
-  function scrollableAt(target, delta) {
-    if (!(target instanceof Element)) return null;
-    const el = target.closest('[data-mscroll]');
-    if (!el) return null;
-    const room = el.scrollHeight - el.clientHeight;
-    if (room < 2) return null;
-    // 데스크톱에선 overflow가 visible이라 넘쳐도 못 굴림. 여기서 잡아주면 페이지가 안 넘어가고 갇힘
-    let ok = scrollableCache.get(el);
-    if (ok === undefined) {
-      const ov = getComputedStyle(el).overflowY;
-      ok = ov === 'auto' || ov === 'scroll';
-      scrollableCache.set(el, ok);
-    }
-    if (!ok) return null;
-    const atTop = el.scrollTop <= 0;
-    const atEnd = el.scrollTop >= room - 1;
-    if (delta > 0 && !atEnd) return el;
-    if (delta < 0 && !atTop) return el;
-    return null;
-  }
-
   // 휠
   // ㄴ 스크롤 한 번에 여러 장 안 넘어가게 감속 감지해서 빠꾸
   const scrollings = [];
   let prevWheelTime = 0, canScroll = true;
   const average = arr => arr.reduce((x, y) => x + y, 0) / arr.length;
 
+  // 모바일(자연 스크롤)일 땐 휠/터치/키보드 전부 브라우저 기본 스크롤에 맡김
+  const compact = () => window.compactMQ.matches;
+
   stage.addEventListener('wheel', e => {
+    if (compact()) return;
     // 카드 위에서 휠 하면 카드 안만 스크롤, 페이지는 안 넘김
     const cardStage = e.target instanceof Element ? e.target.closest('#projectCardStage') : null;
     if (cardStage) {
@@ -3421,9 +3614,6 @@
     else if (e.deltaMode === 2) delta *= window.innerHeight;
     if (delta === 0) return;
 
-    // 페이지 안 스크롤이 남아 있으면 그쪽에 양보
-    if (scrollableAt(e.target, delta)) { scrollings.length = 0; return; }
-
     const now = performance.now();
     if (now - prevWheelTime > 200) scrollings.length = 0;
     prevWheelTime = now;
@@ -3442,14 +3632,12 @@
 
   // 터치
   let ty = null, acc = 0;
-  stage.addEventListener('touchstart', e => { ty = e.touches[0].clientY; acc = 0; }, { passive: true });
+  stage.addEventListener('touchstart', e => { ty = compact() ? null : e.touches[0].clientY; acc = 0; }, { passive: true });
   stage.addEventListener('touchmove', e => {
     if (ty === null) return;
     if (e.target instanceof Element && e.target.closest('#projectCardStage')) return;
     const y = e.touches[0].clientY;
     const dy = ty - y;
-    // 안쪽에 굴릴 게 남았으면 네이티브 스크롤에 맡기고 페이지는 안 넘김
-    if (scrollableAt(e.target, dy)) { ty = y; acc = 0; return; }
     e.preventDefault();
     acc += dy;
     ty = y;
@@ -3463,6 +3651,7 @@
 
   // 키보드
   window.addEventListener('keydown', e => {
+    if (compact()) return;
     const act = document.activeElement;
     if (act && act.closest && act.closest('#indexFolderLayer, .drift-wall__tile') && (e.key === ' ' || e.key === 'Enter')) return;
     const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar';
@@ -3474,11 +3663,75 @@
   });
 
   window.addEventListener('resize', () => {
-    scrollableCache = new WeakMap();   // 브레이크포인트 넘어가면 overflow가 바뀜
-    if (mode === 'base') paint(pos);
+    if (mode === 'base' && !compact()) paint(pos);
   });
 
-  paint(0);
+  // 모바일 : 자연 스크롤
+  // ㄴ 페이지 스택 안 씀. 섹션이 문서 흐름대로 쌓이고 손가락대로 내려감(CSS 모바일 블록)
+  // ㄴ 인트로 커버는 인트로 섹션 스크롤 진행도로 열림. 화면은 sticky로 붙어 있음
+  // ㄴ is-on은 화면 근처 섹션만. 파티클/깊이 글자/랜야드 루프가 이거 보고 쉼
+  // ㄴ 등장 효과는 요소마다 화면에 들어올 때 한 번. 다시 올라가도 안 꺼짐
+  const INTRO_HOLD = 0.22;   // 인트로 스크롤 중 다 열린 채로 두는 비율. 문구 읽을 틈
+  let sectionIO = null, revealIO = null, scrollRaf = 0;
+
+  function introScroll() {
+    scrollRaf = 0;
+    const r = intro.getBoundingClientRect();
+    const room = r.height - window.innerHeight;
+    const p = room > 0 ? clamp01(-r.top / (room * (1 - INTRO_HOLD))) : 1;
+    if (window.introMask) window.introMask.set(p);
+  }
+  const onScroll = () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(introScroll); };
+
+  function startScroll() {
+    // 데스크톱에서 넘어온 거면 페이지 스택 흔적부터 지움
+    if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+    moving = false; mode = 'base';
+    live.clear();
+    pages.forEach(retire);
+    if (settled) { settled.classList.remove('is-front'); settled = null; }
+    ['--exit', '--live', '--in'].forEach(k => { introStage.style.removeProperty(k); index.style.removeProperty(k); });
+
+    sectionIO = new IntersectionObserver(es => {
+      es.forEach(e => e.target.classList.toggle('is-on', e.isIntersecting));
+    }, { rootMargin: '20% 0px' });
+    pages.forEach(p => sectionIO.observe(p));
+
+    // 아래 10%는 빼고 봄. 화면 맨 밑에 걸치자마자 터지면 효과가 안 보임
+    revealIO = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        revealIO.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    stage.querySelectorAll('[data-reveal], [data-hl]').forEach(el => {
+      if (!el.classList.contains('is-in')) revealIO.observe(el);
+    });
+
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    introScroll();
+  }
+
+  function stopScroll() {
+    if (sectionIO) sectionIO.disconnect();
+    if (revealIO) revealIO.disconnect();
+    sectionIO = revealIO = null;
+    removeEventListener('scroll', onScroll);
+    removeEventListener('resize', onScroll);
+    pages.forEach(p => { p.classList.remove('is-on'); window.resetReveals(p); });
+    window.scrollTo(0, 0);
+  }
+
+  window.compactMQ.addEventListener('change', () => {
+    if (compact()) startScroll();
+    else { stopScroll(); paint(pos); }
+  });
+
+  // 모바일 목차 줄은 뒤 스크립트가 만듦. 다 돈 다음에 등장 효과 걸어야 걔네도 잡힘
+  if (compact()) addEventListener('DOMContentLoaded', startScroll, { once: true });
+  else paint(0);
 })();
 </script>
 
@@ -3507,19 +3760,15 @@
   ];
 
   // Drift Wall 설정값
-  // ㄴ 모바일은 7컬럼 그대로 두면 타일이 최소폭에 걸려 화면의 세 배까지 벌어짐
-  const phone = () => window.matchMedia('(max-width: 767px)').matches;
-  const colCount = () => (phone() ? 3 : 7);
-  const minTile = () => (phone() ? 100 : 150);
-  // 손가락엔 hover가 없어서 어두운 채로 굳음. 모바일은 기본 밝기를 올림
-  const dimLevel = () => (phone() ? 0.92 : 0.55);
-
-  let COLUMNS = colCount();
+  // ㄴ 모바일은 벽 자체를 안 만듦(scene이 display:none). 아래 목록(#indexList)이 대신함
+  const COLUMNS = 7;
+  const MIN_TILE = 150;
+  const DIM = 0.55;
   const OVERSCAN = 1.24;
   const GAP = 18, TILT = 16, TURN = -14, ROLL = 0, DEPTH = 120;
   const SPEED = 42, VARIANCE = 0.45, PARALLAX = 0.6;
   const TILE_RATIO = 132 / 200;
-  const tileWidthFor = (w, n) => Math.max(minTile(), Math.min(420, (w * OVERSCAN) / n - GAP));
+  const tileWidthFor = w => Math.max(MIN_TILE, Math.min(420, (w * OVERSCAN) / COLUMNS - GAP));
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const columnFactor = (i, v) => 1 + v * (((i * 0.6180339887 + 0.35) % 1) * 2 - 1);
@@ -3531,6 +3780,29 @@
              '<span class="idx-card__title" style="--hl:' + c.hl + ';--ink:' + c.ink + '">' + c.title + '</span>' +
              '<span class="idx-card__sub">' + c.sub + '</span>' +
            '</span>';
+  }
+
+  // 모바일 목차
+  // ㄴ 폴더 열고 벽에서 고르는 건 폰에선 무거움. 같은 카드를 목록으로 늘어놓고 누르면 그 섹션으로 스크롤
+  const list = document.getElementById('indexList');
+  if (list) {
+    const arrow = '<svg class="idx-row__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+    list.innerHTML = CARDS.map((c, i) =>
+      '<a class="idx-row" href="#' + c.page + '" data-reveal style="--d:' + (80 + i * 70) + 'ms">' +
+        '<span class="idx-row__no">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="idx-row__txt">' +
+          '<span class="idx-row__title" style="--hl:' + c.hl + ';--ink:' + c.ink + '">' + c.title + '</span>' +
+          '<span class="idx-row__sub">' + c.sub + '</span>' +
+        '</span>' + arrow +
+      '</a>').join('');
+    // 주소창에 #fuckhover 같은 거 안 남게 직접 굴림
+    list.addEventListener('click', e => {
+      const a = e.target instanceof Element ? e.target.closest('a.idx-row') : null;
+      const to = a && document.getElementById(a.hash.slice(1));
+      if (!to) return;
+      e.preventDefault();
+      to.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    });
   }
 
   // 주제/부주제는 무조건 한 줄롱
@@ -3635,8 +3907,7 @@
   function buildWall() {
     const w = scene.clientWidth, h = scene.clientHeight;
     if (!w || !h) return;
-    COLUMNS = colCount();
-    tileW = tileWidthFor(w, COLUMNS);
+    tileW = tileWidthFor(w);
     tileH = Math.round(tileW * TILE_RATIO);
     const unit = tileH + GAP;
     const copyHeight = unit * CARDS.length;
@@ -3645,7 +3916,7 @@
     dw.style.setProperty('--dw-tile-w', tileW.toFixed(1) + 'px');
     dw.style.setProperty('--dw-tile-h', tileH + 'px');
     dw.style.setProperty('--dw-gap', GAP + 'px');
-    dw.style.setProperty('--dw-dim', String(dimLevel()));
+    dw.style.setProperty('--dw-dim', String(DIM));
 
     plane.innerHTML = '';
     cols.length = 0;
@@ -3698,7 +3969,7 @@
     if (lastTs === null) lastTs = ts;
     const dt = Math.min(0.05, Math.max(0, ts - lastTs) / 1000);
     lastTs = ts;
-    if (frozen || document.hidden || !page.classList.contains('is-on')) return;
+    if (frozen || document.hidden || !page.classList.contains('is-on') || window.compactMQ.matches) return;
 
     const maxTilt = PARALLAX * 8;
     const damp = 1 - Math.exp(-dt / 0.12);
@@ -3780,7 +4051,7 @@
     info.forEach(it => {
       const k = it.d / maxD;
       const gathered = { transform: 'translate3d(' + it.dx.toFixed(1) + 'px, ' + it.dy.toFixed(1) + 'px, 0) scale(0.08)', opacity: 0 };
-      const placed = { transform: 'translate3d(0, 0, 0) scale(1)', opacity: dimLevel() };
+      const placed = { transform: 'translate3d(0, 0, 0) scale(1)', opacity: DIM };
       scatterAnims.push(it.el.animate(dir === 'in' ? [gathered, placed] : [placed, gathered], {
         duration: 820,
         delay: (dir === 'in' ? k : 1 - k) * 260,
@@ -3833,12 +4104,11 @@
   });
 
   function layout() {
-    const w = scene.clientWidth;
-    if (!w) return;
     syncDock();
-    const n = colCount();
-    const want = tileWidthFor(w, n);
-    if (!cols.length || n !== COLUMNS || Math.abs(want - tileW) > 0.5) buildWall();
+    const w = scene.clientWidth;
+    if (!w) return;   // 모바일. 벽/폴더 안 씀
+    const want = tileWidthFor(w);
+    if (!cols.length || Math.abs(want - tileW) > 0.5) buildWall();
     if (mode !== 'busy') applyFolder(mode === 'wall' ? dockTarget() : centerTarget(), false);
   }
 
@@ -4054,7 +4324,21 @@
     });
   }
 
-  function layout() { if (measure()) place(); }
+  // 모바일은 원형 말고 가로로 미는 두 줄. 크기/자리는 CSS가 잡으니 JS가 박은 것만 걷어냄
+  const compact = () => window.compactMQ.matches;
+  function flatten() {
+    items.forEach((el, i) => {
+      el.style.width = el.style.transform = el.style.transformOrigin = el.style.transition = '';
+      cards[i].style.width = cards[i].style.height = '';
+    });
+    lastX.length = 0;
+    sized = false;
+  }
+
+  function layout() {
+    if (compact()) { flatten(); return; }
+    if (measure()) place();
+  }
 
   function move(direction) {
     const n = items.length;
@@ -4065,10 +4349,12 @@
   prevBtn.addEventListener('click', () => move(-1));
   nextBtn.addEventListener('click', () => move(1));
 
-  // 모바일 : 좌우로 쓸어서 넘기기
+  // 태블릿 : 좌우로 쓸어서 넘기기
   // ㄴ 세로 스와이프는 페이지 넘김이라, 가로가 더 클 때만 가로챔
+  // ㄴ 모바일은 줄 자체가 가로 스크롤이라 안 씀
   let sx = null, sy = null, swiped = false;
   stage.addEventListener('touchstart', e => {
+    if (compact()) { sx = null; return; }
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiped = false;
   }, { passive: true });
   stage.addEventListener('touchmove', e => {
